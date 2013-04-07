@@ -1,0 +1,55 @@
+LIBNAME = libwhatsapp.dll
+
+.PHONY: all
+all: $(LIBNAME)
+
+C_SRCS = wa_purple.c
+CXX_SRCS = whatsapp-protocol.cc wa_api.cc
+
+C_OBJS = $(C_SRCS:.c=.o)
+CXX_OBJS = $(CXX_SRCS:.cc=.o)
+
+STRIP = strip
+CC = i686-w64-mingw32-gcc
+CXX = i686-w64-mingw32-g++
+LD = $(CXX)
+CFLAGS_PURPLE = $(shell mingw32-pkg-config --cflags purple)
+CFLAGS = \
+    -O2 \
+    -m32 \
+    -Wall \
+    -Wextra \
+    -fPIC \
+    -DPURPLE_PLUGINS \
+    -DPIC \
+    $(CFLAGS_PURPLE) \
+    $(EXTRAINCLUDES)
+
+LIBS_PURPLE = $(shell mingw32-pkg-config --libs purple)  -static-libgcc -static-libstdc++ $(EXTRALIBS)
+LDFLAGS = -shared
+
+%.o: %.c
+	$(CC) -c $(CFLAGS) -o $@ $<
+%.o: %.cc
+	$(CXX) -c $(CFLAGS) -o $@ $<
+
+$(LIBNAME): $(C_OBJS) $(CXX_OBJS)
+	$(LD) $(LDFLAGS) -o $@ $^ $(LIBS_PURPLE)
+	$(STRIP) --strip-debug --discard-locals $(LIBNAME)
+
+PLUGIN_DIR_PURPLE:=$(shell mingw32-pkg-config --variable=plugindir purple)
+DATA_ROOT_DIR_PURPLE:=$(shell mingw32-pkg-config --variable=datarootdir purple)
+
+.PHONY: install
+install: $(LIBNAME)
+	install -D $(LIBNAME) $(PLUGIN_DIR_PURPLE)/$(LIBNAME)
+
+.PHONY: uninstall
+uninstall: $(LIBNAME)
+	rm $(PLUGIN_DIR_PURPLE)/$(LIBNAME)
+
+.PHONY: clean
+clean:
+	-rm *.o
+	-rm $(LIBNAME)
+

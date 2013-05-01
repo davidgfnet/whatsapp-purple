@@ -58,7 +58,6 @@ unsigned char *SHA1(const unsigned char *d, int n, unsigned char *md);
 }
 #endif
 
-
 #endif
 
 

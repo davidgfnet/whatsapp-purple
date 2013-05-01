@@ -761,8 +761,9 @@ static GList *waprpl_blist_node_menu(PurpleBlistNode *node) {
 static void waprpl_set_status(PurpleAccount *acct, PurpleStatus *status) {
   whatsapp_connection * wconn = purple_connection_get_protocol_data(purple_account_get_connection(acct));
   const char * sid = purple_status_get_id(status);
-  const char * mid = purple_status_get_attr_string(status, "message");
-    
+  char * mid = purple_status_get_attr_string(status, "message");
+  if (mid == 0) mid = "";
+  
   waAPI_setmypresence(wconn->waAPI,sid,mid);
   waprpl_check_output(purple_account_get_connection(acct));
 }

@@ -283,6 +283,28 @@ unsigned char * MD5(const unsigned char *d, int n, unsigned char *md) {
 	return md;
 }
 
+const char hmap[16]  = { '0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f' };
+std::string tohex(const char * t, int l) {
+	std::string ret;
+	for (int i = 0; i < l; i++) {
+		ret += hmap[((*t  )>>4)&0xF];
+		ret += hmap[((*t++)   )&0xF];
+	}
+	return ret;
+}
+
+std::string md5hex(std::string target) {
+	char outh[16];
+	MD5((unsigned char*)target.c_str(), target.size(), (unsigned char*)outh);
+	return tohex(outh,16);
+}
+
+std::string md5raw(std::string target) {
+	char outh[16];
+	MD5((unsigned char*)target.c_str(), target.size(), (unsigned char*)outh);
+	return std::string(outh,16);
+}
+
 unsigned char * SHA1(const unsigned char *d, int n, unsigned char *md) {
 	PurpleCipher *sha1_cipher;
 	PurpleCipherContext *sha1_ctx;

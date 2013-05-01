@@ -26,6 +26,9 @@
 #include "wa_api.h"
 #endif
 
+std::string md5hex(std::string target);
+std::string md5raw(std::string target);
+
 class RC4Decoder; class DataBuffer; class Tree; class WhatsappConnection;
 
 #define MESSAGE_CHAT     0
@@ -1692,19 +1695,33 @@ void WhatsappConnection::sendResponse() {
 	outbuffer = outbuffer + serialize_tree(&t,false);
 }
 
-/*std::string WhatsappConnection::generateHttpAuth(std::string nonce) {
+std::string generateHeaders(std::string auth, int content_length) {
+	std::string h = 
+		"User-Agent: WhatsApp/2.4.7 S40Version/14.26 Device/Nokia302\r\n" 
+		"Accept: text/json\r\n"
+		"Content-Type: application/x-www-form-urlencoded\r\n"
+		"Authorization: " + auth + "\r\n"
+		"Accept-Encoding: identity\r\n"
+		"Content-Length: " + int2str(content_length) + "\r\n";
+	return h;
+}
+
+std::string WhatsappConnection::generateHttpAuth(std::string nonce) {
+	// cnonce is a 10 ascii char random string
 	std::string cnonce;
-	for (int i = 0; i < 12; i++)
+	for (int i = 0; i < 10; i++)
 		cnonce += ('a'+(rand()%25));
-	
+
 	std::string credentials = phone + ":s.whatsapp.net:" + base64_decode(password);
-	std::string response = md5hex(md5(credentials)+":"+nonce+":"+cnonce)+
+	std::string response = md5hex(  md5hex(md5raw(credentials)+":"+nonce+":"+cnonce)+
 				":"+nonce+":00000001:"+cnonce+":auth:"+
-				md5hex("AUTHENTICATE:WAWA/s.whatsapp.net");
+				md5hex("AUTHENTICATE:WAWA/s.whatsapp.net") );
 	
-	return "Authorization: X-WAWA: username=\"" + phone + "\",digest-uri=\"WAWA/s.whatsapp.net\",cnonce=\"" + cnonce + "\"" +
-		"response=\"" + response + "\"";
-}*/
+	return "X-WAWA: username=\"" + phone + "\",digest-uri=\"WAWA/s.whatsapp.net\"" + 
+		"realm=\"s.whatsapp.net\",nonce=\"" + nonce + "\",cnonce=\"" + 
+		cnonce + "\",nc=\"00000001\",qop=\"auth\",digest-uri=\"WAWA/s.whatsapp.net\"" + 
+		"response=\"" + response + "\",charset=\"utf-8\"";
+}
 
 class WhatsappConnectionAPI {
 private:

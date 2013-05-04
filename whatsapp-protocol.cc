@@ -312,6 +312,11 @@ public:
 		
 		return deco;
 	}
+	void clear() {
+		blen = 0;
+		free(buffer);
+		buffer = (unsigned char*)malloc(1);
+	}
 	void * getPtr() { return buffer; }
 	void addData(const void * ptr, int size) {
 		if (ptr != NULL and size > 0) {
@@ -612,11 +617,13 @@ public:
 		this->last_seen = 0;
 		this->subscribed = false;
 		this->typing = "paused";
+		this->status = "";
 	}
 	
 	std::string phone, name;
 	std::string presence, typing;
-	unsigned long long last_seen;
+	std::string status;
+	unsigned long long last_seen, last_status;
 	bool mycontact;
 	std::string ppprev, pppicture;
 	bool subscribed;
@@ -657,6 +664,7 @@ private:
 	RC4Decoder * in, * out;
 	unsigned char session_key[20];
 	DataBuffer inbuffer, outbuffer;
+	DataBuffer sslbuffer, sslbuffer_in;
 	std::string challenge_data, challenge_response;
 	std::string phone,password;
 	SessionStatus conn_status;
@@ -682,12 +690,17 @@ private:
 	std::vector <std::string> user_changes, user_icons, user_typing;
 	
 	void processIncomingData();
+	void processSSLIncomingData();
 	DataBuffer serialize_tree(Tree * tree, bool crypt);
 	DataBuffer write_tree(Tree * tree);
 	Tree parse_tree(DataBuffer * data);
 	
 	// HTTP interface
 	std::string generateHttpAuth(std::string nonce);
+
+	// SSL / HTTPS interface
+	std::string sslnonce;
+	int sslstatus;  // 0 none, 1/2 requesting A, 3/4 requesting Q
 
 	void receiveMessage(const Message & m);
 	void notifyPresence(std::string from, std::string presence);
@@ -707,6 +720,10 @@ private:
 	void sendInitial();
 	void notifyError(ErrorCode err);
 	DataBuffer generateResponse(std::string from,std::string type,std::string id);
+
+	void generateSyncARequest();
+	void generateSyncQRequest();
+	void updateContactStatuses(std::string json);
 
 public:
 	Tree read_tree(DataBuffer * data);
@@ -733,6 +750,7 @@ public:
 	void send_avatar(const std::string & avatar);
 	void account_info(unsigned long long & creation, unsigned long long & freeexp, std::string & status);
 	int getuserstatus(const std::string & who);
+	std::string getuserstatusstring(const std::string & who);
 	unsigned long long getlastseen(const std::string & who);
 	
 	void manageParticipant(std::string group, std::string participant, std::string command);
@@ -747,6 +765,15 @@ public:
 	int loginStatus() const {
 		return ((int)conn_status)-1;
 	}
+
+	int sendSSLCallback(char* buffer, int maxbytes);
+	int sentSSLCallback(int bytessent);
+	void receiveSSLCallback(char* buffer, int bytesrecv);
+	bool hasSSLDataToSend();
+	void SSLCloseCallback();
+	bool hasSSLConnection(std::string & host, int * port);
+
+	std::string generateHeaders(std::string auth, int content_length);
 };
 
 class ChatMessage: public Message{
@@ -885,6 +912,30 @@ std::vector <Tree> DataBuffer::readList(WhatsappConnection * c) {
 	return l;
 }
 
+void WhatsappConnection::generateSyncARequest() {
+	sslbuffer.clear();
+
+	std::string httpr = "POST /v2/sync/a HTTP/1.1\r\n" + generateHeaders(generateHttpAuth("0"),0) + "\r\n";
+
+	sslbuffer.addData(httpr.c_str(),httpr.size());
+}
+void WhatsappConnection::generateSyncQRequest() {
+	sslbuffer.clear();
+
+	// Query numbers with and without "+"
+	// Seems that american numbers do not like the + symbol
+	std::string body = "ut=all&t=c";
+	for (std::map<std::string, Contact>::iterator iter = contacts.begin();  iter != contacts.end(); iter++) {
+		body += ("&u[]=" + iter->first);
+		body += ("&u[]=%2B" + iter->first);
+	}
+	std::string httpr = "POST /v2/sync/q HTTP/1.1\r\n" + 
+		generateHeaders(generateHttpAuth(sslnonce),body.size()) + "\r\n";
+	httpr += body;
+
+	sslbuffer.addData(httpr.c_str(),httpr.size());
+}
+
 
 WhatsappConnection::WhatsappConnection(std::string phone, std::string password, std::string nickname) {
 	this->phone = phone;
@@ -903,6 +954,7 @@ WhatsappConnection::WhatsappConnection(std::string phone, std::string password, 
 	this->gw1 = -1;
 	this->gw2 = -1;
 	this->gw3 = 0;
+	this->sslstatus = 0;
 	
 	// Trim password spaces
 	while (password.size() > 0 and password[0] == ' ')
@@ -1049,6 +1101,35 @@ void WhatsappConnection::sentCallback(int len) {
 	outbuffer.popData(len);
 }
 
+
+int WhatsappConnection::sendSSLCallback(char* buffer, int maxbytes) {
+	int minlen = sslbuffer.size();
+	if (minlen > maxbytes) minlen = maxbytes;
+	
+	memcpy(buffer,sslbuffer.getPtr(),minlen);
+	return minlen;
+}
+int WhatsappConnection::sentSSLCallback(int bytessent) {
+	sslbuffer.popData(bytessent);
+}
+void WhatsappConnection::receiveSSLCallback(char* buffer, int bytesrecv) {
+	if (buffer != NULL and bytesrecv > 0)
+		sslbuffer_in.addData(buffer,bytesrecv);
+	this->processSSLIncomingData();
+}
+bool WhatsappConnection::hasSSLDataToSend() {
+	return sslbuffer.size() != 0;
+}
+void WhatsappConnection::SSLCloseCallback() {
+	sslstatus = 0;
+}
+bool WhatsappConnection::hasSSLConnection(std::string & host, int * port) {
+	host = "sro.whatsapp.net";
+	*port = 443;
+	return (sslstatus == 1 or sslstatus == 3);
+}
+
+
 void WhatsappConnection::subscribePresence(std::string user) {
 	Tree request("presence",makeAttr2("type","subscribe", "to",user));
 	outbuffer = outbuffer + serialize_tree(&request,true);
@@ -1141,6 +1222,156 @@ void WhatsappConnection::addContacts(std::vector <std::string> clist) {
 			this->getLast(iter->first+"@"+whatsappserver);
 		}
 	}
+	// Query statuses
+	if (sslstatus == 0) {
+		sslbuffer_in.clear();
+		sslstatus = 1;
+		generateSyncARequest();
+	}
+}
+
+unsigned char hexchars(char c1, char c2) {
+	if (c1 >= '0' and c1 <= '9')
+		c1 -= '0';
+	else if (c1 >= 'A' and c1 <= 'F')
+		c1 = c1 - 'A' + 10;
+	else if (c1 >= 'a' and c1 <= 'f')
+		c1 = c1 - 'a' + 10;
+
+	if (c2 >= '0' and c2 <= '9')
+		c2 -= '0';
+	else if (c2 >= 'A' and c2 <= 'F')
+		c2 = c2 - 'A' + 10;
+	else if (c2 >= 'a' and c2 <= 'f')
+		c2 = c2 - 'a' + 10;
+
+	unsigned char r = c2 | (c1 << 4);
+	return r;
+}
+
+std::string utf8_decode(std::string in) {
+	std::string dec;
+	for (int i = 0; i < in.size(); i++) {
+		if (in[i] == '\\' and in[i+1] == 'u') {
+			i += 2; // Skip \u
+
+			while (i < in.size()) {
+				unsigned char hex = hexchars(in[i],in[i+1]);
+				dec += (char)hex;
+				i += 2;
+				if (not (hex >= 0x80 and hex <= 0xBF))
+					break;
+			}
+		}
+		else
+			dec += in[i];
+	}
+	return dec;
+}
+
+std::string query_field(std::string work, std::string lo, bool integer = false) {
+	int p = work.find("\""+lo+"\"");
+	if (p == std::string::npos) return "";
+
+	work = work.substr(p+("\""+lo+"\"").size());
+	
+	p = work.find("\"");
+	if (integer) p = work.find(":");
+	if (p == std::string::npos) return "";
+	
+	work = work.substr(p+1);
+
+	p = work.find("\"");
+	if (integer) {
+		p = 0;
+		while (p < work.size() and work[p] >= '0' and work[p] <= '9') p++;
+	}
+	if (p == std::string::npos) return "";
+
+	work = work.substr(0,p);
+
+	return work;
+}
+
+void WhatsappConnection::updateContactStatuses(std::string json) {
+	while (true) {
+		int offset = json.find("{");
+		if (offset == std::string::npos) break;
+		json = json.substr(offset+1);
+
+		// Look for closure
+		int cl = json.find("{");
+		if (cl == std::string::npos) cl = json.size();
+		std::string work = json.substr(0,cl);
+
+		// Look for "n", the number and "w","t","s"
+		std::string n = query_field(work,"n");
+		std::string w = query_field(work,"w",true);
+		std::string t = query_field(work,"t",true);
+		std::string s = query_field(work,"s");
+
+		if (w == "1") {
+			contacts[n].status = utf8_decode(s);
+			contacts[n].last_status = str2lng(t);
+		}
+
+		json = json.substr(cl);
+	}
+}
+
+// Quick and dirty way to parse the HTTP responses
+void WhatsappConnection::processSSLIncomingData() {
+	// Parse HTTPS headers and JSON body
+	if (sslstatus == 1 or sslstatus == 3) sslstatus++;
+
+	if (sslstatus == 2) {
+		std::string toparse((char*)sslbuffer_in.getPtr(),sslbuffer_in.size());
+		if (toparse.find("nonce=\"") != std::string::npos) {
+			toparse = toparse.substr(toparse.find("nonce=\"") + 7);
+			if (toparse.find("\"") != std::string::npos) {
+				toparse = toparse.substr(0,toparse.find("\""));
+				sslnonce = toparse;
+				sslstatus = 4;
+
+				sslbuffer.clear();
+				sslbuffer_in.clear();
+				generateSyncQRequest();
+			}
+		}
+	}
+	if (sslstatus == 4) {
+		// Look for the first line, to be 200 OK
+		std::string toparse((char*)sslbuffer_in.getPtr(),sslbuffer_in.size());
+		if (toparse.find("\r\n") != std::string::npos) {
+			std::string fl = toparse.substr(0,toparse.find("\r\n"));
+			if (fl.find("200") == std::string::npos)
+				goto abortStatus;
+
+			if (toparse.find("\r\n\r\n") != std::string::npos) {
+				std::string headers = toparse.substr(0,toparse.find("\r\n\r\n")+4);
+				std::string content = toparse.substr(toparse.find("\r\n\r\n")+4);
+
+				// Look for content length
+				if (headers.find("Content-Length:") != std::string::npos) {
+					std::string clen = headers.substr(headers.find("Content-Length:")+strlen("Content-Length:"));
+					clen = clen.substr(0,clen.find("\r\n"));
+					while (clen.size() > 0 and clen[0] == ' ')
+						clen = clen.substr(1);
+					int contentlength = str2int(clen);
+					if (contentlength == content.size()) {
+						// Now we can proceed to parse the JSON
+						updateContactStatuses(content);
+						sslstatus = 0;
+					}
+				}
+			}
+		}
+	}
+
+	return;
+	abortStatus:
+	sslstatus = 0;
+	return;
 }
 
 void WhatsappConnection::processIncomingData() {
@@ -1613,6 +1844,12 @@ int WhatsappConnection::getuserstatus(const std::string & who) {
 	}
 	return -1;
 }
+std::string WhatsappConnection::getuserstatusstring(const std::string & who) {
+	if (contacts.find(who) != contacts.end()) {
+		return contacts[who].status;
+	}
+	return "";
+}
 
 unsigned long long WhatsappConnection::getlastseen(const std::string & who) {
 	// Schedule a last seen update, just in case
@@ -1695,7 +1932,7 @@ void WhatsappConnection::sendResponse() {
 	outbuffer = outbuffer + serialize_tree(&t,false);
 }
 
-std::string generateHeaders(std::string auth, int content_length) {
+std::string WhatsappConnection::generateHeaders(std::string auth, int content_length) {
 	std::string h = 
 		"User-Agent: WhatsApp/2.4.7 S40Version/14.26 Device/Nokia302\r\n" 
 		"Accept: text/json\r\n"
@@ -1718,8 +1955,8 @@ std::string WhatsappConnection::generateHttpAuth(std::string nonce) {
 				md5hex("AUTHENTICATE:WAWA/s.whatsapp.net") );
 	
 	return "X-WAWA: username=\"" + phone + "\",digest-uri=\"WAWA/s.whatsapp.net\"" + 
-		"realm=\"s.whatsapp.net\",nonce=\"" + nonce + "\",cnonce=\"" + 
-		cnonce + "\",nc=\"00000001\",qop=\"auth\",digest-uri=\"WAWA/s.whatsapp.net\"" + 
+		",realm=\"s.whatsapp.net\",nonce=\"" + nonce + "\",cnonce=\"" + 
+		cnonce + "\",nc=\"00000001\",qop=\"auth\",digest-uri=\"WAWA/s.whatsapp.net\"," + 
 		"response=\"" + response + "\",charset=\"utf-8\"";
 }
 
@@ -1750,6 +1987,7 @@ public:
 	void account_info(unsigned long long & creation, unsigned long long & freeexp, std::string & status);
 	void send_avatar(const std::string & avatar);
 	int getuserstatus(const std::string & who);
+	std::string getuserstatusstring(const std::string & who);
 	unsigned long long getlastseen(const std::string & who);
 	void addGroup(std::string subject);
 	void leaveGroup(std::string group);
@@ -1762,6 +2000,13 @@ public:
 	bool groupsUpdated();
 		
 	int loginStatus() const;
+
+	int sendSSLCallback(char* buffer, int maxbytes);
+	int sentSSLCallback(int bytessent);
+	void receiveSSLCallback(char* buffer, int bytesrecv);
+	bool hasSSLDataToSend();
+	void SSLCloseCallback();
+	bool hasSSLConnection(std::string & host, int * port);
 };
 
 WhatsappConnectionAPI::WhatsappConnectionAPI(std::string phone, std::string password, std::string nick) {
@@ -1814,6 +2059,9 @@ void WhatsappConnectionAPI::setMyPresence(std::string s, std::string msg) {
 
 void WhatsappConnectionAPI::notifyTyping(std::string who, int status) {
 	connection->notifyTyping(who,status);
+}
+std::string WhatsappConnectionAPI::getuserstatusstring(const std::string & who) {
+	return connection->getuserstatusstring(who);
 }
 
 bool WhatsappConnectionAPI::query_chatimages(std::string & from, std::string & preview, std::string & url) {
@@ -1868,6 +2116,27 @@ bool WhatsappConnectionAPI::hasDataToSend() {
 void WhatsappConnectionAPI::account_info(unsigned long long & creation, unsigned long long & freeexp, std::string & status) {
 	connection->account_info(creation,freeexp,status);
 }
+
+
+int WhatsappConnectionAPI::sendSSLCallback(char* buffer, int maxbytes) {
+	return connection->sendSSLCallback(buffer,maxbytes);
+}
+int WhatsappConnectionAPI::sentSSLCallback(int bytessent) {
+	return connection->sentSSLCallback(bytessent);
+}
+void WhatsappConnectionAPI::receiveSSLCallback(char* buffer, int bytesrecv) {
+	connection->receiveSSLCallback(buffer,bytesrecv);
+}
+bool WhatsappConnectionAPI::hasSSLDataToSend() {
+	return connection->hasSSLDataToSend();
+}
+void WhatsappConnectionAPI::SSLCloseCallback() {
+	connection->SSLCloseCallback();
+}
+bool WhatsappConnectionAPI::hasSSLConnection(std::string & host, int * port) {
+	return connection->hasSSLConnection(host,port);
+}
+
 
 static const std::string base64_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 static inline bool is_base64(unsigned char c) {

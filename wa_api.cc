@@ -56,6 +56,7 @@ public:
 	void account_info(unsigned long long & creation, unsigned long long & freeexp, std::string & status);
 	void send_avatar(const std::string & avatar);
 	int getuserstatus(const std::string & who);
+	std::string getuserstatusstring(const std::string & who);
 	unsigned long long getlastseen(const std::string & who);
 	std::map <std::string,Group> getGroups();
 	bool groupsUpdated();
@@ -67,6 +68,13 @@ public:
 	void setMyPresence(std::string s, std::string msg);
 	
 	int loginStatus() const;
+
+	int sendSSLCallback(char* buffer, int maxbytes);
+	int sentSSLCallback(int bytessent);
+	void receiveSSLCallback(char* buffer, int bytesrecv);
+	bool hasSSLDataToSend();
+	void SSLCloseCallback();
+	bool hasSSLConnection(std::string & host, int * port);
 };
 
 char * waAPI_getgroups(void * waAPI) {
@@ -133,6 +141,38 @@ int  waAPI_hasoutdata(void * waAPI) {
 	if (((WhatsappConnectionAPI*)waAPI)->hasDataToSend()) return 1;
 	return 0;
 }
+
+
+int  waAPI_sslsendcb(void * waAPI, void * buffer, int maxbytes) {
+	return ((WhatsappConnectionAPI*)waAPI)->sendSSLCallback((char*)buffer,maxbytes);
+}
+
+void waAPI_sslsenddone(void * waAPI, int bytessent) {
+	((WhatsappConnectionAPI*)waAPI)->sentSSLCallback(bytessent);
+}
+
+void waAPI_sslinput(void * waAPI, const void * buffer, int bytesrecv) {
+	((WhatsappConnectionAPI*)waAPI)->receiveSSLCallback((char*)buffer,bytesrecv);
+}
+
+int  waAPI_sslhasoutdata(void * waAPI) {
+	if (((WhatsappConnectionAPI*)waAPI)->hasSSLDataToSend()) return 1;
+	return 0;
+}
+
+int waAPI_hassslconnection(void * waAPI, char ** host, int * port) {
+	std::string shost;
+	bool r = ((WhatsappConnectionAPI*)waAPI)->hasSSLConnection(shost,port);
+	if (r)
+		*host = (char*)g_strdup(shost.c_str());
+	return r;
+}
+
+void waAPI_sslcloseconnection(void * waAPI) {
+	((WhatsappConnectionAPI*)waAPI)->SSLCloseCallback();
+}
+
+
 
 void waAPI_login(void * waAPI) {
 	((WhatsappConnectionAPI*)waAPI)->doLogin();
@@ -225,6 +265,10 @@ int waAPI_querystatus(void * waAPI, char ** who, int *stat) {
 }
 int waAPI_getuserstatus(void * waAPI, const char * who) {
 	return ((WhatsappConnectionAPI*)waAPI)->getuserstatus(who);
+}
+char * waAPI_getuserstatusstring(void * waAPI, const char * who) {
+	std::string s = ((WhatsappConnectionAPI*)waAPI)->getuserstatusstring(who);
+	return g_strdup(s.c_str());
 }
 unsigned long long waAPI_getlastseen(void * waAPI, const char * who) {
 	return ((WhatsappConnectionAPI*)waAPI)->getlastseen(who);

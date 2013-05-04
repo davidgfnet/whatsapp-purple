@@ -38,6 +38,7 @@ int waAPI_queryicon(void * waAPI, char ** who, char ** icon, int * len, char ** 
 void waAPI_accountinfo(void * waAPI, unsigned long long *creation, unsigned long long *freeexpires, char ** status);
 void waAPI_setavatar(void * waAPI, const void *buffer, int len);
 int waAPI_getuserstatus(void * waAPI, const char * who);
+char * waAPI_getuserstatusstring(void * waAPI, const char * who);
 unsigned long long waAPI_getlastseen(void * waAPI, const char * who);
 int waAPI_querytyping(void * waAPI, char ** who, int * stat);
 char * waAPI_getgroups(void * waAPI);
@@ -47,6 +48,14 @@ int waAPI_getgroupsupdated(void * waAPI);
 void waAPI_creategroup(void * waAPI, const char * );
 void waAPI_deletegroup(void * waAPI, const char * );
 void waAPI_manageparticipant(void * waAPI, const char *id, const char * part, const char * command);
+
+// SSL connection
+int  waAPI_sslsendcb(void * waAPI, void * buffer, int maxbytes);
+void waAPI_sslsenddone(void * waAPI, int bytessent);
+void waAPI_sslinput(void * waAPI, const void * buffer, int bytesrecv);
+int  waAPI_sslhasoutdata(void * waAPI);
+void waAPI_sslcloseconnection(void * waAPI);
+int waAPI_hassslconnection(void * waAPI, char ** host, int * port);
 
 // OpenSSL replacements
 unsigned char *MD5(const unsigned char *d, int n, unsigned char *md);

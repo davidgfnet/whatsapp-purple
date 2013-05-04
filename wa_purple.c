@@ -60,6 +60,15 @@
 
 #include "wa_api.h"
 
+#ifdef _WIN32
+#define sys_read  wpurple_read
+#define sys_write wpurple_write
+#else
+#define sys_read  read
+#define sys_write write
+#endif
+
+
 #define WHATSAPP_ID "prpl-whatsapp"
 static PurplePlugin *_whatsapp_protocol = NULL;
 
@@ -470,7 +479,7 @@ static void waprpl_output_cb(gpointer data, gint source, PurpleInputCondition co
     int datatosend = waAPI_sendcb(wconn->waAPI,tempbuff,sizeof(tempbuff));
     if (datatosend == 0) break;
     
-    ret = write(wconn->fd,tempbuff,datatosend);
+    ret = sys_write(wconn->fd,tempbuff,datatosend);
     
     if (ret > 0) {
       waAPI_senddone(wconn->waAPI,ret);
@@ -482,7 +491,6 @@ static void waprpl_output_cb(gpointer data, gint source, PurpleInputCondition co
       gchar *tmp = g_strdup_printf("Lost connection with server (out cb): %s",g_strerror(errno));
       purple_connection_error_reason (gc, PURPLE_CONNECTION_ERROR_NETWORK_ERROR, tmp);
       g_free(tmp);
-      purple_debug_info("waprpl", "Connection error (file desc: %d, ret val %d, errno %d)\n", wconn->fd,ret,errno);
       break;
     }
   } while (ret > 0);
@@ -499,7 +507,7 @@ static void waprpl_input_cb(gpointer data, gint source, PurpleInputCondition con
   char tempbuff[1024];
   int ret;
   do {
-    ret = read(wconn->fd,tempbuff,sizeof(tempbuff));
+    ret = sys_read(wconn->fd,tempbuff,sizeof(tempbuff));
     if (ret > 0)
       waAPI_input(wconn->waAPI,tempbuff,ret);
     else if (ret < 0 && errno == EAGAIN)

@@ -142,7 +142,7 @@ static char *waprpl_status_text(PurpleBuddy *buddy) {
 }
 
 static const char *waprpl_list_icon(PurpleAccount *acct, PurpleBuddy *buddy) {
-  return "irc";
+  return "whatsapp";
 }
 
 static void waprpl_set_nickname(PurpleConnection *gc, const char * nick) {
@@ -1036,13 +1036,13 @@ static PurplePluginProtocolInfo prpl_info =
   NULL,                                /* user_splits, initialized in waprpl_init() */
   NULL,                                /* protocol_options, initialized in waprpl_init() */
   {                                    /* icon_spec, a PurpleBuddyIconSpec */
-      "jpg",                           /* format */
+      "png",                           /* format */
       1,                               /* min_width */
       1,                               /* min_height */
       512,                             /* max_width */
       512,                             /* max_height */
       64000,                           /* max_filesize */
-      PURPLE_ICON_SCALE_DISPLAY,       /* scale_rules */
+      PURPLE_ICON_SCALE_SEND,          /* scale_rules */
   },
   waprpl_list_icon,                    /* list_icon */
   NULL,                                /* list_emblem */

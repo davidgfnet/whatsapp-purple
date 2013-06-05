@@ -6,8 +6,7 @@ WhatsApp protocol implementation for libpurple (pidgin)
 Building
 --------
 
-Just do 'make -f Makefile' and pick the proper makefile.
-Makefile32/64 are the makefiles for Linux (x86/x64 versions).
+Just do `make` (if you have to choose 32/64 bit, run `make -f Makefile32` and pick the proper makefile).
 Makefile.mingw is the makefile for Windows 32 bit.
 
 Binaries

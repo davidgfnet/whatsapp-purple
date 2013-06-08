@@ -363,9 +363,12 @@ static void waprpl_process_incoming_events(PurpleConnection *gc) {
   // User typing info notify
   while (waAPI_querytyping(wconn->waAPI, &who, &status)) {
     if (status == 1) {
+      purple_debug_info(WHATSAPP_ID, "%s is typing\n", who);
       serv_got_typing(gc,who,0,PURPLE_TYPING);
     }
     else {
+      purple_debug_info(WHATSAPP_ID, "%s is not typing\n", who);
+      serv_got_typing(gc,who,0,PURPLE_NOT_TYPING);
       serv_got_typing_stopped(gc,who);
     }
   }
@@ -728,6 +731,8 @@ static unsigned int waprpl_send_typing(PurpleConnection *gc, const char *who, Pu
   
   int status = 0;
   if (typing == PURPLE_TYPING) status = 1;
+
+  purple_debug_info(WHATSAPP_ID, "purple: %s typing status: %d\n", who, typing);
   
   waAPI_sendtyping(wconn->waAPI,who,status);
   waprpl_check_output(gc);

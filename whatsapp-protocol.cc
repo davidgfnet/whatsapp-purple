@@ -1152,12 +1152,11 @@ void WhatsappConnection::gotTyping(std::string who, std::string tstat) {
 }
 
 void WhatsappConnection::notifyTyping(std::string who, int status) {
-	std::string s = "active";
+	std::string s = "paused";
 	if (status == 1) s = "composing";
-	else if (status == 2) s = "paused";
 	
 	Tree mes("message",makeAttr2("to",who+"@"+whatsappserver, "type","chat"));
-	mes.addChild(Tree("composing",makeAttr1("xmlns","http://jabber.org/protocol/chatstates")));
+	mes.addChild(Tree(s,makeAttr1("xmlns","http://jabber.org/protocol/chatstates")));
 
 	outbuffer = outbuffer +serialize_tree(&mes,true);
 }

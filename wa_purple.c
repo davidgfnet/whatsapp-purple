@@ -169,30 +169,12 @@ static void waprpl_show_accountinfo(PurplePluginAction *action) {
   purple_notify_formatted(gc, "Account information", "Account information", "", text, NULL, NULL);
 }
 
-static void waprpl_show_set_nickname(PurplePluginAction *action) {
-  // TODO
-  /*PurpleConnection *gc = (PurpleConnection *) action->context;
-
-  char * tmp = g_strdup_printf(_("Set nickname for %s."), purple_account_get_username(account));
-	
-  purple_request_input(gc, _("Set nickname"), tmp,
-      _("This is the name that other contacts see you as."),
-      purple_connection_get_display_name(gc), FALSE, FALSE, NULL,
-      _("OK"), G_CALLBACK(msn_act_id),
-      _("Cancel"), NULL,
-      purple_connection_get_account(gc), NULL, NULL, gc);
-  g_free(tmp);*/
-}
-
-
 static GList *waprpl_actions(PurplePlugin *plugin, gpointer context) {
   PurplePluginAction * act;
   PurpleConnection *gc = (PurpleConnection *) context;
   whatsapp_connection * wconn = purple_connection_get_protocol_data(gc);
 
   GList *m = NULL;
-  act = purple_plugin_action_new("Set nickname ...", waprpl_show_set_nickname);
-  m = g_list_append(m, act);
   
   act = purple_plugin_action_new("Show account information ...", waprpl_show_accountinfo);
   m = g_list_append(m, act);

@@ -137,6 +137,7 @@ static void waprpl_tooltip_text(PurpleBuddy *buddy, PurpleNotifyUserInfo *info, 
 
 static char *waprpl_status_text(PurpleBuddy *buddy) {
   whatsapp_connection * wconn = purple_connection_get_protocol_data(purple_account_get_connection(purple_buddy_get_account(buddy)));
+  if (!wconn) return 0;
 
   return waAPI_getuserstatusstring(wconn->waAPI,purple_buddy_get_name(buddy));
 }
@@ -154,6 +155,7 @@ static void waprpl_set_nickname(PurpleConnection *gc, const char * nick) {
 static void waprpl_show_accountinfo(PurplePluginAction *action) {
   PurpleConnection * gc = (PurpleConnection *) action->context;
   whatsapp_connection * wconn = purple_connection_get_protocol_data(gc);
+  if (!wconn) return 0;
   
   unsigned long long creation, freeexpires;
   char * status;
@@ -247,9 +249,9 @@ static void waprpl_process_incoming_events(PurpleConnection *gc) {
   
   char * msg, * who, * prev, * url, *author;
   int status; int size;
-  double lat,lng;
+  double lat,lng; unsigned long timestamp;
   // Incoming messages
-  while (waAPI_querychat(wconn->waAPI, &who, &msg, &author)) {
+  while (waAPI_querychat(wconn->waAPI, &who, &msg, &author, &timestamp)) {
     purple_debug_info(WHATSAPP_ID, "Got chat message from %s: %s\n", who,msg);
     
     if (isgroup(who)) {
@@ -276,7 +278,7 @@ static void waprpl_process_incoming_events(PurpleConnection *gc) {
         waprpl_chat_join(gc,hasht);
       
       if (convo != NULL) {
-        serv_got_chat_in(gc, purple_conv_chat_get_id(PURPLE_CONV_CHAT(convo)), author, PURPLE_MESSAGE_RECV, msg, time(NULL));
+        serv_got_chat_in(gc, purple_conv_chat_get_id(PURPLE_CONV_CHAT(convo)), author, PURPLE_MESSAGE_RECV, msg, timestamp);
       }else{
         printf("Received group message but could not find the group! %s\n",msg);
       }
@@ -286,11 +288,11 @@ static void waprpl_process_incoming_events(PurpleConnection *gc) {
       if (!convo)
         convo = purple_conversation_new(PURPLE_CONV_TYPE_IM, acc, who);
       
-      serv_got_chat_in(gc, purple_conv_chat_get_id(PURPLE_CONV_IM(convo)), who, PURPLE_MESSAGE_RECV, msg, time(NULL));
-      purple_conv_im_write(PURPLE_CONV_IM(convo), who, msg, PURPLE_MESSAGE_RECV, time(NULL));
+      serv_got_chat_in(gc, purple_conv_chat_get_id(PURPLE_CONV_IM(convo)), who, PURPLE_MESSAGE_RECV, msg, timestamp);
+      purple_conv_im_write(PURPLE_CONV_IM(convo), who, msg, PURPLE_MESSAGE_RECV, timestamp);
     }
   }
-  while (waAPI_querychatimage(wconn->waAPI, &who, &prev, &size, &url)) {
+  while (waAPI_querychatimage(wconn->waAPI, &who, &prev, &size, &url, &timestamp)) {
     printf("Got chat image %s %s\n",who,url);
     purple_debug_info(WHATSAPP_ID, "Got image from %s: %s\n", who,url);
     
@@ -301,11 +303,11 @@ static void waprpl_process_incoming_events(PurpleConnection *gc) {
       
     int imgid = purple_imgstore_add_with_id(g_memdup(prev, size), size, NULL);
 
-    serv_got_chat_in(gc, purple_conv_chat_get_id(PURPLE_CONV_IM(convo)), who, PURPLE_MESSAGE_RECV, msg, time(NULL));
+    serv_got_chat_in(gc, purple_conv_chat_get_id(PURPLE_CONV_IM(convo)), who, PURPLE_MESSAGE_RECV, msg, timestamp);
     purple_conv_im_write(PURPLE_CONV_IM(convo), who, g_strdup_printf("<a href=\"%s\"><img id=\"%u\"></a>",url,imgid),
-      PURPLE_MESSAGE_RECV | PURPLE_MESSAGE_IMAGES, time(NULL));
+      PURPLE_MESSAGE_RECV | PURPLE_MESSAGE_IMAGES, timestamp);
   }
-  while (waAPI_querychatlocation(wconn->waAPI, &who, &prev, &size, &lat, &lng)) {
+  while (waAPI_querychatlocation(wconn->waAPI, &who, &prev, &size, &lat, &lng, &timestamp)) {
     purple_debug_info(WHATSAPP_ID, "Got geomessage from: %s Coordinates (%f %f)\n", who,(float)lat,(float)lng);
     
     // Search fot the combo
@@ -315,12 +317,12 @@ static void waprpl_process_incoming_events(PurpleConnection *gc) {
       
     int imgid = purple_imgstore_add_with_id(g_memdup(prev, size), size, NULL);
 
-    serv_got_chat_in(gc, purple_conv_chat_get_id(PURPLE_CONV_IM(convo)), who, PURPLE_MESSAGE_RECV, msg, time(NULL));
+    serv_got_chat_in(gc, purple_conv_chat_get_id(PURPLE_CONV_IM(convo)), who, PURPLE_MESSAGE_RECV, msg, timestamp);
     purple_conv_im_write(PURPLE_CONV_IM(convo), who, 
       g_strdup_printf("<a href=\"http://openstreetmap.org/?lat=%f&lon=%f&zoom=16\"><img src=\"%u\"></a>",lat,lng,imgid),
-      PURPLE_MESSAGE_RECV | PURPLE_MESSAGE_IMAGES, time(NULL));
+      PURPLE_MESSAGE_RECV | PURPLE_MESSAGE_IMAGES, timestamp);
   }
-  while (waAPI_querychatsound(wconn->waAPI, &who, &url)) {
+  while (waAPI_querychatsound(wconn->waAPI, &who, &url, &timestamp)) {
     purple_debug_info(WHATSAPP_ID, "Got chat sound from %s: %s\n", who,url);
     
     // Search fot the combo
@@ -328,9 +330,9 @@ static void waprpl_process_incoming_events(PurpleConnection *gc) {
     if (!convo)
       convo = purple_conversation_new(PURPLE_CONV_TYPE_IM, acc, who);
 
-    serv_got_chat_in(gc, purple_conv_chat_get_id(PURPLE_CONV_IM(convo)), who, PURPLE_MESSAGE_RECV, msg, time(NULL));
+    serv_got_chat_in(gc, purple_conv_chat_get_id(PURPLE_CONV_IM(convo)), who, PURPLE_MESSAGE_RECV, msg, timestamp);
     purple_conv_im_write(PURPLE_CONV_IM(convo), who, g_strdup_printf("<a href=\"%s\">%s</a>",url,url),
-      PURPLE_MESSAGE_RECV , time(NULL));
+      PURPLE_MESSAGE_RECV , timestamp);
   }
   
   // User status change
@@ -609,8 +611,10 @@ static void waprpl_close(PurpleConnection *gc) {
   
   if (wconn->waAPI)
     waAPI_delete(wconn->waAPI);
+  wconn->waAPI = NULL;
 
   g_free(wconn);
+  purple_connection_set_protocol_data(gc, 0);
 }
 
 static int waprpl_send_im(PurpleConnection *gc, const char *who, const char *message, PurpleMessageFlags flags) {

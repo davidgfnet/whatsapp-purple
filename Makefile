@@ -16,7 +16,7 @@ CXX = g++
 LD = $(CXX)
 CFLAGS_PURPLE = $(shell pkg-config --cflags purple)
 CFLAGS = \
-    -O2 \
+    -O2  \
     -Wall \
     -Wextra \
     -fPIC \

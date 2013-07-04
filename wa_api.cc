@@ -37,7 +37,7 @@ public:
 	WhatsappConnectionAPI(std::string phone, std::string password, std::string nick);
 	~WhatsappConnectionAPI();
 	
-	void doLogin();
+	void doLogin(std::string);
 	void receiveCallback(const char * data, int len);
 	int  sendCallback(char * data, int len);
 	void sentCallback(int len);
@@ -174,8 +174,8 @@ void waAPI_sslcloseconnection(void * waAPI) {
 
 
 
-void waAPI_login(void * waAPI) {
-	((WhatsappConnectionAPI*)waAPI)->doLogin();
+void waAPI_login(void * waAPI, const char * ua) {
+	((WhatsappConnectionAPI*)waAPI)->doLogin(ua);
 }
 
 void * waAPI_create(const char * username, const char * password, const char * nickname) {

@@ -68,6 +68,7 @@
 #define sys_write write
 #endif
 
+const char default_user_agent[] = "WhatsApp/2.10.750 Android/4.2.1 Device/GalaxyS3";
 
 #define WHATSAPP_ID "prpl-whatsapp"
 static PurplePlugin *_whatsapp_protocol = NULL;
@@ -543,13 +544,16 @@ static void waprpl_connect_cb(gpointer data, gint source, const gchar *error_mes
   PurpleConnection *gc = data;
   whatsapp_connection * wconn = purple_connection_get_protocol_data(gc);
 
+  PurpleAccount *acct = purple_connection_get_account(gc);
+  const char *useragent = purple_account_get_string(acct, "useragent", default_user_agent);
+
   if (source < 0) {
     gchar *tmp = g_strdup_printf("Unable to connect: %s",error_message);
     purple_connection_error_reason (gc,PURPLE_CONNECTION_ERROR_NETWORK_ERROR, tmp);
     g_free(tmp);
   }else{
     wconn->fd = source;
-    waAPI_login(wconn->waAPI);
+    waAPI_login(wconn->waAPI,useragent);
     wconn->rh = purple_input_add(wconn->fd, PURPLE_INPUT_READ, waprpl_input_cb, gc);
     waprpl_check_output(gc);
   }
@@ -1120,6 +1124,9 @@ static void waprpl_init(PurplePlugin *plugin)
   prpl_info.protocol_options = g_list_append(prpl_info.protocol_options, option);
 
   option = purple_account_option_string_new("Nickname", "nick", "");
+  prpl_info.protocol_options = g_list_append(prpl_info.protocol_options, option);
+
+  option = purple_account_option_string_new("User Agent", "useragent", default_user_agent);
   prpl_info.protocol_options = g_list_append(prpl_info.protocol_options, option);
   
   _whatsapp_protocol = plugin;

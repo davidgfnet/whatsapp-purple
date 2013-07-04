@@ -19,7 +19,7 @@ int  waAPI_sendcb(void * waAPI, void * buffer, int maxbytes);
 void waAPI_senddone(void * waAPI, int bytessent);
 void waAPI_input(void * waAPI, const void * buffer, int bytesrecv);
 int  waAPI_hasoutdata(void * waAPI);
-void waAPI_login(void * waAPI);
+void waAPI_login(void * waAPI, const char *ua);
 void * waAPI_create(const char * username, const char * password, const char * nickname);
 void waAPI_delete(void * waAPI);
 void waAPI_sendim(void * waAPI, const char * who, const char *message);

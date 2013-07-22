@@ -275,8 +275,10 @@ static void waprpl_process_incoming_events(PurpleConnection *gc) {
       PurpleConversation *convo = purple_find_chat(gc, convo_id);
       
       // Create a window if it's not open yet
-      if (!convo)
+      if (!convo) {
         waprpl_chat_join(gc,hasht);
+        convo = purple_find_chat(gc, convo_id);
+      }
       
       if (convo != NULL) {
         serv_got_chat_in(gc, purple_conv_chat_get_id(PURPLE_CONV_CHAT(convo)), author, PURPLE_MESSAGE_RECV, msg, timestamp);

@@ -14,6 +14,7 @@
 #include <string>
 #include <iostream>
 #include <map>
+#include <stdio.h>
 
 class WhatsappConnection;
 
@@ -68,11 +69,13 @@ public:
 	void setMyPresence(std::string s, std::string msg);
 	
 	int loginStatus() const;
+	int sendImage(std::string to, int w, int h, unsigned int size, const char * fp);
 
 	int sendSSLCallback(char* buffer, int maxbytes);
 	int sentSSLCallback(int bytessent);
 	void receiveSSLCallback(char* buffer, int bytesrecv);
 	bool hasSSLDataToSend();
+	bool closeSSLConnection();
 	void SSLCloseCallback();
 	bool hasSSLConnection(std::string & host, int * port);
 };
@@ -157,6 +160,7 @@ void waAPI_sslinput(void * waAPI, const void * buffer, int bytesrecv) {
 
 int  waAPI_sslhasoutdata(void * waAPI) {
 	if (((WhatsappConnectionAPI*)waAPI)->hasSSLDataToSend()) return 1;
+	if (((WhatsappConnectionAPI*)waAPI)->closeSSLConnection()) return -1;
 	return 0;
 }
 
@@ -192,6 +196,9 @@ void waAPI_sendim(void * waAPI, const char * who, const char *message) {
 }
 void waAPI_sendchat(void * waAPI, const char * who, const char *message) {
 	((WhatsappConnectionAPI*)waAPI)->sendGroupChat(std::string(who),std::string(message));
+}
+int waAPI_sendimage(void * waAPI, const char * who, int w, int h, unsigned int size, const char * fp) {
+	((WhatsappConnectionAPI*)waAPI)->sendImage(std::string(who),w,h,size,fp);
 }
 
 void waAPI_sendtyping(void * waAPI,const char * who,int typing) {
@@ -342,6 +349,78 @@ std::string tohex(const char * t, int l) {
 	return ret;
 }
 
+static const std::string base64_chars = 
+             "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+             "abcdefghijklmnopqrstuvwxyz"
+             "0123456789+/";
+
+std::string base64_encode_esp(unsigned char const* bytes_to_encode, unsigned int in_len) {
+  std::string ret;
+  int i = 0;
+  int j = 0;
+  unsigned char char_array_3[3];
+  unsigned char char_array_4[4];
+
+  while (in_len--) {
+    char_array_3[i++] = *(bytes_to_encode++);
+    if (i == 3) {
+      char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
+      char_array_4[1] = ((char_array_3[0] & 0x03) << 4) + ((char_array_3[1] & 0xf0) >> 4);
+      char_array_4[2] = ((char_array_3[1] & 0x0f) << 2) + ((char_array_3[2] & 0xc0) >> 6);
+      char_array_4[3] = char_array_3[2] & 0x3f;
+
+      for(i = 0; (i <4) ; i++)
+        ret += base64_chars[char_array_4[i]];
+      i = 0;
+    }
+  }
+
+  if (i)
+  {
+    for(j = i; j < 3; j++)
+      char_array_3[j] = '\0';
+
+    char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
+    char_array_4[1] = ((char_array_3[0] & 0x03) << 4) + ((char_array_3[1] & 0xf0) >> 4);
+    char_array_4[2] = ((char_array_3[1] & 0x0f) << 2) + ((char_array_3[2] & 0xc0) >> 6);
+    char_array_4[3] = char_array_3[2] & 0x3f;
+
+    for (j = 0; (j < i + 1); j++)
+      ret += base64_chars[char_array_4[j]];
+
+    for(j = i; j < 3; j++)
+      ret += "=";
+
+  }
+
+  return ret;
+
+}
+
+
+std::string SHA256_file_b64(const char *filename) {
+	unsigned char md[32];
+
+	PurpleCipher *sha_cipher;
+	PurpleCipherContext *sha_ctx;
+	
+	sha_cipher = purple_ciphers_find_cipher("sha256");
+	sha_ctx = purple_cipher_context_new(sha_cipher, NULL);
+
+	FILE * fd = fopen(filename, "rb");
+	int read = 0;
+	do {
+		char buf[1024];
+		read = fread(buf,1,1024,fd);
+		purple_cipher_context_append(sha_ctx, (guchar *)buf, read);
+	} while (read > 0);
+	fclose(fd);
+
+	purple_cipher_context_digest(sha_ctx, 32, md, NULL);
+	return base64_encode_esp(md,32);
+}
+
+
 std::string md5hex(std::string target) {
 	char outh[16];
 	MD5((unsigned char*)target.c_str(), target.size(), (unsigned char*)outh);
@@ -419,5 +498,57 @@ int PKCS5_PBKDF2_HMAC_SHA1(const char *pass, int passlen, const unsigned char *s
 	
 	return 1;
 }
+
+
+// MIME type, copied from mxit
+#define		MIME_TYPE_OCTETSTREAM		"application/octet-stream"
+#define		ARRAY_SIZE( x )				( sizeof( x ) / sizeof( x[0] ) )
+
+/* supported file mime types */
+static struct mime_type {
+	const char*		magic;
+	const short		magic_len;
+	const char*		mime;
+} const mime_types[] = {
+					/*	magic									length	mime					*/
+	/* images */	{	"\x89\x50\x4E\x47\x0D\x0A\x1A\x0A",		8,		"image/png"				},		/* image png */
+					{	"\xFF\xD8",								2,		"image/jpeg"			},		/* image jpeg */
+					{	"\x3C\x3F\x78\x6D\x6C",					5,		"image/svg+xml"			},		/* image SVGansi */
+					{	"\xEF\xBB\xBF",							3,		"image/svg+xml"			},		/* image SVGutf */
+					{	"\xEF\xBB\xBF",							3,		"image/svg+xml"			},		/* image SVGZ */
+	/* mxit */		{	"\x4d\x58\x4d",							3,		"application/mxit-msgs"	},		/* mxit message */
+					{	"\x4d\x58\x44\x01",						4,		"application/mxit-mood" },		/* mxit mood */
+					{	"\x4d\x58\x45\x01",						4,		"application/mxit-emo"	},		/* mxit emoticon */
+					{	"\x4d\x58\x46\x01",						4,		"application/mxit-emof"	},		/* mxit emoticon frame */
+					{	"\x4d\x58\x53\x01",						4,		"application/mxit-skin"	},		/* mxit skin */
+	/* audio */		{	"\x4d\x54\x68\x64",						4,		"audio/midi"			},		/* audio midi */
+					{	"\x52\x49\x46\x46",						4,		"audio/wav"				},		/* audio wav */
+					{	"\xFF\xF1",								2,		"audio/aac"				},		/* audio aac1 */
+					{	"\xFF\xF9",								2,		"audio/aac"				},		/* audio aac2 */
+					{	"\xFF",									1,		"audio/mp3"				},		/* audio mp3 */
+					{	"\x23\x21\x41\x4D\x52\x0A",				6,		"audio/amr"				},		/* audio AMR */
+					{	"\x23\x21\x41\x4D\x52\x2D\x57\x42",		8,		"audio/amr-wb"			},		/* audio AMR WB */
+					{	"\x00\x00\x00",							3,		"audio/mp4"				},		/* audio mp4 */
+					{	"\x2E\x73\x6E\x64",						4,		"audio/au"				}		/* audio AU */
+};
+
+
+const char* file_mime_type( const char* filename, const char* buf, int buflen ) {
+	unsigned int	i;
+
+	/* check for matching magic headers */
+	for ( i = 0; i < ARRAY_SIZE( mime_types ); i++ ) {
+
+		if ( buflen < mime_types[i].magic_len )	/* data is shorter than size of magic */
+			continue;
+
+		if ( memcmp( buf, mime_types[i].magic, mime_types[i].magic_len ) == 0 )
+			return mime_types[i].mime;
+	}
+
+	/* we did not find the MIME type, so return the default (application/octet-stream) */
+	return MIME_TYPE_OCTETSTREAM;
+}
+
 
 

@@ -24,6 +24,7 @@ void * waAPI_create(const char * username, const char * password, const char * n
 void waAPI_delete(void * waAPI);
 void waAPI_sendim(void * waAPI, const char * who, const char *message);
 void waAPI_sendchat(void * waAPI, const char * who, const char *message);
+int waAPI_sendimage(void * waAPI, const char * who, int w, int h, unsigned int size,const char * fp);
 int waAPI_loginstatus(void * waAPI);
 void waAPI_addcontact(void * waAPI, const char * phone);
 void waAPI_delcontact(void * waAPI, const char * phone);
@@ -63,8 +64,17 @@ int PKCS5_PBKDF2_HMAC_SHA1(const char *pass, int passlen, const unsigned char *s
                            int keylen, unsigned char *out);
 unsigned char *SHA1(const unsigned char *d, int n, unsigned char *md);
 
+const char* file_mime_type( const char* filename, const char* buf, int buflen );
+
 #ifdef __cplusplus
 }
+#endif
+
+#ifdef __cplusplus
+#include <iostream>
+std::string md5hex(std::string target);
+std::string md5raw(std::string target);
+std::string SHA256_file_b64(const char *filename);
 #endif
 
 #endif

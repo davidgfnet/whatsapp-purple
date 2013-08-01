@@ -81,6 +81,18 @@ static PurplePlugin *_whatsapp_protocol = NULL;
 #define WHATSAPP_DEFAULT_PORT   443
 
 typedef struct {
+  char * upload_url;
+  char sha256[48];
+  unsigned int file_size;
+  unsigned int w,h;
+  char * filename;
+  char * fullfilename;
+  char * to;
+  void * wconn;
+  PurpleConnection *gc;
+} wa_file_upload;
+
+typedef struct {
   PurpleAccount *account;
   int fd;         // File descriptor of the socket
   guint rh, wh;   // Read/write handlers
@@ -90,7 +102,7 @@ typedef struct {
   // HTTPS interface for status query
   guint sslrh, sslwh; // Read/write handlers
   int sslfd;
-  PurpleSslConnection *gsc; // SLL handler
+  PurpleSslConnection *gsc; // SSL handler
 } whatsapp_connection;
 static int gid_convo_counter = 0;
 
@@ -743,7 +755,7 @@ static void waprpl_set_buddy_icon(PurpleConnection *gc, PurpleStoredImage *img) 
 }
 
 static gboolean waprpl_can_receive_file(PurpleConnection *gc, const char *who) {
-  return FALSE;
+  return TRUE;
 }
 
 static gboolean waprpl_offline_message(const PurpleBuddy *buddy) {
@@ -965,11 +977,16 @@ void waprpl_check_ssl_output(PurpleConnection *gc) {
   whatsapp_connection * wconn = purple_connection_get_protocol_data(gc);
   if (wconn->sslfd < 0) return;
     
-  if (waAPI_sslhasoutdata(wconn->waAPI) > 0) {
+  int r = waAPI_sslhasoutdata(wconn->waAPI);
+  if (r > 0) {
     // Need to watch for output data (if we are not doing it already)
     if (wconn->sslwh == 0)
       wconn->sslwh = purple_input_add(wconn->sslfd, PURPLE_INPUT_WRITE, waprpl_ssl_output_cb, gc);
-  }else{
+  }
+  else if (r < 0) {
+    waprpl_ssl_cerr_cb(0,0,gc);  // Finished the connection!
+  }
+  else{
     if (wconn->sslwh != 0)
       purple_input_remove(wconn->sslwh);
     
@@ -1000,7 +1017,6 @@ void waprpl_ssl_cerr_cb(PurpleSslConnection *gsc, PurpleSslErrorType error, gpoi
   if (wconn->gsc != 0)
     purple_ssl_close(gsc);
 
-
   wconn->gsc = 0;
   wconn->sslfd = -1;
   wconn->sslrh = 0;
@@ -1025,7 +1041,71 @@ void check_ssl_requests(PurpleAccount *acct) {
   }
 }
 
+void waprpl_xfer_init(PurpleXfer *xfer) {
+  purple_debug_info(WHATSAPP_ID, "File xfer init...\n");
+  wa_file_upload * xinfo = (wa_file_upload*)xfer->data;
+  whatsapp_connection * wconn = xinfo->wconn;
 
+  const char * fn = purple_xfer_get_filename(xfer);
+  const char * fp = purple_xfer_get_local_filename(xfer);
+  size_t fs = purple_xfer_get_size (xfer);
+
+  wa_file_upload * xfer_info = (wa_file_upload *)xfer->data;
+  xfer_info->filename = g_strdup(fn);
+  xfer_info->fullfilename = g_strdup(fp);
+
+  purple_debug_info(WHATSAPP_ID, "Transfer file %s at %s with size %d\n", fn, fp, fs);
+  waAPI_sendimage(wconn->waAPI, xinfo->to, 100,100,fs,fp);
+
+  waprpl_check_output(xinfo->gc);
+}
+
+void waprpl_xfer_start (PurpleXfer * xfer) {
+  purple_debug_info(WHATSAPP_ID, "Starting file tranfer...\n");
+}
+
+void waprpl_xfer_end (PurpleXfer * xfer) {
+  purple_debug_info(WHATSAPP_ID, "Ended file tranfer!\n");
+}
+
+void waprpl_xfer_cancel_send (PurpleXfer * xfer) {
+  purple_debug_info(WHATSAPP_ID, "File tranfer cancel send!!!\n");
+}
+
+
+// Send file (used for sending images?)
+static PurpleXfer* waprpl_new_xfer(PurpleConnection *gc, const char *who) {
+  purple_debug_info(WHATSAPP_ID, "New file xfer\n");
+  PurpleXfer * xfer = purple_xfer_new(gc->account, PURPLE_XFER_SEND, who);
+  g_return_val_if_fail(xfer != NULL, NULL);
+  whatsapp_connection * wconn = purple_connection_get_protocol_data(gc);
+
+  wa_file_upload * xfer_info = g_new0(wa_file_upload, 1);
+  memset(xfer_info,0,sizeof(wa_file_upload));
+  xfer_info->to = g_strdup(who);
+  xfer->data = xfer_info;
+  xfer_info->wconn = wconn;
+  xfer_info->gc = gc;
+
+  purple_xfer_set_init_fnc(xfer, waprpl_xfer_init);
+  purple_xfer_set_start_fnc(xfer, waprpl_xfer_start);
+  purple_xfer_set_end_fnc(xfer, waprpl_xfer_end);
+  purple_xfer_set_cancel_send_fnc(xfer, waprpl_xfer_cancel_send);
+
+  return xfer;
+}
+
+static void waprpl_send_file(PurpleConnection *gc, const char *who, const char *file) {
+  purple_debug_info(WHATSAPP_ID, "Send file called\n");
+  PurpleXfer *xfer = waprpl_new_xfer(gc, who);
+
+  if (file) {
+    purple_xfer_request_accepted(xfer, file);
+    purple_debug_info(WHATSAPP_ID, "Accepted transfer of file %s\n",file);
+  }
+  else
+    purple_xfer_request(xfer);
+}
 
 static PurplePluginProtocolInfo prpl_info =
 {
@@ -1093,8 +1173,8 @@ static PurplePluginProtocolInfo prpl_info =
   NULL,                                /* roomlist_cancel */
   NULL,                                /* roomlist_expand_category */
   waprpl_can_receive_file,             /* can_receive_file */
-  NULL,                                /* send_file */
-  NULL,                                /* new_xfer */
+  waprpl_send_file,                    /* send_file */
+  waprpl_new_xfer,                     /* new_xfer */
   waprpl_offline_message,              /* offline_message */
   NULL,                                /* whiteboard_prpl_ops */
   NULL,                                /* send_raw */

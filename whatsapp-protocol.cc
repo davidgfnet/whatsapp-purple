@@ -43,6 +43,7 @@ struct t_fileupload {
 	std::string type;
 	std::string uploadurl, host;
 	bool uploading;
+	int totalsize;
 };
 
 std::string base64_decode(std::string const& encoded_string);
@@ -797,6 +798,7 @@ public:
 	bool closeSSLConnection();
 	void SSLCloseCallback();
 	bool hasSSLConnection(std::string & host, int * port);
+	int uploadProgress(int & rid, int &bs);
 
 	std::string generateHeaders(std::string auth, int content_length);
 };
@@ -980,10 +982,11 @@ int WhatsappConnection::sendImage(std::string to, int w, int h, unsigned int siz
 	fu.hash = sha256b64hash;
 	fu.type = "image";
 	fu.uploading = false;
+	fu.totalsize = 0;
 	uploadfile_queue.push_back(fu);
 	outbuffer = outbuffer + serialize_tree(&req);
 
-	return 0;
+	return iqid;
 }
 
 void WhatsappConnection::generateSyncARequest() {
@@ -1214,6 +1217,19 @@ bool WhatsappConnection::hasSSLConnection(std::string & host, int * port) {
 	return (sslstatus == 1 or sslstatus == 3 or sslstatus == 5);
 }
 
+int WhatsappConnection::uploadProgress(int & rid, int &bs) {
+	if (!(sslstatus == 5 or sslstatus == 6)) return 0;
+	int totalsize = 0;
+	for (int j = 0; j < uploadfile_queue.size(); j++)
+		if (uploadfile_queue[j].uploading) {
+			rid = uploadfile_queue[j].rid;
+			totalsize = uploadfile_queue[j].totalsize;
+			break;
+		}
+	bs = totalsize - sslbuffer.size();
+	if (bs < 0) bs = 0;
+	return 1;
+}
 
 void WhatsappConnection::subscribePresence(std::string user) {
 	Tree request("presence",makeAttr2("type","subscribe", "to",user));
@@ -1538,7 +1554,11 @@ std::string WhatsappConnection::generateUploadPOST(t_fileupload * fu) {
 	post += "User-Agent: WhatsApp/2.4.7 S40Version/14.26 Device/Nokia302\r\n";
 	post += "Content-Length:  " + int2str(ret.size()) + "\r\n\r\n";
 
-	return post + ret;
+	std::string all = post + ret;
+
+	fu->totalsize = file_buffer.size();
+
+	return all;
 }
 
 void WhatsappConnection::processUploadQueue() {
@@ -2241,6 +2261,7 @@ public:
 	bool closeSSLConnection();
 	void SSLCloseCallback();
 	bool hasSSLConnection(std::string & host, int * port);
+	int uploadProgress(int & rid, int &bs);
 };
 
 WhatsappConnectionAPI::WhatsappConnectionAPI(std::string phone, std::string password, std::string nick) {
@@ -2277,6 +2298,9 @@ unsigned long long WhatsappConnectionAPI::getlastseen(const std::string & who) {
 
 int WhatsappConnectionAPI::sendImage(std::string to, int w, int h, unsigned int size, const char * fp) {
 	return connection->sendImage(to, w, h, size, fp);
+}
+int WhatsappConnectionAPI::uploadProgress(int & rid, int &bs) {
+	return connection->uploadProgress(rid,bs);
 }
 
 void WhatsappConnectionAPI::send_avatar(const std::string & avatar) {

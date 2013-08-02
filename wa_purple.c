@@ -81,15 +81,11 @@ static PurplePlugin *_whatsapp_protocol = NULL;
 #define WHATSAPP_DEFAULT_PORT   443
 
 typedef struct {
-  char * upload_url;
-  char sha256[48];
   unsigned int file_size;
-  unsigned int w,h;
-  char * filename;
-  char * fullfilename;
   char * to;
   void * wconn;
   PurpleConnection *gc;
+  int ref_id;
 } wa_file_upload;
 
 typedef struct {
@@ -319,7 +315,7 @@ static void waprpl_process_incoming_events(PurpleConnection *gc) {
     int imgid = purple_imgstore_add_with_id(g_memdup(prev, size), size, NULL);
 
     serv_got_chat_in(gc, purple_conv_chat_get_id(PURPLE_CONV_IM(convo)), who, PURPLE_MESSAGE_RECV, msg, timestamp);
-    purple_conv_im_write(PURPLE_CONV_IM(convo), who, g_strdup_printf("<a href=\"%s\"><img id=\"%u\"></a>",url,imgid),
+    purple_conv_im_write(PURPLE_CONV_IM(convo), who, g_strdup_printf("<a href=\"%s\"><img id=\"%u\"></a><br/><a href=\"%s\">%s</a>",url,imgid,url,url),
       PURPLE_MESSAGE_RECV | PURPLE_MESSAGE_IMAGES, timestamp);
   }
   while (waAPI_querychatlocation(wconn->waAPI, &who, &prev, &size, &lat, &lng, &timestamp)) {
@@ -992,6 +988,25 @@ void waprpl_check_ssl_output(PurpleConnection *gc) {
     
     wconn->sslwh = 0;
   }
+
+  // Update transfer status
+  int rid, bytes_sent;
+  if (waAPI_fileuploadprogress(wconn->waAPI,&rid,&bytes_sent)) {
+    GList * xfers = purple_xfers_get_all();
+    while (xfers) {
+      PurpleXfer* xfer = xfers->data;
+      wa_file_upload * xinfo = (wa_file_upload*)xfer->data;
+      if (xinfo->ref_id == rid) {
+        purple_debug_info("waprpl", "Upload progress %d bytes done\n",bytes_sent);
+        purple_xfer_set_bytes_sent (xfer, bytes_sent);
+        purple_xfer_update_progress(xfer);
+        if (bytes_sent >= purple_xfer_get_size(xfer))
+          purple_xfer_set_completed(xfer,TRUE);
+        break;
+      }
+      xfers = g_list_next(xfers);
+    }
+  }
 }
 
 static void waprpl_ssl_connected_cb(gpointer data, PurpleSslConnection *gsc, PurpleInputCondition cond) {
@@ -1046,16 +1061,15 @@ void waprpl_xfer_init(PurpleXfer *xfer) {
   wa_file_upload * xinfo = (wa_file_upload*)xfer->data;
   whatsapp_connection * wconn = xinfo->wconn;
 
+  size_t fs = purple_xfer_get_size (xfer);
   const char * fn = purple_xfer_get_filename(xfer);
   const char * fp = purple_xfer_get_local_filename(xfer);
-  size_t fs = purple_xfer_get_size (xfer);
 
   wa_file_upload * xfer_info = (wa_file_upload *)xfer->data;
-  xfer_info->filename = g_strdup(fn);
-  xfer_info->fullfilename = g_strdup(fp);
+  purple_xfer_set_size (xfer, fs);
 
-  purple_debug_info(WHATSAPP_ID, "Transfer file %s at %s with size %d\n", fn, fp, fs);
-  waAPI_sendimage(wconn->waAPI, xinfo->to, 100,100,fs,fp);
+  xfer_info->ref_id = waAPI_sendimage(wconn->waAPI, xinfo->to, 100,100,fs,fp);
+  purple_debug_info(WHATSAPP_ID, "Transfer file %s at %s with size %d (given ref %d)\n", fn, fp, fs, xfer_info->ref_id);
 
   waprpl_check_output(xinfo->gc);
 }
@@ -1070,6 +1084,7 @@ void waprpl_xfer_end (PurpleXfer * xfer) {
 
 void waprpl_xfer_cancel_send (PurpleXfer * xfer) {
   purple_debug_info(WHATSAPP_ID, "File tranfer cancel send!!!\n");
+  // TODO: Add cancel call, should be pretty easy
 }
 
 

@@ -71,6 +71,7 @@ public:
 	int loginStatus() const;
 	int sendImage(std::string to, int w, int h, unsigned int size, const char * fp);
 
+	int uploadProgress(int &, int &);
 	int sendSSLCallback(char* buffer, int maxbytes);
 	int sentSSLCallback(int bytessent);
 	void receiveSSLCallback(char* buffer, int bytesrecv);
@@ -198,7 +199,15 @@ void waAPI_sendchat(void * waAPI, const char * who, const char *message) {
 	((WhatsappConnectionAPI*)waAPI)->sendGroupChat(std::string(who),std::string(message));
 }
 int waAPI_sendimage(void * waAPI, const char * who, int w, int h, unsigned int size, const char * fp) {
-	((WhatsappConnectionAPI*)waAPI)->sendImage(std::string(who),w,h,size,fp);
+	return ((WhatsappConnectionAPI*)waAPI)->sendImage(std::string(who),w,h,size,fp);
+}
+
+int waAPI_fileuploadprogress(void * waAPI, int * rid, int * bs) {
+	int ridl, bsl;
+	int r = ((WhatsappConnectionAPI*)waAPI)->uploadProgress(ridl,bsl);
+	*rid = ridl;
+	*bs = bsl;
+	return r;
 }
 
 void waAPI_sendtyping(void * waAPI,const char * who,int typing) {

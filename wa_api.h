@@ -49,6 +49,7 @@ int waAPI_getgroupsupdated(void * waAPI);
 void waAPI_creategroup(void * waAPI, const char * );
 void waAPI_deletegroup(void * waAPI, const char * );
 void waAPI_manageparticipant(void * waAPI, const char *id, const char * part, const char * command);
+int waAPI_fileuploadprogress(void * waAPI, int * rid, int * bs);
 
 // SSL connection
 int  waAPI_sslsendcb(void * waAPI, void * buffer, int maxbytes);

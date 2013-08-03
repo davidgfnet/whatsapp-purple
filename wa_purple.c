@@ -64,6 +64,7 @@
 #define sys_read  wpurple_read
 #define sys_write wpurple_write
 #else
+#include <unistd.h>
 #define sys_read  read
 #define sys_write write
 #endif
@@ -100,13 +101,16 @@ typedef struct {
   int sslfd;
   PurpleSslConnection *gsc; // SSL handler
 } whatsapp_connection;
-static int gid_convo_counter = 0;
 
 static void waprpl_check_output(PurpleConnection *gc);
 static void waprpl_process_incoming_events(PurpleConnection *gc);
 static void waprpl_insert_contacts(PurpleConnection *gc);
 char * last_seen_text(unsigned long long t);
 static void waprpl_chat_join (PurpleConnection *gc, GHashTable *data);
+void check_ssl_requests(PurpleAccount *acct);
+void waprpl_ssl_cerr_cb(PurpleSslConnection *gsc, PurpleSslErrorType error, gpointer data);
+void waprpl_check_ssl_output(PurpleConnection *gc);
+void waprpl_ssl_input_cb(gpointer data, gint source, PurpleInputCondition cond);
 
 char * last_seen_text(unsigned long long t) {
   time_t tt = t;
@@ -155,16 +159,12 @@ static const char *waprpl_list_icon(PurpleAccount *acct, PurpleBuddy *buddy) {
   return "whatsapp";
 }
 
-static void waprpl_set_nickname(PurpleConnection *gc, const char * nick) {
-  //whatsapp_connection * wconn = purple_connection_get_protocol_data(gc);
-}
-
 // Show the account information received at the login
 // such as expiration, creation, etc.
 static void waprpl_show_accountinfo(PurplePluginAction *action) {
   PurpleConnection * gc = (PurpleConnection *) action->context;
   whatsapp_connection * wconn = purple_connection_get_protocol_data(gc);
-  if (!wconn) return 0;
+  if (!wconn) return;
   
   unsigned long long creation, freeexpires;
   char * status;
@@ -182,8 +182,6 @@ static void waprpl_show_accountinfo(PurplePluginAction *action) {
 
 static GList *waprpl_actions(PurplePlugin *plugin, gpointer context) {
   PurplePluginAction * act;
-  PurpleConnection *gc = (PurpleConnection *) context;
-  whatsapp_connection * wconn = purple_connection_get_protocol_data(gc);
 
   GList *m = NULL;
   
@@ -225,7 +223,7 @@ static void waprpl_blist_node_added (PurpleBlistNode *node) {
     waprpl_check_output(purple_account_get_connection(purple_chat_get_account(ch)));
     
     // Remove it, it will get added at the moment the chat list gets refreshed
-    purple_blist_remove_chat(node);
+    purple_blist_remove_chat(ch);
   }
 }
 
@@ -299,7 +297,7 @@ static void waprpl_process_incoming_events(PurpleConnection *gc) {
       if (!convo)
         convo = purple_conversation_new(PURPLE_CONV_TYPE_IM, acc, who);
       
-      serv_got_chat_in(gc, purple_conv_chat_get_id(PURPLE_CONV_IM(convo)), who, PURPLE_MESSAGE_RECV, msg, timestamp);
+      serv_got_chat_in(gc, purple_conv_chat_get_id(PURPLE_CONV_CHAT(convo)), who, PURPLE_MESSAGE_RECV, msg, timestamp);
       purple_conv_im_write(PURPLE_CONV_IM(convo), who, msg, PURPLE_MESSAGE_RECV, timestamp);
     }
   }
@@ -314,7 +312,7 @@ static void waprpl_process_incoming_events(PurpleConnection *gc) {
       
     int imgid = purple_imgstore_add_with_id(g_memdup(prev, size), size, NULL);
 
-    serv_got_chat_in(gc, purple_conv_chat_get_id(PURPLE_CONV_IM(convo)), who, PURPLE_MESSAGE_RECV, msg, timestamp);
+    serv_got_chat_in(gc, purple_conv_chat_get_id(PURPLE_CONV_CHAT(convo)), who, PURPLE_MESSAGE_RECV, msg, timestamp);
     purple_conv_im_write(PURPLE_CONV_IM(convo), who, g_strdup_printf("<a href=\"%s\"><img id=\"%u\"></a><br/><a href=\"%s\">%s</a>",url,imgid,url,url),
       PURPLE_MESSAGE_RECV | PURPLE_MESSAGE_IMAGES, timestamp);
   }
@@ -328,7 +326,7 @@ static void waprpl_process_incoming_events(PurpleConnection *gc) {
       
     int imgid = purple_imgstore_add_with_id(g_memdup(prev, size), size, NULL);
 
-    serv_got_chat_in(gc, purple_conv_chat_get_id(PURPLE_CONV_IM(convo)), who, PURPLE_MESSAGE_RECV, msg, timestamp);
+    serv_got_chat_in(gc, purple_conv_chat_get_id(PURPLE_CONV_CHAT(convo)), who, PURPLE_MESSAGE_RECV, msg, timestamp);
     purple_conv_im_write(PURPLE_CONV_IM(convo), who, 
       g_strdup_printf("<a href=\"http://openstreetmap.org/?lat=%f&lon=%f&zoom=16\"><img src=\"%u\"></a>",lat,lng,imgid),
       PURPLE_MESSAGE_RECV | PURPLE_MESSAGE_IMAGES, timestamp);
@@ -341,7 +339,7 @@ static void waprpl_process_incoming_events(PurpleConnection *gc) {
     if (!convo)
       convo = purple_conversation_new(PURPLE_CONV_TYPE_IM, acc, who);
 
-    serv_got_chat_in(gc, purple_conv_chat_get_id(PURPLE_CONV_IM(convo)), who, PURPLE_MESSAGE_RECV, msg, timestamp);
+    serv_got_chat_in(gc, purple_conv_chat_get_id(PURPLE_CONV_CHAT(convo)), who, PURPLE_MESSAGE_RECV, msg, timestamp);
     purple_conv_im_write(PURPLE_CONV_IM(convo), who, g_strdup_printf("<a href=\"%s\">%s</a>",url,url),
       PURPLE_MESSAGE_RECV , timestamp);
   }
@@ -393,7 +391,7 @@ static void waprpl_process_incoming_events(PurpleConnection *gc) {
           while (*gplist) {
             if (strcmp(*gplist,grid) == 0) {
               // The group is in the system, update the fields
-              char *id,*sub,*own;
+              char *sub,*own;
               waAPI_getgroupinfo(wconn->waAPI, *gplist, &sub, &own, 0);
               g_hash_table_insert(hasht, g_strdup("subject"), g_strdup(sub));
               g_hash_table_insert(hasht, g_strdup("owner"), g_strdup(own));
@@ -406,7 +404,7 @@ static void waprpl_process_incoming_events(PurpleConnection *gc) {
 
           // The group was deleted
           if (!found) {
-              PurpleBlistNode* del = node;
+              PurpleChat * del = (PurpleChat *)node;
               node = purple_blist_node_next(node,FALSE);
               purple_blist_remove_chat(del);
           }
@@ -651,7 +649,7 @@ static int waprpl_send_chat(PurpleConnection *gc, int id, const char *message, P
       PurpleChat * ch = PURPLE_CHAT(node);
       if (purple_chat_get_account(ch) == account) {
         hasht = purple_chat_get_components(ch);
-        if (chatid_to_convo(g_hash_table_lookup(hasht, "id")) == id) {
+        if (chatid_to_convo(g_hash_table_lookup(hasht, "id")) == (unsigned)id) {
           break;
         }
       }
@@ -664,13 +662,13 @@ static int waprpl_send_chat(PurpleConnection *gc, int id, const char *message, P
   waprpl_check_output(gc);
 
   serv_got_chat_in(gc, purple_conv_chat_get_id(PURPLE_CONV_CHAT(convo)), purple_connection_get_display_name(gc), PURPLE_MESSAGE_SEND, message, time(NULL));
-  purple_conv_im_write(PURPLE_CONV_CHAT(convo), purple_connection_get_display_name(gc), message, PURPLE_MESSAGE_SEND, time(NULL));
+  purple_conv_im_write(PURPLE_CONV_IM(convo), purple_connection_get_display_name(gc), message, PURPLE_MESSAGE_SEND, time(NULL));
 
   return 1;
 }
 
 
-static void waprpl_add_buddy(PurpleConnection *gc, PurpleBuddy *buddy, PurpleGroup *group, const char *message) {
+static void waprpl_add_buddy(PurpleConnection *gc, PurpleBuddy *buddy, PurpleGroup *group) {
   whatsapp_connection * wconn = purple_connection_get_protocol_data(gc);
   const char * name = purple_buddy_get_name(buddy);
   
@@ -679,12 +677,12 @@ static void waprpl_add_buddy(PurpleConnection *gc, PurpleBuddy *buddy, PurpleGro
   waprpl_check_output(gc);
 }
 
-static void waprpl_add_buddies(PurpleConnection *gc, GList *buddies, GList *groups, const char *message) {
+static void waprpl_add_buddies(PurpleConnection *gc, GList *buddies, GList *groups) {
   GList *buddy = buddies;
   GList *group = groups;
 
   while (buddy && group) {
-    waprpl_add_buddy(gc, (PurpleBuddy *)buddy->data, (PurpleGroup *)group->data, message);
+    waprpl_add_buddy(gc, (PurpleBuddy *)buddy->data, (PurpleGroup *)group->data);
     buddy = g_list_next(buddy);
     group = g_list_next(group);
   }
@@ -720,10 +718,6 @@ static void waprpl_add_deny(PurpleConnection *gc, const char *name) {
 
 static void waprpl_rem_deny(PurpleConnection *gc, const char *name) {
   // TODO Do we need to implement deny? Or purple provides it?
-}
-
-static void waprpl_set_idle(PurpleConnection *gc, int idletime) {
-  // TODO We have been idle for idletime seconds
 }
 
 static unsigned int waprpl_send_typing(PurpleConnection *gc, const char *who, PurpleTypingState typing) {
@@ -786,7 +780,7 @@ static GList *waprpl_blist_node_menu(PurpleBlistNode *node) {
 static void waprpl_set_status(PurpleAccount *acct, PurpleStatus *status) {
   whatsapp_connection * wconn = purple_connection_get_protocol_data(purple_account_get_connection(acct));
   const char * sid = purple_status_get_id(status);
-  char * mid = purple_status_get_attr_string(status, "message");
+  const char * mid = purple_status_get_attr_string(status, "message");
   if (mid == 0) mid = "";
   
   waAPI_setmypresence(wconn->waAPI,sid,mid);
@@ -884,7 +878,7 @@ static void waprpl_chat_invite(PurpleConnection *gc, int id, const char *message
       PurpleChat * ch = PURPLE_CHAT(node);
       if (purple_chat_get_account(ch) == account) {
         hasht = purple_chat_get_components(ch);
-        if (chatid_to_convo(g_hash_table_lookup(hasht, "id")) == id) {
+        if (chatid_to_convo(g_hash_table_lookup(hasht, "id")) == (unsigned)id) {
           break;
         }
       }
@@ -899,17 +893,13 @@ static void waprpl_chat_invite(PurpleConnection *gc, int id, const char *message
   purple_conv_chat_add_user (purple_conversation_get_chat_data(convo), name, "", PURPLE_CBFLAGS_NONE, FALSE);
 
   waprpl_check_output(gc);
-  
-  return 1;
 }
 
 static char *waprpl_get_chat_name(GHashTable *data) {
   return g_strdup(g_hash_table_lookup(data, "subject"));
 }
 
-
-
-static void waprpl_ssl_output_cb(gpointer data, gint source, PurpleInputCondition cond) {
+void waprpl_ssl_output_cb(gpointer data, gint source, PurpleInputCondition cond) {
   PurpleConnection *gc = data;
   whatsapp_connection * wconn = purple_connection_get_protocol_data(gc);
 	
@@ -937,7 +927,7 @@ static void waprpl_ssl_output_cb(gpointer data, gint source, PurpleInputConditio
 }
 
 // Try to read some data and push it to the WhatsApp API
-static void waprpl_ssl_input_cb(gpointer data, PurpleSslConnection *gsc, PurpleInputCondition cond) {
+void waprpl_ssl_input_cb(gpointer data, gint source, PurpleInputCondition cond) {
   PurpleConnection *gc = data;
   whatsapp_connection * wconn = purple_connection_get_protocol_data(gc);
 
@@ -1000,7 +990,7 @@ void waprpl_check_ssl_output(PurpleConnection *gc) {
         purple_debug_info("waprpl", "Upload progress %d bytes done\n",bytes_sent);
         purple_xfer_set_bytes_sent (xfer, bytes_sent);
         purple_xfer_update_progress(xfer);
-        if (bytes_sent >= purple_xfer_get_size(xfer))
+        if (bytes_sent >= (signed)purple_xfer_get_size(xfer))
           purple_xfer_set_completed(xfer,TRUE);
         break;
       }

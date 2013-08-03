@@ -18,7 +18,6 @@ CFLAGS_PURPLE = $(shell pkg-config --cflags purple)
 CFLAGS = \
     -O2  \
     -Wall \
-    -Wextra \
     -fPIC \
     -DPURPLE_PLUGINS \
     -DPIC \

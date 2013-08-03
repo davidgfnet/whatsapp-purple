@@ -75,7 +75,7 @@ double str2dbl(std::string s) {
 	return d;
 }
 std::string getusername(std::string user) {
-	int pos = user.find('@');
+	unsigned int pos = user.find('@');
 	if (pos != std::string::npos)
 		return user.substr(0,pos);
 	else
@@ -155,7 +155,7 @@ class KeyGenerator {
 public:
 	static void generateKeyImei(const char * imei, const char * salt, int saltlen, char * out) {
 		char imeir[strlen(imei)];
-		for (int i = 0; i < strlen(imei); i++)
+		for (unsigned int i = 0; i < strlen(imei); i++)
 			imeir[i] = imei[strlen(imei)-i-1];
 		
 		char hash[16];
@@ -210,7 +210,7 @@ private:
 		else
 			memcpy(SHA1_Key, key, key_len);
 
-		for (int i=0; i<sizeof(m_ipad); i++)
+		for (unsigned int i=0; i<sizeof(m_ipad); i++)
 			m_ipad[i] ^= SHA1_Key[i];              
 
 		memcpy(AppendBuf1, m_ipad, sizeof(m_ipad));
@@ -218,7 +218,7 @@ private:
 
 		SHA1(AppendBuf1, sizeof(m_ipad) + text_len, szReport);
 
-		for (int j=0; j<sizeof(m_opad); j++)
+		for (unsigned int j=0; j<sizeof(m_opad); j++)
 			m_opad[j] ^= SHA1_Key[j];
 
 		memcpy(AppendBuf2, m_opad, sizeof(m_opad));
@@ -647,7 +647,7 @@ public:
 class Message {
 public:
 	Message(const WhatsappConnection * wc, const std::string from, const unsigned long long time, const std::string id, const std::string author) {
-		int pos = from.find('@');
+		unsigned int pos = from.find('@');
 		if (pos != std::string::npos) {
 			this->from = from.substr(0,pos);
 			this->server = from.substr(pos+1);
@@ -1043,7 +1043,7 @@ WhatsappConnection::WhatsappConnection(std::string phone, std::string password, 
 WhatsappConnection::~WhatsappConnection() {
 	if (this->in)  delete this->in;
 	if (this->out) delete this->out;
-	for (int i = 0; i < recv_messages.size(); i++) {
+	for (unsigned int i = 0; i < recv_messages.size(); i++) {
 		delete recv_messages[i];
 	}
 }
@@ -1188,7 +1188,9 @@ int WhatsappConnection::sendSSLCallback(char* buffer, int maxbytes) {
 }
 int WhatsappConnection::sentSSLCallback(int bytessent) {
 	sslbuffer.popData(bytessent);
+	return bytessent;
 }
+
 void WhatsappConnection::receiveSSLCallback(char* buffer, int bytesrecv) {
 	if (buffer != NULL and bytesrecv > 0)
 		sslbuffer_in.addData(buffer,bytesrecv);
@@ -1208,7 +1210,7 @@ bool WhatsappConnection::hasSSLConnection(std::string & host, int * port) {
 	*port = 443;
 
 	if (sslstatus == 5)
-		for (int j = 0; j < uploadfile_queue.size(); j++)
+		for (unsigned int j = 0; j < uploadfile_queue.size(); j++)
 			if (uploadfile_queue[j].uploading) {
 				host = uploadfile_queue[j].host;
 				break;
@@ -1220,7 +1222,7 @@ bool WhatsappConnection::hasSSLConnection(std::string & host, int * port) {
 int WhatsappConnection::uploadProgress(int & rid, int &bs) {
 	if (!(sslstatus == 5 or sslstatus == 6)) return 0;
 	int totalsize = 0;
-	for (int j = 0; j < uploadfile_queue.size(); j++)
+	for (unsigned int j = 0; j < uploadfile_queue.size(); j++)
 		if (uploadfile_queue[j].uploading) {
 			rid = uploadfile_queue[j].rid;
 			totalsize = uploadfile_queue[j].totalsize;
@@ -1351,7 +1353,7 @@ unsigned char hexchars(char c1, char c2) {
 
 std::string utf8_decode(std::string in) {
 	std::string dec;
-	for (int i = 0; i < in.size(); i++) {
+	for (unsigned int i = 0; i < in.size(); i++) {
 		if (in[i] == '\\' and in[i+1] == 'u') {
 			i += 2; // Skip \u
 
@@ -1370,7 +1372,7 @@ std::string utf8_decode(std::string in) {
 }
 
 std::string query_field(std::string work, std::string lo, bool integer = false) {
-	int p = work.find("\""+lo+"\"");
+	unsigned int p = work.find("\""+lo+"\"");
 	if (p == std::string::npos) return "";
 
 	work = work.substr(p+("\""+lo+"\"").size());
@@ -1395,12 +1397,12 @@ std::string query_field(std::string work, std::string lo, bool integer = false) 
 
 void WhatsappConnection::updateContactStatuses(std::string json) {
 	while (true) {
-		int offset = json.find("{");
+		unsigned int offset = json.find("{");
 		if (offset == std::string::npos) break;
 		json = json.substr(offset+1);
 
 		// Look for closure
-		int cl = json.find("{");
+		unsigned int cl = json.find("{");
 		if (cl == std::string::npos) cl = json.size();
 		std::string work = json.substr(0,cl);
 
@@ -1420,12 +1422,12 @@ void WhatsappConnection::updateContactStatuses(std::string json) {
 }
 
 void WhatsappConnection::updateFileUpload(std::string json) {
-	int offset = json.find("{");
+	unsigned int offset = json.find("{");
 	if (offset == std::string::npos) return;
 	json = json.substr(offset+1);
 
 	// Look for closure
-	int cl = json.find("{");
+	unsigned int cl = json.find("{");
 	if (cl == std::string::npos) cl = json.size();
 	std::string work = json.substr(0,cl);
 
@@ -1438,7 +1440,7 @@ void WhatsappConnection::updateFileUpload(std::string json) {
 	std::string mimetype = query_field(work,"mimetype");
 
 	std::string to;
-	for (int j = 0; j < uploadfile_queue.size(); j++)
+	for (unsigned int j = 0; j < uploadfile_queue.size(); j++)
 		if (uploadfile_queue[j].uploading and uploadfile_queue[j].hash == filehash) {
 			to = uploadfile_queue[j].to;
 			uploadfile_queue.erase(uploadfile_queue.begin()+j);
@@ -1493,7 +1495,7 @@ void WhatsappConnection::processSSLIncomingData() {
 					clen = clen.substr(0,clen.find("\r\n"));
 					while (clen.size() > 0 and clen[0] == ' ')
 						clen = clen.substr(1);
-					int contentlength = str2int(clen);
+					unsigned int contentlength = str2int(clen);
 					if (contentlength == content.size()) {
 						// Now we can proceed to parse the JSON
 						if (sslstatus == 4)
@@ -1564,7 +1566,7 @@ std::string WhatsappConnection::generateUploadPOST(t_fileupload * fu) {
 void WhatsappConnection::processUploadQueue() {
 	// At idle check for new uploads
 	if (sslstatus == 0) {
-		for (int j = 0; j < uploadfile_queue.size(); j++) {
+		for (unsigned int j = 0; j < uploadfile_queue.size(); j++) {
 			if (uploadfile_queue[j].uploadurl != "" and not uploadfile_queue[j].uploading) {
 				uploadfile_queue[j].uploading = true;
 				std::string postq = generateUploadPOST(&uploadfile_queue[j]);
@@ -1741,12 +1743,12 @@ void WhatsappConnection::processIncomingData() {
 
 				t = treelist[i].getChild("media");
 				if (t.getTag() != "treeerr") {
-					for (int j = 0; j < uploadfile_queue.size(); j++) {
+					for (unsigned int j = 0; j < uploadfile_queue.size(); j++) {
 						if (uploadfile_queue[j].rid == str2int(treelist[i].getAttribute("id"))) {
 							// Queue to upload the file
 							uploadfile_queue[j].uploadurl = t.getAttribute("url");
 							std::string host = uploadfile_queue[j].uploadurl.substr(8); // Remove https://
-							for (int i = 0; i < host.size(); i++)
+							for (unsigned int i = 0; i < host.size(); i++)
 								if (host[i] == '/')
 									host = host.substr(0,i);
 							uploadfile_queue[j].host = host;
@@ -1759,7 +1761,7 @@ void WhatsappConnection::processIncomingData() {
 
 				t = treelist[i].getChild("duplicate");
 				if (t.getTag() != "treeerr") {
-					for (int j = 0; j < uploadfile_queue.size(); j++) {
+					for (unsigned int j = 0; j < uploadfile_queue.size(); j++) {
 						if (uploadfile_queue[j].rid == str2int(treelist[i].getAttribute("id"))) {
 							// Generate a fake JSON and process directly
 							std::string json = "{\"name\":\"" + uploadfile_queue[j].file + "\","
@@ -1780,7 +1782,7 @@ void WhatsappConnection::processIncomingData() {
 
 				std::vector <Tree> childs = treelist[i].getChildren();
 				int acc = 0;
-				for (int j = 0; j < childs.size(); j++) {
+				for (unsigned int j = 0; j < childs.size(); j++) {
 					if (childs[j].getTag() == "group") {
 						bool rep = groups.find(getusername(childs[j].getAttribute("id"))) != groups.end();
 						if (not rep) {
@@ -1868,7 +1870,7 @@ DataBuffer WhatsappConnection::write_tree(Tree * tree) {
 	if (tree->getChildren().size() > 0) {
 		bout.writeListSize(tree->getChildren().size());
 		
-		for (int i = 0; i < tree->getChildren().size(); i++) {
+		for (unsigned int i = 0; i < tree->getChildren().size(); i++) {
 			DataBuffer tt = write_tree(&tree->getChildren()[i]);
 			bout = bout + tt;
 		}
@@ -2029,7 +2031,7 @@ void WhatsappConnection::notifyError(ErrorCode err) {
 }
 
 bool WhatsappConnection::query_chat(std::string & from, std::string & message, std::string & author, unsigned long & t){
-	for (int i = 0; i < recv_messages.size(); i++) {
+	for (unsigned int i = 0; i < recv_messages.size(); i++) {
 		if (recv_messages[i]->type() == 0) {
 			from = recv_messages[i]->from;
 			t = recv_messages[i]->t;
@@ -2044,7 +2046,7 @@ bool WhatsappConnection::query_chat(std::string & from, std::string & message, s
 }
 
 bool WhatsappConnection::query_chatimages(std::string & from, std::string & preview, std::string & url, unsigned long & t) {
-	for (int i = 0; i < recv_messages.size(); i++) {
+	for (unsigned int i = 0; i < recv_messages.size(); i++) {
 		if (recv_messages[i]->type() == 1) {
 			from = recv_messages[i]->from;
 			t = recv_messages[i]->t;
@@ -2059,7 +2061,7 @@ bool WhatsappConnection::query_chatimages(std::string & from, std::string & prev
 }
 
 bool WhatsappConnection::query_chatsounds(std::string & from, std::string & url, unsigned long & t) {
-	for (int i = 0; i < recv_messages.size(); i++) {
+	for (unsigned int i = 0; i < recv_messages.size(); i++) {
 		if (recv_messages[i]->type() == 3) {
 			from = recv_messages[i]->from;
 			t = recv_messages[i]->t;
@@ -2073,7 +2075,7 @@ bool WhatsappConnection::query_chatsounds(std::string & from, std::string & url,
 }
 
 bool WhatsappConnection::query_chatlocations(std::string & from, double & lat, double & lng, std::string & prev, unsigned long & t) {
-	for (int i = 0; i < recv_messages.size(); i++) {
+	for (unsigned int i = 0; i < recv_messages.size(); i++) {
 		if (recv_messages[i]->type() == 2) {
 			from = recv_messages[i]->from;
 			t = recv_messages[i]->t;

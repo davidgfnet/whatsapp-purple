@@ -75,7 +75,7 @@ double str2dbl(std::string s) {
 	return d;
 }
 std::string getusername(std::string user) {
-	unsigned int pos = user.find('@');
+	size_t pos = user.find('@');
 	if (pos != std::string::npos)
 		return user.substr(0,pos);
 	else
@@ -647,7 +647,7 @@ public:
 class Message {
 public:
 	Message(const WhatsappConnection * wc, const std::string from, const unsigned long long time, const std::string id, const std::string author) {
-		unsigned int pos = from.find('@');
+		size_t pos = from.find('@');
 		if (pos != std::string::npos) {
 			this->from = from.substr(0,pos);
 			this->server = from.substr(pos+1);
@@ -1372,7 +1372,7 @@ std::string utf8_decode(std::string in) {
 }
 
 std::string query_field(std::string work, std::string lo, bool integer = false) {
-	unsigned int p = work.find("\""+lo+"\"");
+	size_t p = work.find("\""+lo+"\"");
 	if (p == std::string::npos) return "";
 
 	work = work.substr(p+("\""+lo+"\"").size());
@@ -1397,12 +1397,12 @@ std::string query_field(std::string work, std::string lo, bool integer = false) 
 
 void WhatsappConnection::updateContactStatuses(std::string json) {
 	while (true) {
-		unsigned int offset = json.find("{");
+		size_t offset = json.find("{");
 		if (offset == std::string::npos) break;
 		json = json.substr(offset+1);
 
 		// Look for closure
-		unsigned int cl = json.find("{");
+		size_t cl = json.find("{");
 		if (cl == std::string::npos) cl = json.size();
 		std::string work = json.substr(0,cl);
 
@@ -1422,12 +1422,12 @@ void WhatsappConnection::updateContactStatuses(std::string json) {
 }
 
 void WhatsappConnection::updateFileUpload(std::string json) {
-	unsigned int offset = json.find("{");
+	size_t offset = json.find("{");
 	if (offset == std::string::npos) return;
 	json = json.substr(offset+1);
 
 	// Look for closure
-	unsigned int cl = json.find("{");
+	size_t cl = json.find("{");
 	if (cl == std::string::npos) cl = json.size();
 	std::string work = json.substr(0,cl);
 

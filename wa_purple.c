@@ -1014,6 +1014,7 @@ void waprpl_ssl_cerr_cb(PurpleSslConnection *gsc, PurpleSslErrorType error, gpoi
   // Do not use gsc, may be null
   PurpleConnection *gc = data;
   whatsapp_connection * wconn = purple_connection_get_protocol_data(gc);
+  if (!wconn) return;
 
   if (wconn->sslwh != 0) purple_input_remove(wconn->sslwh);
   if (wconn->sslrh != 0) purple_input_remove(wconn->sslrh);

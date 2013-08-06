@@ -1059,7 +1059,7 @@ void waprpl_xfer_init(PurpleXfer *xfer) {
   purple_xfer_set_size (xfer, fs);
 
   xfer_info->ref_id = waAPI_sendimage(wconn->waAPI, xinfo->to, 100,100,fs,fp);
-  purple_debug_info(WHATSAPP_ID, "Transfer file %s at %s with size %d (given ref %d)\n", fn, fp, fs, xfer_info->ref_id);
+  purple_debug_info(WHATSAPP_ID, "Transfer file %s at %s with size %zu (given ref %d)\n", fn, fp, fs, xfer_info->ref_id);
 
   waprpl_check_output(xinfo->gc);
 }

@@ -661,8 +661,8 @@ static int waprpl_send_chat(PurpleConnection *gc, int id, const char *message, P
   waAPI_sendchat(wconn->waAPI,chat_id,message);
   waprpl_check_output(gc);
 
-  serv_got_chat_in(gc, purple_conv_chat_get_id(PURPLE_CONV_CHAT(convo)), purple_connection_get_display_name(gc), PURPLE_MESSAGE_SEND, message, time(NULL));
-  purple_conv_im_write(PURPLE_CONV_IM(convo), purple_connection_get_display_name(gc), message, PURPLE_MESSAGE_SEND, time(NULL));
+  const char *me = purple_account_get_string(account, "nick", "");
+  purple_conv_chat_write(PURPLE_CONV_CHAT(convo), me, message, PURPLE_MESSAGE_SEND, time(NULL));
 
   return 1;
 }

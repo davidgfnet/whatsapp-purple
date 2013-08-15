@@ -788,8 +788,25 @@ static void waprpl_set_status(PurpleAccount *acct, PurpleStatus *status) {
 }
 
 static void waprpl_get_info(PurpleConnection *gc, const char *username) {
-  // purple_notify_userinfo(gc, username, info, NULL, NULL);
-  // TODO Implement a nice dialog box to show the profile image as well as the buddy status
+  PurpleNotifyUserInfo *info = purple_notify_user_info_new();
+  purple_debug_info(WHATSAPP_ID, "Fetching %s's user info for %s\n", username, gc->account->username);
+  
+  // Get user status
+  whatsapp_connection * wconn = purple_connection_get_protocol_data(gc);
+  const char * status_string = waAPI_getuserstatusstring(wconn->waAPI,username);
+  // Get user picture (big one)
+  char * profile_image = "";
+  char *icon; int len;
+  int res = waAPI_queryavatar(wconn->waAPI, username, &icon, &len);
+  if (res) {
+    int iid = purple_imgstore_add_with_id(g_memdup(icon,len),len,NULL);
+    profile_image = g_strdup_printf("<img id=\"%u\">",iid);
+  }
+
+  purple_notify_user_info_add_pair(info, "Status", status_string);
+  purple_notify_user_info_add_pair(info, "Profile image", profile_image);
+
+  purple_notify_userinfo(gc, username, info, NULL, NULL);
 }
 
 static void waprpl_group_buddy(PurpleConnection *gc, const char *who, const char *old_group, const char *new_group) {

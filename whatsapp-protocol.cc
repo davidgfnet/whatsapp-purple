@@ -731,6 +731,7 @@ private:
 	void subscribePresence(std::string user);
 	void getLast(std::string user);
 	void queryPreview(std::string user);
+	void queryFullSize(std::string user);
 	void gotTyping(std::string who, std::string tstat);
 	void updateGroups();
 	
@@ -769,6 +770,7 @@ public:
 	bool query_chatlocations(std::string & from, double & lat, double & lng, std::string & prev, unsigned long & t);
 	bool query_status(std::string & from, int & status);
 	bool query_icon(std::string & from, std::string & icon, std::string & hash);
+	bool query_avatar(std::string user, std::string & icon);
 	bool query_typing(std::string & from, int & status);
 	void send_avatar(const std::string & avatar);
 	void account_info(unsigned long long & creation, unsigned long long & freeexp, std::string & status);
@@ -1272,6 +1274,14 @@ void WhatsappConnection::account_info(unsigned long long & creation, unsigned lo
 
 void WhatsappConnection::queryPreview(std::string user) {
 	Tree pic("picture", makeAttr2("xmlns","w:profile:picture", "type","preview" ));
+	Tree req("iq", makeAttr3("id",int2str(iqid++), "type","get", "to",user));
+	req.addChild(pic);
+
+	outbuffer = outbuffer + serialize_tree(&req);
+}
+
+void WhatsappConnection::queryFullSize(std::string user) {
+	Tree pic("picture", makeAttr2("xmlns","w:profile:picture", "type","image" ));
 	Tree req("iq", makeAttr3("id",int2str(iqid++), "type","get", "to",user));
 	req.addChild(pic);
 
@@ -1981,6 +1991,7 @@ void WhatsappConnection::addPreviewPicture(std::string from, std::string picture
 }
 
 void WhatsappConnection::addFullsizePicture(std::string from, std::string picture) {
+	from = getusername(from);
 	if (contacts.find(from) == contacts.end()) {
 		Contact newc(from,false);
 		contacts[from] = newc;
@@ -2161,6 +2172,22 @@ bool WhatsappConnection::query_icon(std::string & from, std::string & icon, std:
 	return false;
 }
 
+bool WhatsappConnection::query_avatar(std::string user, std::string & icon) {
+	user = getusername(user);
+	if (contacts.find(user) != contacts.end()) {
+		icon = contacts[user].pppicture;
+		if (icon.size() == 0) {
+			// Return preview icon and query the fullsize picture
+			// for future displays to save bandwidth
+			this->queryFullSize(user+"@"+whatsappserver);
+			icon = contacts[user].ppprev;
+		}
+		return true;
+	}
+	return false;
+}
+
+
 void WhatsappConnection::doPong(std::string id, std::string from) {
 	std::map <std::string,std::string> auth;
 	auth["to"] = from;
@@ -2236,6 +2263,7 @@ public:
 	bool query_chatlocations(std::string & from, double & lat, double & lng, std::string & prev, unsigned long & t);
 	bool query_status(std::string & from, int & status);
 	bool query_icon(std::string & from, std::string & icon, std::string & hash);
+	bool query_avatar(std::string user, std::string & icon);
 	bool query_typing(std::string & from, int & status);
 	void account_info(unsigned long long & creation, unsigned long long & freeexp, std::string & status);
 	void send_avatar(const std::string & avatar);
@@ -2311,6 +2339,10 @@ void WhatsappConnectionAPI::send_avatar(const std::string & avatar) {
 
 bool WhatsappConnectionAPI::query_icon(std::string & from, std::string & icon, std::string & hash) {
 	return connection->query_icon(from, icon, hash);
+}
+
+bool WhatsappConnectionAPI::query_avatar(std::string user, std::string & icon) {
+	return connection->query_avatar(user, icon);
 }
 
 bool WhatsappConnectionAPI::query_typing(std::string & from, int & status) {

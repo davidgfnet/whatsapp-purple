@@ -54,6 +54,7 @@ public:
 	bool query_status(std::string & from, int & stat);
 	bool query_typing(std::string & from, int & status);
 	bool query_icon(std::string & from, std::string & icon, std::string & hash);
+	bool query_avatar(std::string user, std::string & icon);
 	void account_info(unsigned long long & creation, unsigned long long & freeexp, std::string & status);
 	void send_avatar(const std::string & avatar);
 	int getuserstatus(const std::string & who);
@@ -302,6 +303,16 @@ int waAPI_queryicon(void * waAPI, char ** who, char ** icon, int * len, char ** 
 		*icon = (char*)g_memdup(ic.c_str(),ic.size());
 		*len = ic.size();
 		*hash = g_strdup(hs.c_str());
+		return 1;
+	}
+	return 0;	
+}
+
+int waAPI_queryavatar(void * waAPI, const char * who, char ** icon, int * len) {
+	std::string ic;
+	if ( ((WhatsappConnectionAPI*)waAPI)->query_avatar(std::string(who),ic) ) {
+		*icon = (char*)g_memdup(ic.c_str(),ic.size());
+		*len = ic.size();
 		return 1;
 	}
 	return 0;	

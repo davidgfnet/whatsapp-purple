@@ -36,6 +36,7 @@ int waAPI_querystatus(void * waAPI, char ** who, int *stat);
 void waAPI_sendtyping(void * waAPI,const char * who,int typing);
 void waAPI_setmypresence(void * waAPI, const char * st, const char * msg);
 int waAPI_queryicon(void * waAPI, char ** who, char ** icon, int * len, char ** hash);
+int waAPI_queryavatar(void * waAPI, const char * who, char ** icon, int * len);
 void waAPI_accountinfo(void * waAPI, unsigned long long *creation, unsigned long long *freeexpires, char ** status);
 void waAPI_setavatar(void * waAPI, const void *buffer, int len);
 int waAPI_getuserstatus(void * waAPI, const char * who);

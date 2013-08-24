@@ -739,7 +739,7 @@ private:
 	void notifyMyPresence();
 	void sendInitial();
 	void notifyError(ErrorCode err);
-	DataBuffer generateResponse(std::string from,std::string type,std::string id);
+	DataBuffer generateResponse(std::string from,std::string type,std::string id,std::string answer);
 	std::string generateUploadPOST(t_fileupload * fu);
 	void processUploadQueue();
 
@@ -945,14 +945,15 @@ public:
 	std::string preview;
 };
 
-DataBuffer WhatsappConnection::generateResponse(std::string from,std::string type,std::string id) {
-	Tree received("received",makeAttr1("xmlns","urn:xmpp:receipts"));
+DataBuffer WhatsappConnection::generateResponse(std::string from,std::string type,std::string id, std::string answer) {
+	Tree received(answer,makeAttr1("xmlns","urn:xmpp:receipts"));
 
 	//std::string stime = int2str(t);
 	std::map <std::string, std::string> attrs;
 	attrs["to"] = from;
 	attrs["type"] = type;
 	attrs["id"] = id;
+	attrs["t"] = int2str(time(NULL));
 
 	Tree mes("message",attrs);
 	mes.addChild(received);
@@ -1715,12 +1716,19 @@ void WhatsappConnection::processIncomingData() {
 				updateGroups();
 			}
 			// Generate response for the messages
-			if (treelist[i].hasAttribute("type") and treelist[i].hasAttribute("from")) { // and treelist[i].hasChild("notify")
-				
+			if (treelist[i].hasAttribute("type") and treelist[i].hasAttribute("from")) {
+				std::string answer = "received";
+				if (treelist[i].hasChild("received"))
+					answer = "ack";
 				DataBuffer reply = generateResponse(treelist[i].getAttribute("from"),
 													treelist[i].getAttribute("type"),
-													treelist[i].getAttribute("id"));
+													treelist[i].getAttribute("id"),
+													answer);
 				outbuffer = outbuffer + reply;
+			}
+			if (treelist[i].hasAttribute("type") and treelist[i].hasAttribute("from")) {
+				//and treelist[i].hasChild("request")) { // and treelist[i].hasChild("notify")
+				
 			}
 		}
 		else if (treelist[i].getTag() == "presence") {

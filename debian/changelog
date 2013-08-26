@@ -1,3 +1,9 @@
+pidgin-whatsapp (0.2-1) quantal; urgency=low
+
+  * Update to v0.2 due to conflicts with packaging
+
+ -- David Guillen Fandos <david@davidgf.net>  Mon, 26 Aug 2013 13:07:00 +0200
+
 pidgin-whatsapp (0.1-1) quantal; urgency=low
 
   * Update to v0.1 (see github.com/davidgfnet/whatsapp-purple for changes)

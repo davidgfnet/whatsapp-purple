@@ -40,14 +40,17 @@ DATA_ROOT_DIR_PURPLE:=$(shell pkg-config --variable=datarootdir purple)
 
 .PHONY: install
 install: $(LIBNAME)
-	install -D $(LIBNAME) $(PLUGIN_DIR_PURPLE)/$(LIBNAME)
-	install -D whatsapp16.png $(DATA_ROOT_DIR_PURPLE)/pixmaps/pidgin/protocols/16/whatsapp.png
-	install -D whatsapp22.png $(DATA_ROOT_DIR_PURPLE)/pixmaps/pidgin/protocols/22/whatsapp.png
-	install -D whatsapp48.png $(DATA_ROOT_DIR_PURPLE)/pixmaps/pidgin/protocols/48/whatsapp.png
+	install -D $(LIBNAME) $(DESTDIR)$(PLUGIN_DIR_PURPLE)/$(LIBNAME)
+	install -D whatsapp16.png $(DESTDIR)$(DATA_ROOT_DIR_PURPLE)/pixmaps/pidgin/protocols/16/whatsapp.png
+	install -D whatsapp22.png $(DESTDIR)$(DATA_ROOT_DIR_PURPLE)/pixmaps/pidgin/protocols/22/whatsapp.png
+	install -D whatsapp48.png $(DESTDIR)$(DATA_ROOT_DIR_PURPLE)/pixmaps/pidgin/protocols/48/whatsapp.png
 
 .PHONY: uninstall
 uninstall: $(LIBNAME)
-	rm $(PLUGIN_DIR_PURPLE)/$(LIBNAME)
+	rm -f $(DESTDIR)$(PLUGIN_DIR_PURPLE)/$(LIBNAME)
+	rm -f $(DESTDIR)$(DATA_ROOT_DIR_PURPLE)/pixmaps/pidgin/protocols/16/whatsapp.png
+	rm -f $(DESTDIR)$(DATA_ROOT_DIR_PURPLE)/pixmaps/pidgin/protocols/22/whatsapp.png
+	rm -f $(DESTDIR)$(DATA_ROOT_DIR_PURPLE)/pixmaps/pidgin/protocols/48/whatsapp.png
 
 .PHONY: clean
 clean:

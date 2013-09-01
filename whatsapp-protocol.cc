@@ -657,7 +657,7 @@ public:
 		this->t = time;
 		this->wc = const_cast <WhatsappConnection*> (wc);
 		this->id = id;
-		this->author = getusername(author);
+		this->author = author;
 	}
 	virtual ~Message() {}
 	std::string from, server, author;
@@ -818,7 +818,7 @@ public:
 	
 	DataBuffer serialize() const {
 		Tree request("request",makeAttr1("xmlns","urn:xmpp:receipts"));
-		Tree notify ("notify", makeAttr2("xmlns","urn:xmpp:whatsapp", "name",from));
+		Tree notify ("notify", makeAttr2("xmlns","urn:xmpp:whatsapp", "name",author));
 		Tree xhash  ("x",      makeAttr1("xmlns","jabber:x:event"));
 		xhash.addChild(Tree("server"));
 		Tree tbody("body"); tbody.setData(this->message);
@@ -867,7 +867,7 @@ public:
 
 	DataBuffer serialize() const {
 		Tree request("request",makeAttr1("xmlns","urn:xmpp:receipts"));
-		Tree notify ("notify", makeAttr2("xmlns","urn:xmpp:whatsapp", "name",from));
+		Tree notify ("notify", makeAttr2("xmlns","urn:xmpp:whatsapp", "name",author));
 		Tree xhash  ("x",      makeAttr1("xmlns","jabber:x:event"));
 		xhash.addChild(Tree("server"));
 
@@ -1302,13 +1302,13 @@ void WhatsappConnection::send_avatar(const std::string & avatar) {
 }
 
 void WhatsappConnection::sendChat(std::string to, std::string message) {
-	ChatMessage msg(this, to, time(NULL), int2str(msgcounter++), message, "");
+	ChatMessage msg(this, to, time(NULL), int2str(msgcounter++), message, nickname);
 	DataBuffer buf =  msg.serialize();
 
 	outbuffer = outbuffer + buf;
 }
 void WhatsappConnection::sendGroupChat(std::string to, std::string message) {
-	ChatMessage msg(this, to, time(NULL), int2str(msgcounter++), message, "");
+	ChatMessage msg(this, to, time(NULL), int2str(msgcounter++), message, nickname);
 	msg.server = "g.us";
 	DataBuffer buf =  msg.serialize();
 

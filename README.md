@@ -3,6 +3,13 @@ whatsapp-purple
 
 WhatsApp protocol implementation for libpurple (pidgin)
 
+Get a copy
+----------
+
+Ubuntu users can use launchpad repository: https://launchpad.net/~whatsapp-purple/+archive/ppa/
+
+Windows users can find a copy at the nightly builds server: http://davidgf.net/nightly/whatsapp-purple/win32/
+
 Building
 --------
 

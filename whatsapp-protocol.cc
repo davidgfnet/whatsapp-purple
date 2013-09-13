@@ -657,7 +657,7 @@ public:
 		this->t = time;
 		this->wc = const_cast <WhatsappConnection*> (wc);
 		this->id = id;
-		this->author = author;
+		this->author = getusername(author);
 	}
 	virtual ~Message() {}
 	std::string from, server, author;
@@ -1362,19 +1362,37 @@ unsigned char hexchars(char c1, char c2) {
 	return r;
 }
 
+std::string UnicodeToUTF8(unsigned int c) {
+	std::string ret;
+	if (c <= 0x7F)
+		ret += ((char)c);
+	else if (c <= 0x7FF) {
+		ret += ((char)(0xC0 | (c >> 6  )));
+		ret += ((char)(0x80 | (c & 0x3F)));
+	}
+	else if (c <= 0xFFFF) {
+		if (c >= 0xD800 and c <= 0xDFFF) return ret; // Invalid char
+		ret += ((char)(0xE0 | (c >> 12 )));
+		ret += ((char)(0x80 | ((c>>6) & 0x3F)));
+		ret += ((char)(0x80 | (c & 0x3F)));
+	}
+	return ret;
+}
+
 std::string utf8_decode(std::string in) {
 	std::string dec;
 	for (unsigned int i = 0; i < in.size(); i++) {
 		if (in[i] == '\\' and in[i+1] == 'u') {
 			i += 2; // Skip \u
-
-			while (i < in.size()) {
-				unsigned char hex = hexchars(in[i],in[i+1]);
-				dec += (char)hex;
-				i += 2;
-				if (not (hex >= 0x80 and hex <= 0xBF))
-					break;
-			}
+			unsigned char hex1 = hexchars(in[i+0],in[i+1]);
+			unsigned char hex2 = hexchars(in[i+2],in[i+3]);
+			unsigned int uchar = (hex1<<8)|hex2;
+			dec += UnicodeToUTF8(uchar);
+			i += 3;
+		}
+		else if (in[i] == '\\' and in[i+1] == '"') {
+			dec += '"';
+			i++;
 		}
 		else
 			dec += in[i];
@@ -1394,7 +1412,12 @@ std::string query_field(std::string work, std::string lo, bool integer = false) 
 	
 	work = work.substr(p+1);
 
-	p = work.find("\"");
+	p = 0;
+	while (p < work.size()) {
+		if (work[p] == '"' and (p == 0 or work[p-1] != '\\'))
+			break;
+		p++;
+	}
 	if (integer) {
 		p = 0;
 		while (p < work.size() and work[p] >= '0' and work[p] <= '9') p++;

@@ -227,6 +227,42 @@ static void waprpl_blist_node_added (PurpleBlistNode *node) {
   }
 }
 
+PurpleConversation * get_open_combo(const char * who, PurpleConnection *gc) {
+  PurpleAccount * acc = purple_connection_get_account(gc);
+  if (isgroup(who)) {
+    // Search fot the combo
+    PurpleBlistNode* node = purple_blist_get_root();
+    GHashTable* hasht = NULL;
+    while (node != 0) {
+      if (PURPLE_BLIST_NODE_IS_CHAT(node)) {
+        PurpleChat * ch = PURPLE_CHAT(node);
+        if (purple_chat_get_account(ch) == acc) {
+          hasht = purple_chat_get_components(ch);
+          if (strcmp(g_hash_table_lookup(hasht, "id"),who) == 0) {
+            break;
+          }
+        }
+      }
+      node = purple_blist_node_next(node,FALSE);
+    }
+    int convo_id = chatid_to_convo(who);
+    PurpleConversation *convo = purple_find_chat(gc, convo_id);
+    
+    // Create a window if it's not open yet
+    if (!convo) {
+      waprpl_chat_join(gc,hasht);
+      convo = purple_find_chat(gc, convo_id);
+    }
+    return convo;
+  }else{
+    // Search for the combo
+    PurpleConversation *convo = purple_find_conversation_with_account(PURPLE_CONV_TYPE_IM, who, acc);
+    if (!convo)
+      convo = purple_conversation_new(PURPLE_CONV_TYPE_IM, acc, who);
+      return convo;
+  }
+}
+
 static void waprpl_process_incoming_events(PurpleConnection *gc) {
   whatsapp_connection * wconn = purple_connection_get_protocol_data(gc);
   PurpleAccount * acc = purple_connection_get_account(gc);
@@ -261,87 +297,55 @@ static void waprpl_process_incoming_events(PurpleConnection *gc) {
   while (waAPI_querychat(wconn->waAPI, &who, &msg, &author, &timestamp)) {
     purple_debug_info(WHATSAPP_ID, "Got chat message from %s: %s\n", who,msg);
     
+    PurpleConversation * convo = get_open_combo(who, gc);
     if (isgroup(who)) {
-      // Search fot the combo
-      PurpleBlistNode* node = purple_blist_get_root();
-      GHashTable* hasht = NULL;
-      while (node != 0) {
-        if (PURPLE_BLIST_NODE_IS_CHAT(node)) {
-          PurpleChat * ch = PURPLE_CHAT(node);
-          if (purple_chat_get_account(ch) == acc) {
-            hasht = purple_chat_get_components(ch);
-            if (strcmp(g_hash_table_lookup(hasht, "id"),who) == 0) {
-              break;
-            }
-          }
-        }
-        node = purple_blist_node_next(node,FALSE);
-      }
-      int convo_id = chatid_to_convo(who);
-      PurpleConversation *convo = purple_find_chat(gc, convo_id);
-      
-      // Create a window if it's not open yet
-      if (!convo) {
-        waprpl_chat_join(gc,hasht);
-        convo = purple_find_chat(gc, convo_id);
-      }
-      
-      if (convo != NULL) {
+      if (convo)
         serv_got_chat_in(gc, purple_conv_chat_get_id(PURPLE_CONV_CHAT(convo)), author, PURPLE_MESSAGE_RECV, msg, timestamp);
-      }else{
-        printf("Received group message but could not find the group! %s\n",msg);
-      }
     }else{
-      // Search fot the combo
-      PurpleConversation *convo = purple_find_conversation_with_account(PURPLE_CONV_TYPE_IM, who, acc);
-      if (!convo)
-        convo = purple_conversation_new(PURPLE_CONV_TYPE_IM, acc, who);
-      
       serv_got_chat_in(gc, purple_conv_chat_get_id(PURPLE_CONV_CHAT(convo)), who, PURPLE_MESSAGE_RECV, msg, timestamp);
       purple_conv_im_write(PURPLE_CONV_IM(convo), who, msg, PURPLE_MESSAGE_RECV, timestamp);
     }
   }
   while (waAPI_querychatimage(wconn->waAPI, &who, &prev, &size, &url, &timestamp)) {
-    printf("Got chat image %s %s\n",who,url);
     purple_debug_info(WHATSAPP_ID, "Got image from %s: %s\n", who,url);
-    
-    // Search fot the combo
-    PurpleConversation *convo = purple_find_conversation_with_account(PURPLE_CONV_TYPE_IM, who, acc);
-    if (!convo)
-      convo = purple_conversation_new(PURPLE_CONV_TYPE_IM, acc, who);
-      
     int imgid = purple_imgstore_add_with_id(g_memdup(prev, size), size, NULL);
-
-    serv_got_chat_in(gc, purple_conv_chat_get_id(PURPLE_CONV_CHAT(convo)), who, PURPLE_MESSAGE_RECV, msg, timestamp);
-    purple_conv_im_write(PURPLE_CONV_IM(convo), who, g_strdup_printf("<a href=\"%s\"><img id=\"%u\"></a><br/><a href=\"%s\">%s</a>",url,imgid,url,url),
-      PURPLE_MESSAGE_RECV | PURPLE_MESSAGE_IMAGES, timestamp);
+    
+    char * msg = g_strdup_printf("<a href=\"%s\"><img id=\"%u\"></a><br/><a href=\"%s\">%s</a>",url,imgid,url,url);
+    PurpleConversation * convo = get_open_combo(who, gc);
+    if (isgroup(who)) {
+      if (convo)
+        serv_got_chat_in(gc, purple_conv_chat_get_id(PURPLE_CONV_CHAT(convo)), author, PURPLE_MESSAGE_RECV, msg, timestamp);
+    }else{
+      serv_got_chat_in(gc, purple_conv_chat_get_id(PURPLE_CONV_CHAT(convo)), who, PURPLE_MESSAGE_RECV, msg, timestamp);
+      purple_conv_im_write(PURPLE_CONV_IM(convo), who, msg, PURPLE_MESSAGE_RECV | PURPLE_MESSAGE_IMAGES, timestamp);
+    }
   }
   while (waAPI_querychatlocation(wconn->waAPI, &who, &prev, &size, &lat, &lng, &timestamp)) {
     purple_debug_info(WHATSAPP_ID, "Got geomessage from: %s Coordinates (%f %f)\n", who,(float)lat,(float)lng);
-    
-    // Search fot the combo
-    PurpleConversation *convo = purple_find_conversation_with_account(PURPLE_CONV_TYPE_IM, who, acc);
-    if (!convo)
-      convo = purple_conversation_new(PURPLE_CONV_TYPE_IM, acc, who);
-      
     int imgid = purple_imgstore_add_with_id(g_memdup(prev, size), size, NULL);
-
-    serv_got_chat_in(gc, purple_conv_chat_get_id(PURPLE_CONV_CHAT(convo)), who, PURPLE_MESSAGE_RECV, msg, timestamp);
-    purple_conv_im_write(PURPLE_CONV_IM(convo), who, 
-      g_strdup_printf("<a href=\"http://openstreetmap.org/?lat=%f&lon=%f&zoom=16\"><img src=\"%u\"></a>",lat,lng,imgid),
-      PURPLE_MESSAGE_RECV | PURPLE_MESSAGE_IMAGES, timestamp);
+    char * msg =g_strdup_printf("<a href=\"http://openstreetmap.org/?lat=%f&lon=%f&zoom=16\"><img src=\"%u\"></a>",lat,lng,imgid);
+    
+    PurpleConversation * convo = get_open_combo(who, gc);
+    if (isgroup(who)) {
+      if (convo)
+        serv_got_chat_in(gc, purple_conv_chat_get_id(PURPLE_CONV_CHAT(convo)), author, PURPLE_MESSAGE_RECV, msg, timestamp);
+    }else{
+      serv_got_chat_in(gc, purple_conv_chat_get_id(PURPLE_CONV_CHAT(convo)), who, PURPLE_MESSAGE_RECV, msg, timestamp);
+      purple_conv_im_write(PURPLE_CONV_IM(convo), who, msg, PURPLE_MESSAGE_RECV | PURPLE_MESSAGE_IMAGES, timestamp);
+    }
   }
   while (waAPI_querychatsound(wconn->waAPI, &who, &url, &timestamp)) {
     purple_debug_info(WHATSAPP_ID, "Got chat sound from %s: %s\n", who,url);
+    char * msg = g_strdup_printf("<a href=\"%s\">%s</a>",url,url);
     
-    // Search fot the combo
-    PurpleConversation *convo = purple_find_conversation_with_account(PURPLE_CONV_TYPE_IM, who, acc);
-    if (!convo)
-      convo = purple_conversation_new(PURPLE_CONV_TYPE_IM, acc, who);
-
-    serv_got_chat_in(gc, purple_conv_chat_get_id(PURPLE_CONV_CHAT(convo)), who, PURPLE_MESSAGE_RECV, msg, timestamp);
-    purple_conv_im_write(PURPLE_CONV_IM(convo), who, g_strdup_printf("<a href=\"%s\">%s</a>",url,url),
-      PURPLE_MESSAGE_RECV , timestamp);
+    PurpleConversation * convo = get_open_combo(who, gc);
+    if (isgroup(who)) {
+      if (convo)
+        serv_got_chat_in(gc, purple_conv_chat_get_id(PURPLE_CONV_CHAT(convo)), author, PURPLE_MESSAGE_RECV, msg, timestamp);
+    }else{
+      serv_got_chat_in(gc, purple_conv_chat_get_id(PURPLE_CONV_CHAT(convo)), who, PURPLE_MESSAGE_RECV, msg, timestamp);
+      purple_conv_im_write(PURPLE_CONV_IM(convo), who, msg, PURPLE_MESSAGE_RECV | PURPLE_MESSAGE_IMAGES, timestamp);
+    }
   }
   
   // User status change

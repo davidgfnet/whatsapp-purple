@@ -7,7 +7,7 @@ ifeq ($(ARCH),i686)
 else ifeq ($(ARCH),x86_64)
 	ARCHFLAGS = -m64
 else
-	ARCHFLAGS = ""
+	ARCHFLAGS = 
 endif
 
 .PHONY: all

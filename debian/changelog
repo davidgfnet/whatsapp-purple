@@ -1,3 +1,9 @@
+pidgin-whatsapp (0.2-4) quantal; urgency=low
+
+  * Fixed bug in build Makefile
+
+ -- David Guillen Fandos <david@davidgf.net>  Mon, 14 Sep 2013 23:00:00 +0200
+
 pidgin-whatsapp (0.2-3) quantal; urgency=low
 
   * Fixed bugs in user status parsing

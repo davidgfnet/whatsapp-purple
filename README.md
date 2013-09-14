@@ -13,7 +13,7 @@ Windows users can find a copy at the nightly builds server: http://davidgf.net/n
 Building
 --------
 
-Just do `make` (if you have to choose 32/64 bit, run `make -f Makefile32` and pick the proper makefile).
+Just do `make` (if you have to choose 32/64 bit, run `make ARCH=i686` or `make ARCH=x86_64`).
 Makefile.mingw is the makefile for Windows 32 bit.
 
 Binaries

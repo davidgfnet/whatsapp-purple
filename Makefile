@@ -1,5 +1,14 @@
 
 LIBNAME = libwhatsapp.so
+ARCH = ""
+
+ifeq ($(ARCH),i686)
+	ARCHFLAGS = -m32
+else ifeq ($(ARCH),x86_64)
+	ARCHFLAGS = -m64
+else
+	ARCHFLAGS = ""
+endif
 
 .PHONY: all
 all: $(LIBNAME)
@@ -16,7 +25,8 @@ CXX = g++
 LD = $(CXX)
 CFLAGS_PURPLE = $(shell pkg-config --cflags purple)
 CFLAGS = \
-    -O2  \
+    $(ARCHFLAGS) \
+    -O2 \
     -Wall \
     -fPIC \
     -DPURPLE_PLUGINS \
@@ -24,7 +34,7 @@ CFLAGS = \
     $(CFLAGS_PURPLE)
 
 LIBS_PURPLE = $(shell pkg-config --libs purple)
-LDFLAGS = -shared -pipe 
+LDFLAGS =  $(ARCHFLAGS) -shared -pipe 
 
 %.o: %.c
 	$(CC) -c $(CFLAGS) -o $@ $<
@@ -54,6 +64,6 @@ uninstall: $(LIBNAME)
 
 .PHONY: clean
 clean:
-	-rm -f  *.o
+	-rm -f *.o
 	-rm -f $(LIBNAME)
 

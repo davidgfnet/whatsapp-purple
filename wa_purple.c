@@ -112,23 +112,6 @@ void waprpl_ssl_cerr_cb(PurpleSslConnection *gsc, PurpleSslErrorType error, gpoi
 void waprpl_check_ssl_output(PurpleConnection *gc);
 void waprpl_ssl_input_cb(gpointer data, gint source, PurpleInputCondition cond);
 
-char * last_seen_text(unsigned long long t) {
-  time_t tt = t;
-  
-  if (t < 60)
-    return g_strdup_printf("%d seconds ago",(int)t);
-  else if (t < 60*60)
-    return g_strdup_printf("%d minutes ago",(int)t/60);
-  else if (t < 24*60*60)
-    return g_strdup_printf("%d hour(s) ago",(int)t/(60*60));
-  else if (t < 48*60*60)
-    return g_strdup_printf("yesterday");
-  else if (t < 24*60*60*7)
-    return g_strdup_printf("%d day(s) ago",(int)t/(60*60*24));
-  else
-    return g_strdup_printf("On %s",g_strdup(asctime(localtime(&tt))));
-}
-
 unsigned int chatid_to_convo(const char * id) {
   // Get the chat number to use as combo id
   int unused,cid;
@@ -145,7 +128,7 @@ static void waprpl_tooltip_text(PurpleBuddy *buddy, PurpleNotifyUserInfo *info, 
   else status = "Available";
   unsigned long long lseen = waAPI_getlastseen(wconn->waAPI,purple_buddy_get_name(buddy));
   purple_notify_user_info_add_pair_plaintext(info, "Status", status);
-  purple_notify_user_info_add_pair_plaintext(info, "Last seen", last_seen_text(lseen));
+  purple_notify_user_info_add_pair_plaintext(info, "Last seen on WhatsApp", purple_str_seconds_to_string(lseen));
 }
 
 static char *waprpl_status_text(PurpleBuddy *buddy) {

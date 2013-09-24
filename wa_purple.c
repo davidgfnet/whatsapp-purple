@@ -179,32 +179,34 @@ static int isgroup(const char *user) {
 }
 
 static void waprpl_blist_node_removed (PurpleBlistNode *node) {
-  if (PURPLE_BLIST_NODE_IS_CHAT(node)) {
-    PurpleChat * ch = PURPLE_CHAT(node);
-    char * gid = g_hash_table_lookup(purple_chat_get_components(ch), "id");
-    if (gid == 0) return; // Group is not created yet...
-    whatsapp_connection * wconn = purple_connection_get_protocol_data(purple_account_get_connection(purple_chat_get_account(ch)));
-    waAPI_deletegroup(wconn->waAPI, gid);
-    waprpl_check_output(purple_account_get_connection(purple_chat_get_account(ch)));
-  }
+  if (!PURPLE_BLIST_NODE_IS_CHAT(node))
+    return;
+
+  PurpleChat * ch = PURPLE_CHAT(node);
+  char * gid = g_hash_table_lookup(purple_chat_get_components(ch), "id");
+  if (gid == 0) return; // Group is not created yet...
+  whatsapp_connection * wconn = purple_connection_get_protocol_data(purple_account_get_connection(purple_chat_get_account(ch)));
+  waAPI_deletegroup(wconn->waAPI, gid);
+  waprpl_check_output(purple_account_get_connection(purple_chat_get_account(ch)));
 }
 
 static void waprpl_blist_node_added (PurpleBlistNode *node) {
-  if (PURPLE_BLIST_NODE_IS_CHAT(node)) {
-    PurpleChat * ch = PURPLE_CHAT(node);
-    whatsapp_connection * wconn = purple_connection_get_protocol_data(purple_account_get_connection(purple_chat_get_account(ch)));
-    GHashTable * hasht = purple_chat_get_components(ch);
-    const char *groupname = g_hash_table_lookup(hasht, "subject");
-    const char *gid = g_hash_table_lookup(hasht, "id");
-    if (gid != 0) return;  // Already created
-    purple_debug_info(WHATSAPP_ID, "Creating group %s\n", groupname);
-    
-    waAPI_creategroup(wconn->waAPI, groupname);
-    waprpl_check_output(purple_account_get_connection(purple_chat_get_account(ch)));
-    
-    // Remove it, it will get added at the moment the chat list gets refreshed
-    purple_blist_remove_chat(ch);
-  }
+  if (!PURPLE_BLIST_NODE_IS_CHAT(node))
+    return;
+
+  PurpleChat * ch = PURPLE_CHAT(node);
+  whatsapp_connection * wconn = purple_connection_get_protocol_data(purple_account_get_connection(purple_chat_get_account(ch)));
+  GHashTable * hasht = purple_chat_get_components(ch);
+  const char *groupname = g_hash_table_lookup(hasht, "subject");
+  const char *gid = g_hash_table_lookup(hasht, "id");
+  if (gid != 0) return;  // Already created
+  purple_debug_info(WHATSAPP_ID, "Creating group %s\n", groupname);
+
+  waAPI_creategroup(wconn->waAPI, groupname);
+  waprpl_check_output(purple_account_get_connection(purple_chat_get_account(ch)));
+
+  // Remove it, it will get added at the moment the chat list gets refreshed
+  purple_blist_remove_chat(ch);
 }
 
 PurpleConversation * get_open_combo(const char * who, PurpleConnection *gc) {

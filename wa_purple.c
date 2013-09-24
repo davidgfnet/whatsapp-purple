@@ -252,13 +252,13 @@ static void waprpl_process_incoming_events(PurpleConnection *gc) {
     purple_connection_update_progress(gc, "Connecting", 0, 4);
     break;
   case 1:
-    purple_connection_update_progress(gc, "Sending auth", 1, 4);
+    purple_connection_update_progress(gc, "Sending authorization", 1, 4);
     break;
   case 2:
-    purple_connection_update_progress(gc, "Waiting response", 2, 4);
+    purple_connection_update_progress(gc, "Awaiting response", 2, 4);
     break;
   case 3:
-    purple_connection_update_progress(gc, "Connected", 3, 4);
+    purple_connection_update_progress(gc, "Connection established", 3, 4);
     purple_connection_set_state(gc, PURPLE_CONNECTED);
     
     if (!wconn->connected)

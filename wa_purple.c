@@ -170,19 +170,12 @@ static void waprpl_show_accountinfo(PurplePluginAction *action) {
 static GList *waprpl_actions(PurplePlugin *plugin, gpointer context) {
   PurplePluginAction * act;
 
-  GList *m = NULL;
-  
   act = purple_plugin_action_new("Show account information ...", waprpl_show_accountinfo);
-  m = g_list_append(m, act);
-
-  return m;
+  return g_list_append(NULL, act);
 }
+
 static int isgroup(const char *user) {
-  while (*user != 0) {
-    if (*user++ == '-')
-      return 1;
-  }
-  return 0;
+  return (strchr(user, '-') != NULL);
 }
 
 static void waprpl_blist_node_removed (PurpleBlistNode *node) {
@@ -827,16 +820,13 @@ static void waprpl_insert_contacts(PurpleConnection *gc) {
 
 // WA group support as chats
 static GList *waprpl_chat_join_info(PurpleConnection *gc) {
-  GList *m = NULL;
   struct proto_chat_entry *pce;
 
   pce = g_new0(struct proto_chat_entry, 1);
   pce->label = "_Subject:";
   pce->identifier = "subject";
   pce->required = TRUE;
-  m = g_list_append(m, pce);
-
-  return m;
+  return g_list_append(NULL, pce);
 }
 
 static GHashTable *waprpl_chat_info_defaults(PurpleConnection *gc, const char *chat_name) {
@@ -1228,14 +1218,6 @@ static void waprpl_init(PurplePlugin *plugin)
   _whatsapp_protocol = plugin;
 }
 
-static gboolean load_plugin(PurplePlugin *plugin) {
-  return TRUE;
-}
-
-static gboolean unload_plugin(PurplePlugin *plugin) {
-  return TRUE;
-}
-
 static PurplePluginInfo info =
 {
   PURPLE_PLUGIN_MAGIC,                                     /* magic */
@@ -1253,8 +1235,8 @@ static PurplePluginInfo info =
   "WhatsApp protocol for libpurple",                       /* description */
   "David Guillen Fandos (david@davidgf.net)",              /* author */
   "http://davidgf.net",                                    /* homepage */
-  load_plugin,                                             /* load */
-  unload_plugin,                                           /* unload */
+  NULL,                                                    /* load */
+  NULL,                                                    /* unload */
   NULL,                                                    /* destroy */
   NULL,                                                    /* ui_info */
   &prpl_info,                                              /* extra_info */

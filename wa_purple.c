@@ -132,10 +132,14 @@ static void waprpl_tooltip_text(PurpleBuddy *buddy, PurpleNotifyUserInfo *info, 
 }
 
 static char *waprpl_status_text(PurpleBuddy *buddy) {
+  char * statusmsg;
   whatsapp_connection * wconn = purple_connection_get_protocol_data(purple_account_get_connection(purple_buddy_get_account(buddy)));
   if (!wconn) return 0;
 
-  return waAPI_getuserstatusstring(wconn->waAPI,purple_buddy_get_name(buddy));
+  statusmsg = waAPI_getuserstatusstring(wconn->waAPI, purple_buddy_get_name(buddy));
+  if (!statusmsg || strlen(statusmsg) == 0)
+    return NULL;
+  return statusmsg;
 }
 
 static const char *waprpl_list_icon(PurpleAccount *acct, PurpleBuddy *buddy) {

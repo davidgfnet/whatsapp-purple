@@ -761,6 +761,9 @@ static GList *waprpl_status_types(PurpleAccount *acct) {
       "message", "Message", purple_value_new(PURPLE_TYPE_STRING), NULL);
   types = g_list_prepend(types, type);
 
+  type = purple_status_type_new(PURPLE_STATUS_OFFLINE, NULL, NULL, TRUE);
+  types = g_list_append(types, type);
+
   return g_list_reverse(types);
 }
 

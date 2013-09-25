@@ -622,8 +622,12 @@ static void waprpl_close(PurpleConnection *gc) {
 
 static int waprpl_send_im(PurpleConnection *gc, const char *who, const char *message, PurpleMessageFlags flags) {
   whatsapp_connection * wconn = purple_connection_get_protocol_data(gc);
+  char * plain;
 
-  waAPI_sendim(wconn->waAPI,who,message);
+  purple_markup_html_to_xhtml(message, NULL, &plain);
+  waAPI_sendim(wconn->waAPI,who,plain);
+  g_free(plain);
+
   waprpl_check_output(gc);
   
   return 1;
@@ -632,6 +636,7 @@ static int waprpl_send_chat(PurpleConnection *gc, int id, const char *message, P
   whatsapp_connection * wconn = purple_connection_get_protocol_data(gc);
   PurpleAccount *account = purple_connection_get_account(gc);
   PurpleConversation *convo = purple_find_chat(gc, id);
+  char * plain;
   
   PurpleBlistNode* node = purple_blist_get_root();
   GHashTable* hasht = NULL;
@@ -649,7 +654,11 @@ static int waprpl_send_chat(PurpleConnection *gc, int id, const char *message, P
   }
 
   char * chat_id = g_hash_table_lookup(hasht, "id");
-  waAPI_sendchat(wconn->waAPI,chat_id,message);
+
+  purple_markup_html_to_xhtml(message, NULL, &plain);
+  waAPI_sendchat(wconn->waAPI,chat_id,plain);
+  g_free(plain);
+
   waprpl_check_output(gc);
 
   const char *me = purple_account_get_string(account, "nick", "");

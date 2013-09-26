@@ -181,11 +181,11 @@ void waAPI_sslcloseconnection(void * waAPI) {
 
 
 void waAPI_login(void * waAPI, const char * ua) {
-	((WhatsappConnectionAPI*)waAPI)->doLogin(ua);
+	((WhatsappConnectionAPI*)waAPI)->doLogin(std::string(ua));
 }
 
 void * waAPI_create(const char * username, const char * password, const char * nickname) {
-	WhatsappConnectionAPI * api = new WhatsappConnectionAPI (username,password,nickname);
+	WhatsappConnectionAPI * api = new WhatsappConnectionAPI (std::string(username),std::string(password),std::string(nickname));
 	return api;
 }
 
@@ -285,15 +285,15 @@ int waAPI_querystatus(void * waAPI, char ** who, int *stat) {
 	return 0;
 }
 int waAPI_getuserstatus(void * waAPI, const char * who) {
-	return ((WhatsappConnectionAPI*)waAPI)->getuserstatus(who);
+	return ((WhatsappConnectionAPI*)waAPI)->getuserstatus(std::string(who));
 }
 char * waAPI_getuserstatusstring(void * waAPI, const char * who) {
 	if (!waAPI) return 0;
-	std::string s = ((WhatsappConnectionAPI*)waAPI)->getuserstatusstring(who);
+	std::string s = ((WhatsappConnectionAPI*)waAPI)->getuserstatusstring(std::string(who));
 	return g_strdup(s.c_str());
 }
 unsigned long long waAPI_getlastseen(void * waAPI, const char * who) {
-	return ((WhatsappConnectionAPI*)waAPI)->getlastseen(who);
+	return ((WhatsappConnectionAPI*)waAPI)->getlastseen(std::string(who));
 }
 
 int waAPI_queryicon(void * waAPI, char ** who, char ** icon, int * len, char ** hash) {

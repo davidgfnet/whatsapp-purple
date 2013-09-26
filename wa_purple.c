@@ -853,6 +853,14 @@ static void waprpl_chat_join (PurpleConnection *gc, GHashTable *data) {
   whatsapp_connection * wconn = purple_connection_get_protocol_data(gc);
   const char *groupname = g_hash_table_lookup(data, "subject");
   char * id = g_hash_table_lookup(data, "id");
+
+  if (!id) {
+    gchar *tmp = g_strdup_printf("Joining %s requires an invitation.", groupname);
+    purple_notify_error(gc, "Invitation only", "Invitation only", tmp);
+    g_free(tmp);
+    return;
+  }
+
   int prplid = chatid_to_convo(id);
   purple_debug_info(WHATSAPP_ID, "joining group %s\n", groupname);
   

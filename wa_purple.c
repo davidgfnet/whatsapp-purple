@@ -857,13 +857,13 @@ static void waprpl_chat_join (PurpleConnection *gc, GHashTable *data) {
   purple_debug_info(WHATSAPP_ID, "joining group %s\n", groupname);
   
   if (!purple_find_chat(gc, prplid)) {
+    char *subject, *owner, *part;
+    if (!waAPI_getgroupinfo(wconn->waAPI, id, &subject, &owner, &part)) return;
+
     // Notify chat add
     PurpleConversation * conv = serv_got_joined_chat(gc, prplid, groupname);
     
     // Add people in the chat
-
-    char *subject, *owner, *part;
-    if (!waAPI_getgroupinfo(wconn->waAPI, id, &subject, &owner, &part)) return;
     purple_debug_info(WHATSAPP_ID, "group info ID(%s) SUBJECT(%s) OWNER(%s)\n", id, subject, owner);
     
     gchar **plist = g_strsplit(part,",",0);

@@ -748,14 +748,6 @@ static GList *waprpl_status_types(PurpleAccount *acct) {
   return g_list_reverse(types);
 }
 
-static GList *waprpl_blist_node_menu(PurpleBlistNode *node) {
-  if (PURPLE_BLIST_NODE_IS_BUDDY(node)) {
-    return NULL;
-  } else {
-    return NULL;
-  }
-}
-
 static void waprpl_set_status(PurpleAccount *acct, PurpleStatus *status) {
   whatsapp_connection * wconn = purple_connection_get_protocol_data(purple_account_get_connection(acct));
   const char * sid = purple_status_get_id(status);
@@ -1127,7 +1119,7 @@ static PurplePluginProtocolInfo prpl_info =
   waprpl_status_text,                  /* status_text */
   waprpl_tooltip_text,                 /* tooltip_text */
   waprpl_status_types,                 /* status_types */
-  waprpl_blist_node_menu,              /* blist_node_menu */
+  NULL,                                /* blist_node_menu */
   waprpl_chat_join_info,               /* chat_info */
   waprpl_chat_info_defaults,           /* chat_info_defaults */
   waprpl_login,                        /* login */

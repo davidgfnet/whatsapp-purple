@@ -245,6 +245,17 @@ PurpleConversation * get_open_combo(const char * who, PurpleConnection *gc) {
   }
 }
 
+static void conv_add_participants(PurpleConversation *conv, const char *part, const char *owner) {
+  gchar **plist = g_strsplit(part, ",", 0);
+
+  purple_conv_chat_clear_users(purple_conversation_get_chat_data(conv));
+  while (*plist) {
+    purple_conv_chat_add_user (purple_conversation_get_chat_data(conv),
+      *plist, "", PURPLE_CBFLAGS_NONE | (!strcmp(owner, *plist) ? PURPLE_CBFLAGS_FOUNDER : 0), FALSE);
+    plist++;
+  }
+}
+
 static void waprpl_process_incoming_events(PurpleConnection *gc) {
   whatsapp_connection * wconn = purple_connection_get_protocol_data(gc);
   PurpleAccount * acc = purple_connection_get_account(gc);
@@ -439,19 +450,9 @@ static void waprpl_process_incoming_events(PurpleConnection *gc) {
       char * id = g_hash_table_lookup(purple_chat_get_components(ch), "id");
       int prplid = chatid_to_convo(id);
       PurpleConversation * conv = purple_find_chat(gc, prplid);
-      if (conv) {
-        char *subject, *owner, *part;
-        if (!waAPI_getgroupinfo(wconn->waAPI, id, &subject, &owner, &part)) return;
-        
-        purple_conv_chat_clear_users(purple_conversation_get_chat_data(conv));
-        gchar **plist = g_strsplit(part,",",0);
-        while (*plist) {
-          purple_conv_chat_add_user (purple_conversation_get_chat_data(conv),
-            *plist,"",PURPLE_CBFLAGS_NONE | (!strcmp(owner,*plist) ? PURPLE_CBFLAGS_FOUNDER : 0),FALSE);
-          plist++;
-        }
-      }
-      
+      char *subject, *owner, *part;
+      if (conv && waAPI_getgroupinfo(wconn->waAPI, id, &subject, &owner, &part))
+        conv_add_participants(conv, part, owner);
       gplist++;
     }
   }
@@ -873,13 +874,7 @@ static void waprpl_chat_join (PurpleConnection *gc, GHashTable *data) {
     
     // Add people in the chat
     purple_debug_info(WHATSAPP_ID, "group info ID(%s) SUBJECT(%s) OWNER(%s)\n", id, subject, owner);
-    
-    gchar **plist = g_strsplit(part,",",0);
-    while (*plist) {
-      purple_conv_chat_add_user (purple_conversation_get_chat_data(conv),
-        *plist,"",PURPLE_CBFLAGS_NONE | (!strcmp(owner,*plist) ? PURPLE_CBFLAGS_FOUNDER : 0),FALSE);
-      plist++;
-    }
+    conv_add_participants(conv, part, owner);
   }
 }
 

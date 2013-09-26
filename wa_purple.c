@@ -302,20 +302,20 @@ static void waprpl_process_incoming_events(PurpleConnection *gc) {
     purple_debug_info(WHATSAPP_ID, "Got chat message from %s: %s\n", who,msg);
     conv_add_message(gc, who, msg, author, timestamp);
   }
-  while (waAPI_querychatimage(wconn->waAPI, &who, &prev, &size, &url, &timestamp)) {
+  while (waAPI_querychatimage(wconn->waAPI, &who, &prev, &size, &url, &author, &timestamp)) {
     purple_debug_info(WHATSAPP_ID, "Got image from %s: %s\n", who,url);
     int imgid = purple_imgstore_add_with_id(g_memdup(prev, size), size, NULL);
     
     char * msg = g_strdup_printf("<a href=\"%s\"><img id=\"%u\"></a><br/><a href=\"%s\">%s</a>",url,imgid,url,url);
     conv_add_message(gc, who, msg, author, timestamp);
   }
-  while (waAPI_querychatlocation(wconn->waAPI, &who, &prev, &size, &lat, &lng, &timestamp)) {
+  while (waAPI_querychatlocation(wconn->waAPI, &who, &prev, &size, &lat, &lng, &author, &timestamp)) {
     purple_debug_info(WHATSAPP_ID, "Got geomessage from: %s Coordinates (%f %f)\n", who,(float)lat,(float)lng);
     int imgid = purple_imgstore_add_with_id(g_memdup(prev, size), size, NULL);
     char * msg =g_strdup_printf("<a href=\"http://openstreetmap.org/?lat=%f&lon=%f&zoom=16\"><img src=\"%u\"></a>",lat,lng,imgid);
     conv_add_message(gc, who, msg, author, timestamp);
   }
-  while (waAPI_querychatsound(wconn->waAPI, &who, &url, &timestamp)) {
+  while (waAPI_querychatsound(wconn->waAPI, &who, &url, &author, &timestamp)) {
     purple_debug_info(WHATSAPP_ID, "Got chat sound from %s: %s\n", who,url);
     char * msg = g_strdup_printf("<a href=\"%s\">%s</a>",url,url);
     conv_add_message(gc, who, msg, author, timestamp);

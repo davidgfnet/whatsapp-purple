@@ -1119,14 +1119,14 @@ void WhatsappConnection::addGroup(std::string subject) {
 	outbuffer = outbuffer + serialize_tree(&req);
 }
 
-void WhatsappConnection::doLogin(std::string useragent) {
+void WhatsappConnection::doLogin(std::string resource) {
 	// Send stream init
 	DataBuffer first;
 	
 	{
 	std::map <std::string,std::string> auth;
 	first.addData("WA\1\2",4);
-	auth["resource"] = useragent;
+	auth["resource"] = resource;
 	auth["to"] = whatsappserver;
 	Tree t("start",auth);
 	first = first + serialize_tree(&t,false);
@@ -2422,8 +2422,8 @@ int WhatsappConnectionAPI::loginStatus() const {
 	return connection->loginStatus();
 }
 
-void WhatsappConnectionAPI::doLogin(std::string useragent) {
-	connection->doLogin(useragent);
+void WhatsappConnectionAPI::doLogin(std::string resource) {
+	connection->doLogin(resource);
 }
 void WhatsappConnectionAPI::receiveCallback(const char * data, int len) {
 	connection->receiveCallback(data,len);

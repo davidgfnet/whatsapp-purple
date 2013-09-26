@@ -765,9 +765,9 @@ public:
 	void sendChat(std::string to, std::string message);
 	void sendGroupChat(std::string to, std::string message);
 	bool query_chat(std::string & from, std::string & message,std::string & author, unsigned long & t);
-	bool query_chatimages(std::string & from, std::string & preview, std::string & url, unsigned long & t);
-	bool query_chatsounds(std::string & from, std::string & url, unsigned long & t);
-	bool query_chatlocations(std::string & from, double & lat, double & lng, std::string & prev, unsigned long & t);
+	bool query_chatimages(std::string & from, std::string & preview, std::string & url, std::string & author, unsigned long & t);
+	bool query_chatsounds(std::string & from, std::string & url, std::string & author, unsigned long & t);
+	bool query_chatlocations(std::string & from, double & lat, double & lng, std::string & prev, std::string & author, unsigned long & t);
 	bool query_status(std::string & from, int & status);
 	bool query_icon(std::string & from, std::string & icon, std::string & hash);
 	bool query_avatar(std::string user, std::string & icon);
@@ -2087,13 +2087,14 @@ bool WhatsappConnection::query_chat(std::string & from, std::string & message, s
 	return false;
 }
 
-bool WhatsappConnection::query_chatimages(std::string & from, std::string & preview, std::string & url, unsigned long & t) {
+bool WhatsappConnection::query_chatimages(std::string & from, std::string & preview, std::string & url, std::string & author, unsigned long & t) {
 	for (unsigned int i = 0; i < recv_messages.size(); i++) {
 		if (recv_messages[i]->type() == 1) {
 			from = recv_messages[i]->from;
 			t = recv_messages[i]->t;
 			preview = ((ImageMessage*)recv_messages[i])->preview;
 			url = ((ImageMessage*)recv_messages[i])->url;
+			author = ((ImageMessage*)recv_messages[i])->author;
 			delete recv_messages[i];
 			recv_messages.erase(recv_messages.begin()+i);
 			return true;
@@ -2102,12 +2103,13 @@ bool WhatsappConnection::query_chatimages(std::string & from, std::string & prev
 	return false;
 }
 
-bool WhatsappConnection::query_chatsounds(std::string & from, std::string & url, unsigned long & t) {
+bool WhatsappConnection::query_chatsounds(std::string & from, std::string & url, std::string & author, unsigned long & t) {
 	for (unsigned int i = 0; i < recv_messages.size(); i++) {
 		if (recv_messages[i]->type() == 3) {
 			from = recv_messages[i]->from;
 			t = recv_messages[i]->t;
 			url = ((SoundMessage*)recv_messages[i])->url;
+			author = ((SoundMessage*)recv_messages[i])->author;
 			delete recv_messages[i];
 			recv_messages.erase(recv_messages.begin()+i);
 			return true;
@@ -2116,7 +2118,7 @@ bool WhatsappConnection::query_chatsounds(std::string & from, std::string & url,
 	return false;
 }
 
-bool WhatsappConnection::query_chatlocations(std::string & from, double & lat, double & lng, std::string & prev, unsigned long & t) {
+bool WhatsappConnection::query_chatlocations(std::string & from, double & lat, double & lng, std::string & prev, std::string & author, unsigned long & t) {
 	for (unsigned int i = 0; i < recv_messages.size(); i++) {
 		if (recv_messages[i]->type() == 2) {
 			from = recv_messages[i]->from;
@@ -2124,6 +2126,7 @@ bool WhatsappConnection::query_chatlocations(std::string & from, double & lat, d
 			prev = ((LocationMessage*)recv_messages[i])->preview;
 			lat = ((LocationMessage*)recv_messages[i])->latitude;
 			lng = ((LocationMessage*)recv_messages[i])->longitude;
+			author = ((LocationMessage*)recv_messages[i])->author;
 			delete recv_messages[i];
 			recv_messages.erase(recv_messages.begin()+i);
 			return true;
@@ -2289,9 +2292,9 @@ public:
 	void sendChat(std::string to, std::string message);
 	void sendGroupChat(std::string to, std::string message);
 	bool query_chat(std::string & from, std::string & message,std::string & author, unsigned long & t);
-	bool query_chatimages(std::string & from, std::string & preview, std::string & url, unsigned long & t);
-	bool query_chatsounds(std::string & from, std::string & url, unsigned long & t);
-	bool query_chatlocations(std::string & from, double & lat, double & lng, std::string & prev, unsigned long & t);
+	bool query_chatimages(std::string & from, std::string & preview, std::string & url, std::string & author, unsigned long & t);
+	bool query_chatsounds(std::string & from, std::string & url, std::string & author, unsigned long & t);
+	bool query_chatlocations(std::string & from, double & lat, double & lng, std::string & prev, std::string & author, unsigned long & t);
 	bool query_status(std::string & from, int & status);
 	bool query_icon(std::string & from, std::string & icon, std::string & hash);
 	bool query_avatar(std::string user, std::string & icon);
@@ -2391,20 +2394,20 @@ std::string WhatsappConnectionAPI::getuserstatusstring(const std::string & who) 
 	return connection->getuserstatusstring(who);
 }
 
-bool WhatsappConnectionAPI::query_chatimages(std::string & from, std::string & preview, std::string & url, unsigned long & t) {
-	return connection->query_chatimages(from,preview,url,t);
+bool WhatsappConnectionAPI::query_chatimages(std::string & from, std::string & preview, std::string & url, std::string & author, unsigned long & t) {
+	return connection->query_chatimages(from, preview, url, author, t);
 }
 
-bool WhatsappConnectionAPI::query_chatsounds(std::string & from, std::string & url, unsigned long & t) {
-	return connection->query_chatsounds(from,url,t);
+bool WhatsappConnectionAPI::query_chatsounds(std::string & from, std::string & url, std::string & author, unsigned long & t) {
+	return connection->query_chatsounds(from, url, author, t);
 }
 
 bool WhatsappConnectionAPI::query_chat(std::string & from, std::string & msg, std::string & author, unsigned long & t) {
-	return connection->query_chat(from,msg,author,t);
+	return connection->query_chat(from, msg, author, t);
 }
 
-bool WhatsappConnectionAPI::query_chatlocations(std::string & from, double & lat, double & lng, std::string & prev, unsigned long & t) {
-	return connection->query_chatlocations(from,lat,lng,prev,t);
+bool WhatsappConnectionAPI::query_chatlocations(std::string & from, double & lat, double & lng, std::string & prev, std::string & author, unsigned long & t) {
+	return connection->query_chatlocations(from, lat, lng, prev, author, t);
 }
 
 bool WhatsappConnectionAPI::query_status(std::string & from, int & status) {

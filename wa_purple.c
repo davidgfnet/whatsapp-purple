@@ -256,6 +256,17 @@ static void conv_add_participants(PurpleConversation *conv, const char *part, co
   }
 }
 
+static void conv_add_message(PurpleConnection *gc, const char *who, const char *msg, const char *author, unsigned long timestamp) {
+  PurpleConversation * convo = get_open_combo(who, gc);
+  if (isgroup(who)) {
+    if (convo)
+      serv_got_chat_in(gc, purple_conv_chat_get_id(PURPLE_CONV_CHAT(convo)), author, PURPLE_MESSAGE_RECV, msg, timestamp);
+  } else {
+    serv_got_chat_in(gc, purple_conv_chat_get_id(PURPLE_CONV_CHAT(convo)), who, PURPLE_MESSAGE_RECV, msg, timestamp);
+    purple_conv_im_write(PURPLE_CONV_IM(convo), who, msg, PURPLE_MESSAGE_RECV | PURPLE_MESSAGE_IMAGES, timestamp);
+  }
+}
+
 static void waprpl_process_incoming_events(PurpleConnection *gc) {
   whatsapp_connection * wconn = purple_connection_get_protocol_data(gc);
   PurpleAccount * acc = purple_connection_get_account(gc);
@@ -289,56 +300,25 @@ static void waprpl_process_incoming_events(PurpleConnection *gc) {
   // Incoming messages
   while (waAPI_querychat(wconn->waAPI, &who, &msg, &author, &timestamp)) {
     purple_debug_info(WHATSAPP_ID, "Got chat message from %s: %s\n", who,msg);
-    
-    PurpleConversation * convo = get_open_combo(who, gc);
-    if (isgroup(who)) {
-      if (convo)
-        serv_got_chat_in(gc, purple_conv_chat_get_id(PURPLE_CONV_CHAT(convo)), author, PURPLE_MESSAGE_RECV, msg, timestamp);
-    }else{
-      serv_got_chat_in(gc, purple_conv_chat_get_id(PURPLE_CONV_CHAT(convo)), who, PURPLE_MESSAGE_RECV, msg, timestamp);
-      purple_conv_im_write(PURPLE_CONV_IM(convo), who, msg, PURPLE_MESSAGE_RECV, timestamp);
-    }
+    conv_add_message(gc, who, msg, author, timestamp);
   }
-  while (waAPI_querychatimage(wconn->waAPI, &who, &prev, &size, &url, &timestamp)) {
+  while (waAPI_querychatimage(wconn->waAPI, &who, &prev, &size, &url, &author, &timestamp)) {
     purple_debug_info(WHATSAPP_ID, "Got image from %s: %s\n", who,url);
     int imgid = purple_imgstore_add_with_id(g_memdup(prev, size), size, NULL);
     
     char * msg = g_strdup_printf("<a href=\"%s\"><img id=\"%u\"></a><br/><a href=\"%s\">%s</a>",url,imgid,url,url);
-    PurpleConversation * convo = get_open_combo(who, gc);
-    if (isgroup(who)) {
-      if (convo)
-        serv_got_chat_in(gc, purple_conv_chat_get_id(PURPLE_CONV_CHAT(convo)), author, PURPLE_MESSAGE_RECV, msg, timestamp);
-    }else{
-      serv_got_chat_in(gc, purple_conv_chat_get_id(PURPLE_CONV_CHAT(convo)), who, PURPLE_MESSAGE_RECV, msg, timestamp);
-      purple_conv_im_write(PURPLE_CONV_IM(convo), who, msg, PURPLE_MESSAGE_RECV | PURPLE_MESSAGE_IMAGES, timestamp);
-    }
+    conv_add_message(gc, who, msg, author, timestamp);
   }
-  while (waAPI_querychatlocation(wconn->waAPI, &who, &prev, &size, &lat, &lng, &timestamp)) {
+  while (waAPI_querychatlocation(wconn->waAPI, &who, &prev, &size, &lat, &lng, &author, &timestamp)) {
     purple_debug_info(WHATSAPP_ID, "Got geomessage from: %s Coordinates (%f %f)\n", who,(float)lat,(float)lng);
     int imgid = purple_imgstore_add_with_id(g_memdup(prev, size), size, NULL);
     char * msg =g_strdup_printf("<a href=\"http://openstreetmap.org/?lat=%f&lon=%f&zoom=16\"><img src=\"%u\"></a>",lat,lng,imgid);
-    
-    PurpleConversation * convo = get_open_combo(who, gc);
-    if (isgroup(who)) {
-      if (convo)
-        serv_got_chat_in(gc, purple_conv_chat_get_id(PURPLE_CONV_CHAT(convo)), author, PURPLE_MESSAGE_RECV, msg, timestamp);
-    }else{
-      serv_got_chat_in(gc, purple_conv_chat_get_id(PURPLE_CONV_CHAT(convo)), who, PURPLE_MESSAGE_RECV, msg, timestamp);
-      purple_conv_im_write(PURPLE_CONV_IM(convo), who, msg, PURPLE_MESSAGE_RECV | PURPLE_MESSAGE_IMAGES, timestamp);
-    }
+    conv_add_message(gc, who, msg, author, timestamp);
   }
-  while (waAPI_querychatsound(wconn->waAPI, &who, &url, &timestamp)) {
+  while (waAPI_querychatsound(wconn->waAPI, &who, &url, &author, &timestamp)) {
     purple_debug_info(WHATSAPP_ID, "Got chat sound from %s: %s\n", who,url);
     char * msg = g_strdup_printf("<a href=\"%s\">%s</a>",url,url);
-    
-    PurpleConversation * convo = get_open_combo(who, gc);
-    if (isgroup(who)) {
-      if (convo)
-        serv_got_chat_in(gc, purple_conv_chat_get_id(PURPLE_CONV_CHAT(convo)), author, PURPLE_MESSAGE_RECV, msg, timestamp);
-    }else{
-      serv_got_chat_in(gc, purple_conv_chat_get_id(PURPLE_CONV_CHAT(convo)), who, PURPLE_MESSAGE_RECV, msg, timestamp);
-      purple_conv_im_write(PURPLE_CONV_IM(convo), who, msg, PURPLE_MESSAGE_RECV | PURPLE_MESSAGE_IMAGES, timestamp);
-    }
+    conv_add_message(gc, who, msg, author, timestamp);
   }
   
   // User status change

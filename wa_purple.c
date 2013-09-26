@@ -111,6 +111,7 @@ void check_ssl_requests(PurpleAccount * acct);
 void waprpl_ssl_cerr_cb(PurpleSslConnection * gsc, PurpleSslErrorType error, gpointer data);
 void waprpl_check_ssl_output(PurpleConnection * gc);
 void waprpl_ssl_input_cb(gpointer data, gint source, PurpleInputCondition cond);
+static void waprpl_set_status(PurpleAccount * acct, PurpleStatus * status);
 
 unsigned int chatid_to_convo(const char *id)
 {
@@ -308,6 +309,11 @@ static void waprpl_process_incoming_events(PurpleConnection * gc)
 			waprpl_insert_contacts(gc);
 
 		wconn->connected = 1;
+
+		PurpleAccount *account = purple_connection_get_account(gc);
+		PurpleStatus *status = purple_account_get_active_status(account);
+		waprpl_set_status(account, status);
+
 		break;
 	default:
 		break;

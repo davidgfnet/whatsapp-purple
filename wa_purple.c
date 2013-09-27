@@ -302,13 +302,12 @@ static void conv_add_participants(PurpleConversation * conv, const char *part, c
 
 static void conv_add_message(PurpleConnection * gc, const char *who, const char *msg, const char *author, unsigned long timestamp)
 {
-	PurpleConversation *convo = get_open_combo(who, gc);
 	if (isgroup(who)) {
+		PurpleConversation *convo = get_open_combo(who, gc);
 		if (convo)
 			serv_got_chat_in(gc, purple_conv_chat_get_id(PURPLE_CONV_CHAT(convo)), author, PURPLE_MESSAGE_RECV, msg, timestamp);
 	} else {
-		serv_got_chat_in(gc, purple_conv_chat_get_id(PURPLE_CONV_CHAT(convo)), who, PURPLE_MESSAGE_RECV, msg, timestamp);
-		purple_conv_im_write(PURPLE_CONV_IM(convo), who, msg, PURPLE_MESSAGE_RECV | PURPLE_MESSAGE_IMAGES, timestamp);
+		serv_got_im(gc, who, msg, PURPLE_MESSAGE_RECV | PURPLE_MESSAGE_IMAGES, timestamp);
 	}
 }
 

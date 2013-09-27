@@ -223,25 +223,54 @@ static void waprpl_blist_node_added(PurpleBlistNode * node)
 	purple_blist_remove_chat(ch);
 }
 
+static PurpleChat *blist_find_chat_by_hasht_cond(PurpleConnection *gc, int (*fn)(GHashTable *hasht, void *data), void *data)
+{
+	PurpleAccount *account = purple_connection_get_account(gc);
+	PurpleBlistNode *node = purple_blist_get_root();
+	GHashTable *hasht;
+
+	while (node) {
+		if (PURPLE_BLIST_NODE_IS_CHAT(node)) {
+			PurpleChat *ch = PURPLE_CHAT(node);
+			if (purple_chat_get_account(ch) == account) {
+				hasht = purple_chat_get_components(ch);
+				if (fn(hasht, data))
+					return ch;
+			}
+		}
+		node = purple_blist_node_next(node, FALSE);
+	}
+
+	return NULL;
+}
+
+static int hasht_cmp_id(GHashTable *hasht, void *data)
+{
+	return !strcmp(g_hash_table_lookup(hasht, "id"), *((char **)data));
+}
+
+static int hasht_cmp_convo(GHashTable *hasht, void *data)
+{
+	return (chatid_to_convo(g_hash_table_lookup(hasht, "id")) == *((int *)data));
+}
+
+static PurpleChat *blist_find_chat_by_id(PurpleConnection *gc, const char *id)
+{
+	return blist_find_chat_by_hasht_cond(gc, hasht_cmp_id, &id);
+}
+
+static PurpleChat *blist_find_chat_by_convo(PurpleConnection *gc, int convo)
+{
+	return blist_find_chat_by_hasht_cond(gc, hasht_cmp_convo, &convo);
+}
+
 PurpleConversation *get_open_combo(const char *who, PurpleConnection * gc)
 {
 	PurpleAccount *acc = purple_connection_get_account(gc);
 	if (isgroup(who)) {
 		/* Search fot the combo */
-		PurpleBlistNode *node = purple_blist_get_root();
-		GHashTable *hasht = NULL;
-		while (node != 0) {
-			if (PURPLE_BLIST_NODE_IS_CHAT(node)) {
-				PurpleChat *ch = PURPLE_CHAT(node);
-				if (purple_chat_get_account(ch) == acc) {
-					hasht = purple_chat_get_components(ch);
-					if (strcmp(g_hash_table_lookup(hasht, "id"), who) == 0) {
-						break;
-					}
-				}
-			}
-			node = purple_blist_node_next(node, FALSE);
-		}
+		PurpleChat *ch = blist_find_chat_by_id(gc, who);
+		GHashTable *hasht = purple_chat_get_components(ch);
 		int convo_id = chatid_to_convo(who);
 		PurpleConversation *convo = purple_find_chat(gc, convo_id);
 
@@ -420,24 +449,8 @@ static void waprpl_process_incoming_events(PurpleConnection * gc)
 		char *glist = waAPI_getgroups(wconn->waAPI);
 		gchar **gplist = g_strsplit(glist, ",", 0);
 		while (*gplist) {
-			int found = 0;
-			PurpleBlistNode *node = purple_blist_get_root();
-			PurpleChat *ch;
-			while (node != 0) {
-				if (PURPLE_BLIST_NODE_IS_CHAT(node)) {
-					ch = PURPLE_CHAT(node);
-					if (purple_chat_get_account(ch) == acc) {
-						char *grid = g_hash_table_lookup(purple_chat_get_components(ch), "id");
-						if (strcmp(*gplist, grid) == 0) {
-							found = 1;
-							break;
-						}
-					}
-				}
-				node = purple_blist_node_next(node, FALSE);
-			}
-
-			if (!found) {
+			PurpleChat *ch = blist_find_chat_by_id(gc, *gplist);
+			if (!ch) {
 				char *sub, *own;
 				waAPI_getgroupinfo(wconn->waAPI, *gplist, &sub, &own, 0);
 				purple_debug_info("waprpl", "New group found %s %s\n", *gplist, sub);
@@ -642,24 +655,10 @@ static int waprpl_send_chat(PurpleConnection * gc, int id, const char *message, 
 	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
 	PurpleAccount *account = purple_connection_get_account(gc);
 	PurpleConversation *convo = purple_find_chat(gc, id);
-	char *plain;
-
-	PurpleBlistNode *node = purple_blist_get_root();
-	GHashTable *hasht = NULL;
-	while (node != 0) {
-		if (PURPLE_BLIST_NODE_IS_CHAT(node)) {
-			PurpleChat *ch = PURPLE_CHAT(node);
-			if (purple_chat_get_account(ch) == account) {
-				hasht = purple_chat_get_components(ch);
-				if (chatid_to_convo(g_hash_table_lookup(hasht, "id")) == (unsigned)id) {
-					break;
-				}
-			}
-		}
-		node = purple_blist_node_next(node, FALSE);
-	}
-
+	PurpleChat *ch = blist_find_chat_by_convo(gc, id);
+	GHashTable *hasht = purple_chat_get_components(ch);
 	char *chat_id = g_hash_table_lookup(hasht, "id");
+	char *plain;
 
 	purple_markup_html_to_xhtml(message, NULL, &plain);
 	waAPI_sendchat(wconn->waAPI, chat_id, plain);
@@ -908,25 +907,11 @@ static void waprpl_chat_join(PurpleConnection * gc, GHashTable * data)
 static void waprpl_chat_invite(PurpleConnection * gc, int id, const char *message, const char *name)
 {
 	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
-	PurpleAccount *account = purple_connection_get_account(gc);
 	PurpleConversation *convo = purple_find_chat(gc, id);
-
-	PurpleBlistNode *node = purple_blist_get_root();
-	GHashTable *hasht = NULL;
-	while (node != 0) {
-		if (PURPLE_BLIST_NODE_IS_CHAT(node)) {
-			PurpleChat *ch = PURPLE_CHAT(node);
-			if (purple_chat_get_account(ch) == account) {
-				hasht = purple_chat_get_components(ch);
-				if (chatid_to_convo(g_hash_table_lookup(hasht, "id")) == (unsigned)id) {
-					break;
-				}
-			}
-		}
-		node = purple_blist_node_next(node, FALSE);
-	}
-
+	PurpleChat *ch = blist_find_chat_by_convo(gc, id);
+	GHashTable *hasht = purple_chat_get_components(ch);
 	char *chat_id = g_hash_table_lookup(hasht, "id");
+
 	if (strstr(name, "@s.whatsapp.net") == 0)
 		name = g_strdup_printf("%s@s.whatsapp.net", name);
 	waAPI_manageparticipant(wconn->waAPI, chat_id, name, "add");

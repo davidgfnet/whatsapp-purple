@@ -415,7 +415,7 @@ void waAPI_setmypresence(void *waAPI, const char *st, const char *msg)
 	((WhatsappConnectionAPI *) waAPI)->setMyPresence(st, msg);
 }
 
-// Implementations when Openssl is not present
+/* Implementations when Openssl is not present */
 
 unsigned char *MD5(const unsigned char *d, int n, unsigned char *md)
 {
@@ -539,7 +539,7 @@ int PKCS5_PBKDF2_HMAC_SHA1(const char *pass, int passlen, const unsigned char *s
 {
 	unsigned char digtmp[20], *p, itmp[4];
 	int cplen, j, k, tkeylen;
-	int mdlen = 20;		// SHA1
+	int mdlen = 20;		/* SHA1 */
 	unsigned long i = 1;
 
 	PurpleCipherContext *context = purple_cipher_context_new_by_name("hmac", NULL);
@@ -588,7 +588,7 @@ int PKCS5_PBKDF2_HMAC_SHA1(const char *pass, int passlen, const unsigned char *s
 	return 1;
 }
 
-// MIME type, copied from mxit
+/* MIME type, copied from mxit */
 #define		MIME_TYPE_OCTETSTREAM	"application/octet-stream"
 #define		ARRAY_SIZE( x )		( sizeof( x ) / sizeof( x[0] ) )
 

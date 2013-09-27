@@ -1051,10 +1051,10 @@ void waprpl_ssl_cerr_cb(PurpleSslConnection * gsc, PurpleSslErrorType error, gpo
 		purple_input_remove(wconn->sslrh);
 
 	waAPI_sslcloseconnection(wconn->waAPI);
-	if (wconn->gsc != 0)
-		purple_ssl_close(gsc);
 
-	wconn->gsc = 0;
+	/* The connection is closed and freed automatically. */
+	wconn->gsc = NULL;
+
 	wconn->sslfd = -1;
 	wconn->sslrh = 0;
 	wconn->sslwh = 0;

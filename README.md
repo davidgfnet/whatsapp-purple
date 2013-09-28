@@ -43,3 +43,9 @@ http://blog.philippheckel.com/2013/07/05/how-to-sniff-the-whatsapp-password-from
 Please, do not contact me by email for this kind of issues, I won't answer your
 questions. For developing matters you can open an issue, create a pull request
 or (in case you think it's necessary) email me.
+
+* **How do I get a meaningful backtrace?**
+
+In order to get a proper backtrace, you can either use your package manager to
+install a debug package or rebuild the library with debug symbols using `make
+debug`.

@@ -426,6 +426,8 @@ unsigned char *MD5(const unsigned char *d, int n, unsigned char *md)
 	md5_ctx = purple_cipher_context_new(md5_cipher, NULL);
 	purple_cipher_context_append(md5_ctx, (guchar *) d, n);
 	purple_cipher_context_digest(md5_ctx, 16, md, NULL);
+	purple_cipher_context_destroy(md5_ctx);
+
 	return md;
 }
 
@@ -506,6 +508,8 @@ std::string SHA256_file_b64(const char *filename)
 	fclose(fd);
 
 	purple_cipher_context_digest(sha_ctx, 32, md, NULL);
+	purple_cipher_context_destroy(sha_ctx);
+
 	return base64_encode_esp(md, 32);
 }
 
@@ -532,6 +536,8 @@ unsigned char *SHA1(const unsigned char *d, int n, unsigned char *md)
 	sha1_ctx = purple_cipher_context_new(sha1_cipher, NULL);
 	purple_cipher_context_append(sha1_ctx, (guchar *) d, n);
 	purple_cipher_context_digest(sha1_ctx, 20, md, NULL);
+	purple_cipher_context_destroy(sha1_ctx);
+
 	return md;
 }
 

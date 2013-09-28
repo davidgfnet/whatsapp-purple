@@ -43,6 +43,9 @@ LDFLAGS =  $(ARCHFLAGS) -shared -pipe
 
 $(LIBNAME): $(C_OBJS) $(CXX_OBJS) 
 	$(LD) $(LDFLAGS) -o $@ $^ $(LIBS_PURPLE)
+
+.PHONY: strip
+strip: $(LIBNAME)
 	$(STRIP) --strip-unneeded $(LIBNAME)
 
 PLUGIN_DIR_PURPLE:=$(shell pkg-config --variable=plugindir purple)

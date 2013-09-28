@@ -48,6 +48,10 @@ $(LIBNAME): $(C_OBJS) $(CXX_OBJS)
 strip: $(LIBNAME)
 	$(STRIP) --strip-unneeded $(LIBNAME)
 
+.PHONY: debug
+debug: CFLAGS += -g
+debug: $(LIBNAME)
+
 PLUGIN_DIR_PURPLE:=$(shell pkg-config --variable=plugindir purple)
 DATA_ROOT_DIR_PURPLE:=$(shell pkg-config --variable=datarootdir purple)
 

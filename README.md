@@ -22,6 +22,8 @@ Binaries
 Check http://davidgf.net/nightly/whatsapp-purple/ for nightly
 builds ;)
 
+For experimental builds (branch 'pu') check http://davidgf.net/nightly/whatsapp-purple-experimental/
+
 FAQ
 ---
 

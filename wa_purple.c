@@ -292,12 +292,13 @@ PurpleConversation *get_open_combo(const char *who, PurpleConnection * gc)
 static void conv_add_participants(PurpleConversation * conv, const char *part, const char *owner)
 {
 	gchar **plist = g_strsplit(part, ",", 0);
+	gchar **p;
 
 	purple_conv_chat_clear_users(purple_conversation_get_chat_data(conv));
-	while (*plist) {
-		purple_conv_chat_add_user(purple_conversation_get_chat_data(conv), *plist, "", PURPLE_CBFLAGS_NONE | (!strcmp(owner, *plist) ? PURPLE_CBFLAGS_FOUNDER : 0), FALSE);
-		plist++;
-	}
+	for (p = plist; *p; p++)
+		purple_conv_chat_add_user(purple_conversation_get_chat_data(conv), *p, "", PURPLE_CBFLAGS_NONE | (!strcmp(owner, *p) ? PURPLE_CBFLAGS_FOUNDER : 0), FALSE);
+
+	g_strfreev(plist);
 }
 
 static void conv_add_message(PurpleConnection * gc, const char *who, const char *msg, const char *author, unsigned long timestamp)
@@ -446,21 +447,26 @@ static void waprpl_process_incoming_events(PurpleConnection * gc)
 				node = purple_blist_node_next(node, FALSE);
 				purple_blist_remove_chat(del);
 			}
+
+			g_strfreev(gplist);
 		}
 
 		/* Add new groups */
 		char *glist = waAPI_getgroups(wconn->waAPI);
 		gchar **gplist = g_strsplit(glist, ",", 0);
-		while (*gplist) {
-			PurpleChat *ch = blist_find_chat_by_id(gc, *gplist);
+		gchar **p;
+
+		for (p = gplist; *p; p++) {
+			gchar *gpid = *p;
+			PurpleChat *ch = blist_find_chat_by_id(gc, gpid);
 			if (!ch) {
 				char *sub, *own;
-				waAPI_getgroupinfo(wconn->waAPI, *gplist, &sub, &own, 0);
-				purple_debug_info("waprpl", "New group found %s %s\n", *gplist, sub);
+				waAPI_getgroupinfo(wconn->waAPI, gpid, &sub, &own, 0);
+				purple_debug_info("waprpl", "New group found %s %s\n", gpid, sub);
 
 				GHashTable *htable = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
 				g_hash_table_insert(htable, g_strdup("subject"), g_strdup(sub));
-				g_hash_table_insert(htable, g_strdup("id"), g_strdup(*gplist));
+				g_hash_table_insert(htable, g_strdup("id"), g_strdup(gpid));
 				g_hash_table_insert(htable, g_strdup("owner"), g_strdup(own));
 
 				ch = purple_chat_new(acc, sub, htable);
@@ -473,8 +479,9 @@ static void waprpl_process_incoming_events(PurpleConnection * gc)
 			char *subject, *owner, *part;
 			if (conv && waAPI_getgroupinfo(wconn->waAPI, id, &subject, &owner, &part))
 				conv_add_participants(conv, part, owner);
-			gplist++;
 		}
+
+		g_strfreev(gplist);
 	}
 }
 

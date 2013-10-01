@@ -311,6 +311,18 @@ static void conv_add_message(PurpleConnection * gc, const char *who, const char 
 	}
 }
 
+static int str_array_find(gchar **haystack, const gchar *needle)
+{
+	int i;
+
+	for (i = 0; haystack[i]; i++) {
+		if (!strcmp(haystack[i], needle))
+			return i;
+	}
+
+	return -1;
+}
+
 static void waprpl_process_incoming_events(PurpleConnection * gc)
 {
 	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
@@ -407,41 +419,33 @@ static void waprpl_process_incoming_events(PurpleConnection * gc)
 	if (waAPI_getgroupsupdated(wconn->waAPI)) {
 
 		/* Delete/update the chats that are in our list */
-		PurpleBlistNode *node = purple_blist_get_root();
-		while (node != 0) {
-			if (PURPLE_BLIST_NODE_IS_CHAT(node)) {
-				PurpleChat *ch = PURPLE_CHAT(node);
-				if (purple_chat_get_account(ch) == acc) {
+		PurpleBlistNode *node;
 
-					int found = 0;
-					GHashTable *hasht = purple_chat_get_components(ch);
-					char *grid = g_hash_table_lookup(hasht, "id");
-					char *glist = waAPI_getgroups(wconn->waAPI);
-					gchar **gplist = g_strsplit(glist, ",", 0);
-					while (*gplist) {
-						if (strcmp(*gplist, grid) == 0) {
-							/* The group is in the system, update the fields */
-							char *sub, *own;
-							waAPI_getgroupinfo(wconn->waAPI, *gplist, &sub, &own, 0);
-							g_hash_table_insert(hasht, g_strdup("subject"), g_strdup(sub));
-							g_hash_table_insert(hasht, g_strdup("owner"), g_strdup(own));
+		for (node = purple_blist_get_root(); node; node = purple_blist_node_next(node, FALSE)) {
+			if (!PURPLE_BLIST_NODE_IS_CHAT(node))
+				continue;
 
-							found = 1;
-							break;
-						}
-						gplist++;
-					}
+			PurpleChat *ch = PURPLE_CHAT(node);
+			if (purple_chat_get_account(ch) != acc)
+				continue;
 
-					/* The group was deleted */
-					if (!found) {
-						PurpleChat *del = (PurpleChat *) node;
-						node = purple_blist_node_next(node, FALSE);
-						purple_blist_remove_chat(del);
-					}
+			GHashTable *hasht = purple_chat_get_components(ch);
+			char *grid = g_hash_table_lookup(hasht, "id");
+			char *glist = waAPI_getgroups(wconn->waAPI);
+			gchar **gplist = g_strsplit(glist, ",", 0);
 
-				}
+			if (str_array_find(gplist, grid) >= 0) {
+				/* The group is in the system, update the fields */
+				char *sub, *own;
+				waAPI_getgroupinfo(wconn->waAPI, grid, &sub, &own, 0);
+				g_hash_table_insert(hasht, g_strdup("subject"), g_strdup(sub));
+				g_hash_table_insert(hasht, g_strdup("owner"), g_strdup(own));
+			} else {
+				/* The group was deleted */
+				PurpleChat *del = (PurpleChat *) node;
+				node = purple_blist_node_next(node, FALSE);
+				purple_blist_remove_chat(del);
 			}
-			node = purple_blist_node_next(node, FALSE);
 		}
 
 		/* Add new groups */

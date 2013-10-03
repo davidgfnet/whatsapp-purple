@@ -30,30 +30,30 @@ http://davidgf.net/nightly/whatsapp-purple-experimental/
 FAQ
 ---
 
-* **How do I get my user name and password?**
+### How do I get my user name and password?
 
 Your user name is your phone number, as for the password there are many ways to
 get it. You can either sniff it or just ask for a new one. Check these links
 here:
 
-https://github.com/venomous0x/WhatsAPI#faq
-https://github.com/shirioko/MissVenom
-http://blog.philippheckel.com/2013/07/05/how-to-sniff-the-whatsapp-password-from-your-android-phone-or-iphone/
+* https://github.com/venomous0x/WhatsAPI#faq
+* https://github.com/shirioko/MissVenom
+* http://blog.philippheckel.com/2013/07/05/how-to-sniff-the-whatsapp-password-from-your-android-phone-or-iphone/
 
 Please, do not contact me by email for this kind of issues, I won't answer your
 questions. For developing matters you can open an issue, create a pull request
 or (in case you think it's necessary) email me.
 
-* **How do I get graphical WhatsApp smileys?**
+### How do I get graphical WhatsApp smileys?
 
 You need to install and enable the Emoji smiley theme. Just copy one of the
 subdirectories from following Git repositories to `$HOME/.purple/smileys/` and
 enable the newly installed theme in the Pidgin preferences window:
 
-https://github.com/stv0g/unicode-emoji
-https://github.com/VxJasonxV/emoji-for-pidgin
+* https://github.com/stv0g/unicode-emoji
+* https://github.com/VxJasonxV/emoji-for-pidgin
 
-* **How do I get a meaningful backtrace?**
+### How do I get a meaningful backtrace?
 
 In order to get a proper backtrace, you can either use your package manager to
 install a debug package or rebuild the library with debug symbols using `make

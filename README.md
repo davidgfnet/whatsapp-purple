@@ -44,6 +44,15 @@ Please, do not contact me by email for this kind of issues, I won't answer your
 questions. For developing matters you can open an issue, create a pull request
 or (in case you think it's necessary) email me.
 
+* **How do I get graphical WhatsApp smileys?**
+
+You need to install and enable the Emoji smiley theme. Just copy one of the
+subdirectories from following Git repositories to `$HOME/.purple/smileys/` and
+enable the newly installed theme in the Pidgin preferences window:
+
+https://github.com/stv0g/unicode-emoji
+https://github.com/VxJasonxV/emoji-for-pidgin
+
 * **How do I get a meaningful backtrace?**
 
 In order to get a proper backtrace, you can either use your package manager to

@@ -1,3 +1,18 @@
+pidgin-whatsapp (0.3-1) quantal; urgency=low
+
+  * Fixed some bugs in chat groups
+    - Images/files are received in the chat windows
+    - Buddy names appear in the chat window
+    - Notifications are received OK
+  * Fixed escaping of HTML/XML characters such as double quotes
+  * Adding offline status
+  * Error checking for group chats with proper error notifications
+  * Initial status fixed: the status set at startup time is used
+  * Fixed memory leaks which caused memory starvation
+  * Many other small bug fixes and code refactor
+
+ -- David Guillen Fandos <david@davidgf.net>  Tue, 8 Oct 2013 23:20:00 +0200
+
 pidgin-whatsapp (0.2-4) quantal; urgency=low
 
   * Fixed bug in build Makefile

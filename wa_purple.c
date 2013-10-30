@@ -194,10 +194,14 @@ static void waprpl_blist_node_removed(PurpleBlistNode * node)
 		return;
 
 	PurpleChat *ch = PURPLE_CHAT(node);
+	PurpleConnection *gc = purple_account_get_connection(purple_chat_get_account(ch));
+	if (purple_connection_get_prpl(gc) != _whatsapp_protocol)
+		return;
+
 	char *gid = g_hash_table_lookup(purple_chat_get_components(ch), "id");
 	if (gid == 0)
 		return;		/* Group is not created yet... */
-	whatsapp_connection *wconn = purple_connection_get_protocol_data(purple_account_get_connection(purple_chat_get_account(ch)));
+	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
 	waAPI_deletegroup(wconn->waAPI, gid);
 	waprpl_check_output(purple_account_get_connection(purple_chat_get_account(ch)));
 }
@@ -208,7 +212,11 @@ static void waprpl_blist_node_added(PurpleBlistNode * node)
 		return;
 
 	PurpleChat *ch = PURPLE_CHAT(node);
-	whatsapp_connection *wconn = purple_connection_get_protocol_data(purple_account_get_connection(purple_chat_get_account(ch)));
+	PurpleConnection *gc = purple_account_get_connection(purple_chat_get_account(ch));
+	if (purple_connection_get_prpl(gc) != _whatsapp_protocol)
+		return;
+
+	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
 	GHashTable *hasht = purple_chat_get_components(ch);
 	const char *groupname = g_hash_table_lookup(hasht, "subject");
 	const char *gid = g_hash_table_lookup(hasht, "id");

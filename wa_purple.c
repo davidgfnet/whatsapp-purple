@@ -170,6 +170,9 @@ static void waprpl_show_accountinfo(PurplePluginAction * action)
 
 	purple_notify_formatted(gc, "Account information", "Account information", "", text, NULL, NULL);
 
+	g_free(text);
+	g_free(ex);
+	g_free(cr);
 }
 
 static GList *waprpl_actions(PurplePlugin * plugin, gpointer context)
@@ -378,17 +381,20 @@ static void waprpl_process_incoming_events(PurpleConnection * gc)
 
 		char *msg = g_strdup_printf("<a href=\"%s\"><img id=\"%u\"></a><br/><a href=\"%s\">%s</a>", url, imgid, url, url);
 		conv_add_message(gc, who, msg, author, timestamp);
+		g_free(msg);
 	}
 	while (waAPI_querychatlocation(wconn->waAPI, &who, &prev, &size, &lat, &lng, &author, &timestamp)) {
 		purple_debug_info(WHATSAPP_ID, "Got geomessage from: %s Coordinates (%f %f)\n", who, (float)lat, (float)lng);
 		int imgid = purple_imgstore_add_with_id(g_memdup(prev, size), size, NULL);
 		char *msg = g_strdup_printf("<a href=\"http://openstreetmap.org/?lat=%f&lon=%f&zoom=16\"><img src=\"%u\"></a>", lat, lng, imgid);
 		conv_add_message(gc, who, msg, author, timestamp);
+		g_free(msg);
 	}
 	while (waAPI_querychatsound(wconn->waAPI, &who, &url, &author, &timestamp)) {
 		purple_debug_info(WHATSAPP_ID, "Got chat sound from %s: %s\n", who, url);
 		char *msg = g_strdup_printf("<a href=\"%s\">%s</a>", url, url);
 		conv_add_message(gc, who, msg, author, timestamp);
+		g_free(msg);
 	}
 
 	/* User status change */
@@ -508,6 +514,7 @@ static void waprpl_output_cb(gpointer data, gint source, PurpleInputCondition co
 		} else {
 			gchar *tmp = g_strdup_printf("Lost connection with server (out cb): %s", g_strerror(errno));
 			purple_connection_error_reason(gc, PURPLE_CONNECTION_ERROR_NETWORK_ERROR, tmp);
+			g_free(tmp);
 			break;
 		}
 	} while (ret > 0);
@@ -533,6 +540,7 @@ static void waprpl_input_cb(gpointer data, gint source, PurpleInputCondition con
 		else if (ret < 0) {
 			gchar *tmp = g_strdup_printf("Lost connection with server (in cb): %s", g_strerror(errno));
 			purple_connection_error_reason(gc, PURPLE_CONNECTION_ERROR_NETWORK_ERROR, tmp);
+			g_free(tmp);
 			break;
 		} else {
 			purple_connection_error_reason(gc, PURPLE_CONNECTION_ERROR_NETWORK_ERROR, "Server closed the connection");
@@ -575,6 +583,7 @@ static void waprpl_connect_cb(gpointer data, gint source, const gchar * error_me
 	if (source < 0) {
 		gchar *tmp = g_strdup_printf("Unable to connect: %s", error_message);
 		purple_connection_error_reason(gc, PURPLE_CONNECTION_ERROR_NETWORK_ERROR, tmp);
+		g_free(tmp);
 	} else {
 		wconn->fd = source;
 		waAPI_login(wconn->waAPI, resource);
@@ -641,6 +650,7 @@ static void waprpl_close(PurpleConnection * gc)
 		waAPI_delete(wconn->waAPI);
 	wconn->waAPI = NULL;
 
+	g_free(wconn);
 	purple_connection_set_protocol_data(gc, 0);
 }
 
@@ -651,6 +661,7 @@ static int waprpl_send_im(PurpleConnection * gc, const char *who, const char *me
 
 	purple_markup_html_to_xhtml(message, NULL, &plain);
 	waAPI_sendim(wconn->waAPI, who, plain);
+	g_free(plain);
 
 	waprpl_check_output(gc);
 
@@ -669,6 +680,7 @@ static int waprpl_send_chat(PurpleConnection * gc, int id, const char *message, 
 
 	purple_markup_html_to_xhtml(message, NULL, &plain);
 	waAPI_sendchat(wconn->waAPI, chat_id, plain);
+	g_free(plain);
 
 	waprpl_check_output(gc);
 
@@ -824,6 +836,9 @@ static void waprpl_get_info(PurpleConnection * gc, const char *username)
 	purple_notify_user_info_add_pair(info, "Status", status_string);
 	purple_notify_user_info_add_pair(info, "Profile image", profile_image);
 
+	if (res)
+		g_free(profile_image);
+
 	purple_notify_userinfo(gc, username, info, NULL, NULL);
 }
 
@@ -886,6 +901,7 @@ static void waprpl_chat_join(PurpleConnection * gc, GHashTable * data)
 	if (!id) {
 		gchar *tmp = g_strdup_printf("Joining %s requires an invitation.", groupname);
 		purple_notify_error(gc, "Invitation only", "Invitation only", tmp);
+		g_free(tmp);
 		return;
 	}
 

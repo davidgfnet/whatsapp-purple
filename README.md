@@ -16,7 +16,7 @@ Building
 --------
 
 Just run `make` (if you have to choose between 32 and 64 bit, run `make
-ARCH=i686` or `make ARCH=x86_64`). Makefile.mingw is the Makefile for 32-bit
+ARCH=i686` or `make ARCH=x86_64`). `Makefile.mingw` is the Makefile for 32-bit
 Windows.
 
 Binaries
@@ -32,13 +32,20 @@ FAQ
 
 ### How do I get my user name and password?
 
-Your user name is your phone number, as for the password there are many ways to
-get it. You can either sniff it or just ask for a new one. Check these links
-here:
+Your user name is your phone number (including the country code but without any
+additional leading zeros, e.g. `4917012345678`) , as for the password there are
+many ways to get it. You can either sniff it or just ask for a new one. Check
+these links here:
 
 * https://github.com/venomous0x/WhatsAPI#faq
 * https://github.com/shirioko/MissVenom
 * http://blog.philippheckel.com/2013/07/05/how-to-sniff-the-whatsapp-password-from-your-android-phone-or-iphone/
+
+If you want to register a new WhatsApp account, you can use tools like yowsup
+or WART:
+
+* https://github.com/tgalal/yowsup
+* https://github.com/shirioko/WART
 
 Please, do not contact me by email for this kind of issues, I won't answer your
 questions. For developing matters you can open an issue, create a pull request

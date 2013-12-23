@@ -53,6 +53,12 @@ enable the newly installed theme in the Pidgin preferences window:
 * https://github.com/stv0g/unicode-emoji
 * https://github.com/VxJasonxV/emoji-for-pidgin
 
+Emoji Whatsapp + bug fixed unicode emoticons (Pidgin 2.10.7-Windows "pidgin.dll") 
+
+* http://www.mediafire.com/download/2arg5498mjjj0hw/Emotes_Whatsapp_%2B_Pidgin.dll.rar
+
++Info: https://github.com/davidgfnet/whatsapp-purple/issues/29#issuecomment-28894796 (Spanish)
+
 ### How do I get a meaningful backtrace?
 
 In order to get a proper backtrace, you can either use your package manager to

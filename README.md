@@ -1,7 +1,7 @@
 whatsapp-purple
 ===============
 
-WhatsApp protocol implementation for libpurple (pidgin)
+WhatsApp protocol implementation for libpurple (Pidgin)
 
 Get a copy
 ----------
@@ -24,7 +24,7 @@ Binaries
 
 Check http://davidgf.net/nightly/whatsapp-purple/ for nightly builds ;)
 
-For experimental builds (branch 'pu') check
+For experimental builds (branch `pu`) check
 http://davidgf.net/nightly/whatsapp-purple-experimental/
 
 FAQ
@@ -33,7 +33,7 @@ FAQ
 ### How do I get my user name and password?
 
 Your user name is your phone number (including the country code but without any
-additional leading zeros, e.g. `4917012345678`) , as for the password there are
+additional leading zeros, e.g. `4917012345678`), as for the password there are
 many ways to get it. You can either sniff it or just ask for a new one. Check
 these links here:
 

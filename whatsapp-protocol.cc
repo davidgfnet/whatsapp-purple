@@ -1875,10 +1875,12 @@ void WhatsappConnection::processIncomingData()
 				t = treelist[i].getChild("composing");
 				if (t.getTag() != "treeerr") {
 					this->gotTyping(from, "composing");
+					continue;
 				}
 				t = treelist[i].getChild("paused");
 				if (t.getTag() != "treeerr") {
 					this->gotTyping(from, "paused");
+					continue;
 				}
 			} else if (treelist[i].hasAttributeValue("type", "notification") and treelist[i].hasAttribute("from")) {
 				/* If the nofitication comes from a group, assume we have to reload groups ;) */

@@ -371,30 +371,45 @@ static void waprpl_process_incoming_events(PurpleConnection * gc)
 	double lat, lng;
 	unsigned long timestamp;
 	/* Incoming messages */
-	while (waAPI_querychat(wconn->waAPI, &who, &msg, &author, &timestamp)) {
-		purple_debug_info(WHATSAPP_ID, "Got chat message from %s: %s\n", who, msg);
-		conv_add_message(gc, who, msg, author, timestamp);
-	}
-	while (waAPI_querychatimage(wconn->waAPI, &who, &prev, &size, &url, &author, &timestamp)) {
-		purple_debug_info(WHATSAPP_ID, "Got image from %s: %s\n", who, url);
-		int imgid = purple_imgstore_add_with_id(g_memdup(prev, size), size, NULL);
+	while (1) {
+		int r = waAPI_querynext(wconn->waAPI);
+		switch (r) {
+		case 0:
+		if (waAPI_querychat(wconn->waAPI, &who, &msg, &author, &timestamp)) {
+			purple_debug_info(WHATSAPP_ID, "Got chat message from %s: %s\n", who, msg);
+			conv_add_message(gc, who, msg, author, timestamp);
+		}
+		break;
+		case 1:
+		if (waAPI_querychatimage(wconn->waAPI, &who, &prev, &size, &url, &author, &timestamp)) {
+			purple_debug_info(WHATSAPP_ID, "Got image from %s: %s\n", who, url);
+			int imgid = purple_imgstore_add_with_id(g_memdup(prev, size), size, NULL);
 
-		char *msg = g_strdup_printf("<a href=\"%s\"><img id=\"%u\"></a><br/><a href=\"%s\">%s</a>", url, imgid, url, url);
-		conv_add_message(gc, who, msg, author, timestamp);
-		g_free(msg);
-	}
-	while (waAPI_querychatlocation(wconn->waAPI, &who, &prev, &size, &lat, &lng, &author, &timestamp)) {
-		purple_debug_info(WHATSAPP_ID, "Got geomessage from: %s Coordinates (%f %f)\n", who, (float)lat, (float)lng);
-		int imgid = purple_imgstore_add_with_id(g_memdup(prev, size), size, NULL);
-		char *msg = g_strdup_printf("<a href=\"http://openstreetmap.org/?lat=%f&lon=%f&zoom=16\"><img src=\"%u\"></a>", lat, lng, imgid);
-		conv_add_message(gc, who, msg, author, timestamp);
-		g_free(msg);
-	}
-	while (waAPI_querychatsound(wconn->waAPI, &who, &url, &author, &timestamp)) {
-		purple_debug_info(WHATSAPP_ID, "Got chat sound from %s: %s\n", who, url);
-		char *msg = g_strdup_printf("<a href=\"%s\">%s</a>", url, url);
-		conv_add_message(gc, who, msg, author, timestamp);
-		g_free(msg);
+			char *msg = g_strdup_printf("<a href=\"%s\"><img id=\"%u\"></a><br/><a href=\"%s\">%s</a>", url, imgid, url, url);
+			conv_add_message(gc, who, msg, author, timestamp);
+			g_free(msg);
+		}
+		break;
+		case 2:
+		if (waAPI_querychatlocation(wconn->waAPI, &who, &prev, &size, &lat, &lng, &author, &timestamp)) {
+			purple_debug_info(WHATSAPP_ID, "Got geomessage from: %s Coordinates (%f %f)\n", who, (float)lat, (float)lng);
+			int imgid = purple_imgstore_add_with_id(g_memdup(prev, size), size, NULL);
+			char *msg = g_strdup_printf("<a href=\"http://openstreetmap.org/?lat=%f&lon=%f&zoom=16\"><img src=\"%u\"></a>", lat, lng, imgid);
+			conv_add_message(gc, who, msg, author, timestamp);
+			g_free(msg);
+		}
+		break;
+		case 3:
+		if (waAPI_querychatsound(wconn->waAPI, &who, &url, &author, &timestamp)) {
+			purple_debug_info(WHATSAPP_ID, "Got chat sound from %s: %s\n", who, url);
+			char *msg = g_strdup_printf("<a href=\"%s\">%s</a>", url, url);
+			conv_add_message(gc, who, msg, author, timestamp);
+			g_free(msg);
+		}
+		break;
+		default: break;
+		};
+		if (r < 0) break;
 	}
 
 	/* User status change */

@@ -58,6 +58,7 @@ public:
 	bool query_typing(std::string & from, int &status);
 	bool query_icon(std::string & from, std::string & icon, std::string & hash);
 	bool query_avatar(std::string user, std::string & icon);
+	int query_next();
 	void account_info(unsigned long long &creation, unsigned long long &freeexp, std::string & status);
 	void send_avatar(const std::string & avatar);
 	int getuserstatus(const std::string & who);
@@ -253,6 +254,11 @@ int waAPI_fileuploadprogress(void *waAPI, int *rid, int *bs)
 void waAPI_sendtyping(void *waAPI, const char *who, int typing)
 {
 	((WhatsappConnectionAPI *) waAPI)->notifyTyping(std::string(who), typing);
+}
+
+int waAPI_querynext(void *waAPI)
+{
+	return ((WhatsappConnectionAPI *) waAPI)->query_next();
 }
 
 int waAPI_querychat(void *waAPI, char **who, char **message, char **author, unsigned long *timestamp)

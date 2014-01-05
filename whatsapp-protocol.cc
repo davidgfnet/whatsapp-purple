@@ -872,6 +872,7 @@ public:
 	bool query_chatimages(std::string & from, std::string & preview, std::string & url, std::string & author, unsigned long &t);
 	bool query_chatsounds(std::string & from, std::string & url, std::string & author, unsigned long &t);
 	bool query_chatlocations(std::string & from, double &lat, double &lng, std::string & prev, std::string & author, unsigned long &t);
+	int query_next();
 	bool query_status(std::string & from, int &status);
 	bool query_icon(std::string & from, std::string & icon, std::string & hash);
 	bool query_avatar(std::string user, std::string & icon);
@@ -2227,6 +2228,19 @@ void WhatsappConnection::notifyError(ErrorCode err)
 
 }
 
+// Returns an integer indicating the next message type (sorting by timestamp)
+int WhatsappConnection::query_next() {
+	int res = -1;
+	unsigned int cur_ts = ~0;
+	for (unsigned int i = 0; i < recv_messages.size(); i++) {
+		if (recv_messages[i]->t < cur_ts) {
+			cur_ts = recv_messages[i]->t;
+			res = recv_messages[i]->type();
+		}
+	}
+	return res;
+}
+
 bool WhatsappConnection::query_chat(std::string & from, std::string & message, std::string & author, unsigned long &t)
 {
 	for (unsigned int i = 0; i < recv_messages.size(); i++) {
@@ -2456,6 +2470,7 @@ public:
 	bool query_chatsounds(std::string & from, std::string & url, std::string & author, unsigned long &t);
 	bool query_chatlocations(std::string & from, double &lat, double &lng, std::string & prev, std::string & author, unsigned long &t);
 	bool query_status(std::string & from, int &status);
+	int query_next();
 	bool query_icon(std::string & from, std::string & icon, std::string & hash);
 	bool query_avatar(std::string user, std::string & icon);
 	bool query_typing(std::string & from, int &status);
@@ -2531,6 +2546,10 @@ void WhatsappConnectionAPI::manageParticipant(std::string group, std::string par
 unsigned long long WhatsappConnectionAPI::getlastseen(const std::string & who)
 {
 	return connection->getlastseen(who);
+}
+
+int WhatsappConnectionAPI::query_next() {
+	return connection->query_next();
 }
 
 int WhatsappConnectionAPI::sendImage(std::string to, int w, int h, unsigned int size, const char *fp)

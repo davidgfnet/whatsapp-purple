@@ -1063,6 +1063,7 @@ static void waprpl_ssl_connected_cb(gpointer data, PurpleSslConnection * gsc, Pu
 {
 	PurpleConnection *gc = data;
 	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
+	if (!wconn) return; // The account has disconnected 
 
 	purple_debug_info("waprpl", "SSL connection stablished\n");
 

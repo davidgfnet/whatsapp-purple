@@ -871,6 +871,7 @@ public:
 	bool query_chat(std::string & from, std::string & message, std::string & author, unsigned long &t);
 	bool query_chatimages(std::string & from, std::string & preview, std::string & url, std::string & author, unsigned long &t);
 	bool query_chatsounds(std::string & from, std::string & url, std::string & author, unsigned long &t);
+	bool query_chatvideos(std::string & from, std::string & url, std::string & author, unsigned long &t);
 	bool query_chatlocations(std::string & from, double &lat, double &lng, std::string & prev, std::string & author, unsigned long &t);
 	int query_next();
 	bool query_status(std::string & from, int &status);
@@ -1028,6 +1029,25 @@ public:
 		return new SoundMessage(wc, from, t, id, author, url, hash, filetype);
 	}
 	std::string url;	/* Sound URL */
+	std::string hash, filetype;
+};
+
+class VideoMessage:public Message {
+public:
+	VideoMessage(const WhatsappConnection * wc, const std::string from, const unsigned long long time, const std::string id, const std::string author, const std::string url, const std::string hash, const std::string filetype):Message(wc, from, time, id, author)
+	{
+		this->url = url;
+		this->filetype = filetype;
+	}
+	int type() const
+	{
+		return 4;
+	}
+	Message *copy() const
+	{
+		return new VideoMessage(wc, from, t, id, author, url, hash, filetype);
+	}
+	std::string url;	/* Video URL */
 	std::string hash, filetype;
 };
 
@@ -1871,6 +1891,8 @@ void WhatsappConnection::processIncomingData()
 						this->receiveMessage(LocationMessage(this, from, time, id, author, str2dbl(t.getAttribute("latitude")), str2dbl(t.getAttribute("longitude")), t.getData()));
 					} else if (t.hasAttributeValue("type", "audio")) {
 						this->receiveMessage(SoundMessage(this, from, time, id, author, t.getAttribute("url"), t.getAttribute("filehash"), t.getAttribute("mimetype")));
+					} else if (t.hasAttributeValue("type", "video")) {
+						this->receiveMessage(VideoMessage(this, from, time, id, author, t.getAttribute("url"), t.getAttribute("filehash"), t.getAttribute("mimetype")));
 					}
 				}
 				t = treelist[i].getChild("composing");
@@ -2290,6 +2312,22 @@ bool WhatsappConnection::query_chatsounds(std::string & from, std::string & url,
 	return false;
 }
 
+bool WhatsappConnection::query_chatvideos(std::string & from, std::string & url, std::string & author, unsigned long &t)
+{
+	for (unsigned int i = 0; i < recv_messages.size(); i++) {
+		if (recv_messages[i]->type() == 4) {
+			from = recv_messages[i]->from;
+			t = recv_messages[i]->t;
+			url = ((VideoMessage *) recv_messages[i])->url;
+			author = ((VideoMessage *) recv_messages[i])->author;
+			delete recv_messages[i];
+			recv_messages.erase(recv_messages.begin() + i);
+			return true;
+		}
+	}
+	return false;
+}
+
 bool WhatsappConnection::query_chatlocations(std::string & from, double &lat, double &lng, std::string & prev, std::string & author, unsigned long &t)
 {
 	for (unsigned int i = 0; i < recv_messages.size(); i++) {
@@ -2468,6 +2506,7 @@ public:
 	bool query_chat(std::string & from, std::string & message, std::string & author, unsigned long &t);
 	bool query_chatimages(std::string & from, std::string & preview, std::string & url, std::string & author, unsigned long &t);
 	bool query_chatsounds(std::string & from, std::string & url, std::string & author, unsigned long &t);
+	bool query_chatvideos(std::string & from, std::string & url, std::string & author, unsigned long &t);
 	bool query_chatlocations(std::string & from, double &lat, double &lng, std::string & prev, std::string & author, unsigned long &t);
 	bool query_status(std::string & from, int &status);
 	int query_next();
@@ -2605,6 +2644,10 @@ bool WhatsappConnectionAPI::query_chatimages(std::string & from, std::string & p
 bool WhatsappConnectionAPI::query_chatsounds(std::string & from, std::string & url, std::string & author, unsigned long &t)
 {
 	return connection->query_chatsounds(from, url, author, t);
+}
+bool WhatsappConnectionAPI::query_chatvideos(std::string & from, std::string & url, std::string & author, unsigned long &t)
+{
+	return connection->query_chatvideos(from, url, author, t);
 }
 
 bool WhatsappConnectionAPI::query_chat(std::string & from, std::string & msg, std::string & author, unsigned long &t)

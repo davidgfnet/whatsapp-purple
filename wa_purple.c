@@ -407,6 +407,14 @@ static void waprpl_process_incoming_events(PurpleConnection * gc)
 			g_free(msg);
 		}
 		break;
+		case 4:
+		if (waAPI_querychatvideo(wconn->waAPI, &who, &url, &author, &timestamp)) {
+			purple_debug_info(WHATSAPP_ID, "Got chat video from %s: %s\n", who, url);
+			char *msg = g_strdup_printf("<a href=\"%s\">%s</a>", url, url);
+			conv_add_message(gc, who, msg, author, timestamp);
+			g_free(msg);
+		}
+		break;
 		default: break;
 		};
 		if (r < 0) break;

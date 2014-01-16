@@ -54,6 +54,7 @@ public:
 	bool query_chatimages(std::string & from, std::string & preview, std::string & url, std::string & author, unsigned long &t);
 	bool query_chatlocations(std::string & from, double &lat, double &lng, std::string & preview, std::string & author, unsigned long &t);
 	bool query_chatsounds(std::string & from, std::string & url, std::string & author, unsigned long &t);
+	bool query_chatvideos(std::string & from, std::string & url, std::string & author, unsigned long &t);
 	bool query_status(std::string & from, int &stat);
 	bool query_typing(std::string & from, int &status);
 	bool query_icon(std::string & from, std::string & icon, std::string & hash);
@@ -306,6 +307,19 @@ int waAPI_querychatsound(void *waAPI, char **who, char **url, char **author, uns
 	std::string fr, ur, auth;
 	unsigned long t;
 	if (((WhatsappConnectionAPI *) waAPI)->query_chatsounds(fr, ur, auth, t)) {
+		*who = g_strdup(fr.c_str());
+		*url = g_strdup(ur.c_str());
+		*author = g_strdup(auth.c_str());
+		*timestamp = t;
+		return 1;
+	}
+	return 0;
+}
+int waAPI_querychatvideo(void *waAPI, char **who, char **url, char **author, unsigned long *timestamp)
+{
+	std::string fr, ur, auth;
+	unsigned long t;
+	if (((WhatsappConnectionAPI *) waAPI)->query_chatvideos(fr, ur, auth, t)) {
 		*who = g_strdup(fr.c_str());
 		*url = g_strdup(ur.c_str());
 		*author = g_strdup(auth.c_str());

@@ -470,8 +470,9 @@ static void waprpl_process_incoming_events(PurpleConnection * gc)
 				/* The group is in the system, update the fields */
 				char *sub, *own;
 				waAPI_getgroupinfo(wconn->waAPI, grid, &sub, &own, 0);
-				g_hash_table_insert(hasht, g_strdup("subject"), g_strdup(sub));
-				g_hash_table_insert(hasht, g_strdup("owner"), g_strdup(own));
+				g_hash_table_replace(hasht, g_strdup("subject"), g_strdup(sub));
+				g_hash_table_replace(hasht, g_strdup("owner"), g_strdup(own));
+				purple_blist_alias_chat(ch, g_strdup(sub));
 			} else {
 				/* The group was deleted */
 				PurpleChat *del = (PurpleChat *) node;

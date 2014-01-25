@@ -36,6 +36,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
+#include <math.h>
 
 #include "account.h"
 #include "accountopt.h"
@@ -320,6 +321,12 @@ static void conv_add_message(PurpleConnection * gc, const char *who, const char 
 	}
 }
 
+static char * dbl2str(double num) {
+	double a,b;
+	b = modf (num, &a);
+	return g_strdup_printf("%d.%d", (int)a, (int)(b*100000000.0f));
+}
+
 static int str_array_find(gchar **haystack, const gchar *needle)
 {
 	int i;
@@ -393,8 +400,7 @@ static void waprpl_process_incoming_events(PurpleConnection * gc)
 		case 2:
 		if (waAPI_querychatlocation(wconn->waAPI, &who, &prev, &size, &lat, &lng, &author, &timestamp)) {
 			purple_debug_info(WHATSAPP_ID, "Got geomessage from: %s Coordinates (%f %f)\n", who, (float)lat, (float)lng);
-			int imgid = purple_imgstore_add_with_id(g_memdup(prev, size), size, NULL);
-			char *msg = g_strdup_printf("<a href=\"http://openstreetmap.org/?lat=%f&lon=%f&zoom=16\"><img src=\"%u\"></a>", lat, lng, imgid);
+			char *msg = g_strdup_printf("<a href=\"http://openstreetmap.org/?lat=%s&lon=%s&zoom=20\">http://openstreetmap.org/?lat=%s&lon=%s&zoom=20</a>", dbl2str(lat), dbl2str(lng), dbl2str(lat), dbl2str(lng));
 			conv_add_message(gc, who, msg, author, timestamp);
 			g_free(msg);
 		}

@@ -80,8 +80,18 @@ int str2int(std::string s)
 
 double str2dbl(std::string s)
 {
+  // Manual parsing. we assume dot as separator :)
+  int i1,i2;
+  sscanf(s.c_str(), "%d.%d", &i1, &i2);
 	double d;
-	sscanf(s.c_str(), "%lf", &d);
+  int i3 = i2;
+  int n = 1;
+  while (i3 > 0) {
+    i3 /= 10;
+    n *= 10;
+  }
+
+  d = i1 + ((double)i2)/n;
 	return d;
 }
 

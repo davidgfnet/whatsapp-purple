@@ -64,7 +64,7 @@
 #define sys_write write
 #endif
 
-const char default_resource[] = "S40-2.11.1";
+const char default_resource[] = "Android-2.11.151-443";
 
 #define WHATSAPP_ID "prpl-whatsapp"
 static PurplePlugin *_whatsapp_protocol = NULL;
@@ -599,7 +599,7 @@ static void waprpl_check_output(PurpleConnection * gc)
 		wconn->wh = 0;
 	}
 
-	check_ssl_requests(purple_connection_get_account(gc));
+	//check_ssl_requests(purple_connection_get_account(gc));
 }
 
 static void waprpl_connect_cb(gpointer data, gint source, const gchar * error_message)
@@ -870,6 +870,8 @@ static void waprpl_get_info(PurpleConnection * gc, const char *username)
 		g_free(profile_image);
 
 	purple_notify_userinfo(gc, username, info, NULL, NULL);
+	
+	waprpl_check_output(gc);
 }
 
 static void waprpl_group_buddy(PurpleConnection * gc, const char *who, const char *old_group, const char *new_group)

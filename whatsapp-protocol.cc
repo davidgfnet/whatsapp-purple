@@ -555,7 +555,7 @@ public:
 		int sub_dict = (lu >> 8);
 		
 		if (sub_dict != 0)
-			putInt(sub_dict + 236, 1);   // Put dict byte first!
+			putInt(sub_dict + 236 - 1, 1);   // Put dict byte first!
 		
 		if (lu != 0) {
 			putInt(lu & 0xFF, 1); // Now put second byte
@@ -1126,8 +1126,8 @@ int WhatsappConnection::sendImage(std::string to, int w, int h, unsigned int siz
 {
 	/* Type can be: audio/image/video */
 	std::string sha256b64hash = SHA256_file_b64(fp);
-	Tree iq("media", makeAttr4("xmlns", "w:m", "type", "image", "hash", sha256b64hash, "size", int2str(size)));
-	Tree req("iq", makeAttr3("id", int2str(++iqid), "type", "set", "to", whatsappserver));
+	Tree iq("media", makeAttr3("type", "image", "hash", sha256b64hash, "size", int2str(size)));
+	Tree req("iq", makeAttr4("id", int2str(++iqid), "type", "set", "to", whatsappserver, "xmlns", "w:m"));
 	req.addChild(iq);
 
 	t_fileupload fu;
@@ -1535,8 +1535,8 @@ void WhatsappConnection::addContacts(std::vector < std::string > clist)
 	/* Query statuses */
 	if (sslstatus == 0) {
 		sslbuffer_in.clear();
-		sslstatus = 1;
-		generateSyncARequest();
+		//sslstatus = 1;
+		//generateSyncARequest();
 	}
 }
 

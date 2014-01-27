@@ -380,10 +380,7 @@ public:
 	DataBuffer *decodedBuffer(RC4Decoder * decoder, int clength, bool dout)
 	{
 		DataBuffer *deco = new DataBuffer(this->buffer, clength);
-		//if (1||dout)
-			decoder->cipher(&deco->buffer[0], clength - 4);
-		//else
-			//decoder->cipher(&deco->buffer[4], clength - 4);
+		decoder->cipher(&deco->buffer[0], clength - 4);
 		return deco;
 	}
 	DataBuffer encodedBuffer(RC4Decoder * decoder, unsigned char *key, bool dout, unsigned int seq)
@@ -512,7 +509,7 @@ public:
 		if (blen == 0)
 			throw 0;
 		int type = readInt(1);
-		if (type > 2 and type < 236) {
+		if (type > 2 and type <= 236) {
 			std::string r;
 			if (getDecoded(type,r))
 				return r;
@@ -863,6 +860,7 @@ private:
 	void queryFullSize(std::string user);
 	void gotTyping(std::string who, std::string tstat);
 	void updateGroups();
+	void queryStatuses();
 
 	void notifyMyMessage();
 	void notifyMyPresence();
@@ -1006,7 +1004,7 @@ public:
 		Tree xhash("x", makeAttr1("xmlns", "jabber:x:event"));
 		xhash.addChild(Tree("server"));
 
-		Tree tmedia("media", makeAttr5("xmlns", "urn:xmpp:whatsapp:mms", "type", "image", "url", url, "size", int2str(size), "file", "myfile.jpg"));
+		Tree tmedia("media", makeAttr4("type", "image", "url", url, "size", int2str(size), "file", "myfile.jpg"));
 
 		tmedia.setData(preview);	/* ICON DATA! */
 
@@ -1254,9 +1252,9 @@ void WhatsappConnection::updateGroups()
 void WhatsappConnection::manageParticipant(std::string group, std::string participant, std::string command)
 {
 	Tree part("participant", makeAttr1("jid", participant));
-	Tree iq(command, makeAttr1("xmlns", "w:g"));
+	Tree iq(command);
 	iq.addChild(part);
-	Tree req("iq", makeAttr3("id", int2str(iqid++), "type", "set", "to", group + "@g.us"));
+	Tree req("iq", makeAttr4("id", int2str(iqid++), "type", "set", "to", group + "@g.us", "xmlns", "w:g"));
 	req.addChild(iq);
 
 	outbuffer = outbuffer + serialize_tree(&req);
@@ -1265,9 +1263,9 @@ void WhatsappConnection::manageParticipant(std::string group, std::string partic
 void WhatsappConnection::leaveGroup(std::string group)
 {
 	Tree gr("group", makeAttr1("id", group + "@g.us"));
-	Tree iq("leave", makeAttr1("xmlns", "w:g"));
+	Tree iq("leave");
 	iq.addChild(gr);
-	Tree req("iq", makeAttr3("id", int2str(iqid++), "type", "set", "to", "g.us"));
+	Tree req("iq", makeAttr4("id", int2str(iqid++), "type", "set", "to", "g.us", "xmlns", "w:g"));
 	req.addChild(iq);
 
 	outbuffer = outbuffer + serialize_tree(&req);
@@ -1275,8 +1273,8 @@ void WhatsappConnection::leaveGroup(std::string group)
 
 void WhatsappConnection::addGroup(std::string subject)
 {
-	Tree gr("group", makeAttr3("xmlns", "w:g", "action", "create", "subject", subject));
-	Tree req("iq", makeAttr3("id", int2str(iqid++), "type", "set", "to", "g.us"));
+	Tree gr("group", makeAttr2("action", "create", "subject", subject));
+	Tree req("iq", makeAttr4("id", int2str(iqid++), "type", "set", "to", "g.us", "xmlns", "w:g"));
 	req.addChild(gr);
 
 	outbuffer = outbuffer + serialize_tree(&req);
@@ -1426,6 +1424,21 @@ void WhatsappConnection::subscribePresence(std::string user)
 	outbuffer = outbuffer + serialize_tree(&request);
 }
 
+void WhatsappConnection::queryStatuses()
+{
+	Tree req("iq", makeAttr4("to", "s.whatsapp.net", "type", "get", "id", int2str(iqid++), "xmlns", "status"));
+	Tree stat("status");
+
+	for (std::map < std::string, Contact >::iterator iter = contacts.begin(); iter != contacts.end(); iter++)
+	{
+		Tree user("user", makeAttr1("jid", iter->first + "@" + whatsappserver));
+		stat.addChild(user);
+	}
+	req.addChild(stat);
+	
+	outbuffer = outbuffer + serialize_tree(&req);
+}
+
 void WhatsappConnection::getLast(std::string user)
 {
 	Tree iq("query");
@@ -1533,11 +1546,7 @@ void WhatsappConnection::addContacts(std::vector < std::string > clist)
 		}
 	}
 	/* Query statuses */
-	if (sslstatus == 0) {
-		sslbuffer_in.clear();
-		//sslstatus = 1;
-		//generateSyncARequest();
-	}
+	this->queryStatuses();
 }
 
 unsigned char hexchars(char c1, char c2)
@@ -2006,6 +2015,18 @@ void WhatsappConnection::processIncomingData()
 					}
 				}
 
+				// Status result
+				t = treelist[i].getChild("status");
+				if (t.getTag() != "treeerr") {
+					std::vector < Tree > childs = t.getChildren();
+					for (unsigned int j = 0; j < childs.size(); j++) {
+						if (childs[j].getTag() == "user") {
+							std::string user = getusername(childs[j].getAttribute("jid"));
+							contacts[user].status = utf8_decode(childs[j].getData());
+						}
+					}
+				}
+
 				std::vector < Tree > childs = treelist[i].getChildren();
 				int acc = 0;
 				for (unsigned int j = 0; j < childs.size(); j++) {
@@ -2126,10 +2147,8 @@ Tree WhatsappConnection::parse_tree(DataBuffer * data)
 			data->popData(bsize);	/* Pop data unencrypted for next parsing! */
 			
 			/* Remove hash */
-			decoded_data->popData(4);  // FIXME: Check this and seq number calc
+			decoded_data->popData(4); 
 			
-			//this->frame_seq++; FIXME
-
 			return tt;
 		} else {
 			printf("Received crypted data before establishing crypted layer! Skipping!\n");

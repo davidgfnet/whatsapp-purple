@@ -1,3 +1,13 @@
+pidgin-whatsapp (0.4-1) quantal; urgency=low
+
+  * Updated WhatsApp API to the newest version (v1.4)
+    - Contact statuses working again
+    - Sending images might not work, please check
+    - No more update messages from WA server
+  * Other small bugs such as profile photo querying...
+
+ -- David Guillen Fandos <david@davidgf.net>  Mon, 28 Jan 2014 00:15:00 +0200
+
 pidgin-whatsapp (0.3-2) quantal; urgency=low
 
   * Fixed some bugs:

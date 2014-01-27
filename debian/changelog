@@ -1,3 +1,13 @@
+pidgin-whatsapp (0.3-2) quantal; urgency=low
+
+  * Fixed some bugs:
+    - Location reception link updated
+    - Added video reception support
+    - Fixed SIGSEGV on some corner cases
+  * Many other small bug fixes and code refactor
+
+ -- David Guillen Fandos <david@davidgf.net>  Mon, 27 Jan 2014 23:40:00 +0200
+
 pidgin-whatsapp (0.3-1) quantal; urgency=low
 
   * Fixed some bugs in chat groups

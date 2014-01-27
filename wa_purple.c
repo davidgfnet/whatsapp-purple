@@ -599,7 +599,7 @@ static void waprpl_check_output(PurpleConnection * gc)
 		wconn->wh = 0;
 	}
 
-	//check_ssl_requests(purple_connection_get_account(gc));
+	check_ssl_requests(purple_connection_get_account(gc));
 }
 
 static void waprpl_connect_cb(gpointer data, gint source, const gchar * error_message)

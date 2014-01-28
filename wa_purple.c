@@ -339,6 +339,125 @@ static int str_array_find(gchar **haystack, const gchar *needle)
 	return -1;
 }
 
+static void query_chat_message(PurpleConnection *gc)
+{
+	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
+	char *msg, *who, *author;
+	unsigned long timestamp;
+
+	if (waAPI_querychat(wconn->waAPI, &who, &msg, &author, &timestamp)) {
+		purple_debug_info(WHATSAPP_ID, "Got chat message from %s: %s\n", who, msg);
+		conv_add_message(gc, who, msg, author, timestamp);
+	}
+}
+
+static void query_chat_image(PurpleConnection *gc)
+{
+	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
+	char *who, *prev, *url, *author;
+	int size;
+	unsigned long timestamp;
+
+	if (waAPI_querychatimage(wconn->waAPI, &who, &prev, &size, &url, &author, &timestamp)) {
+		purple_debug_info(WHATSAPP_ID, "Got image from %s: %s\n", who, url);
+		int imgid = purple_imgstore_add_with_id(g_memdup(prev, size), size, NULL);
+
+		char *msg = g_strdup_printf("<a href=\"%s\"><img id=\"%u\"></a><br/><a href=\"%s\">%s</a>", url, imgid, url, url);
+		conv_add_message(gc, who, msg, author, timestamp);
+		g_free(msg);
+	}
+}
+
+static void query_chat_location(PurpleConnection *gc)
+{
+	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
+	char *who, *prev, *author;
+	int size;
+	double lat, lng;
+	unsigned long timestamp;
+
+	if (waAPI_querychatlocation(wconn->waAPI, &who, &prev, &size, &lat, &lng, &author, &timestamp)) {
+		purple_debug_info(WHATSAPP_ID, "Got geomessage from: %s Coordinates (%f %f)\n", who, (float)lat, (float)lng);
+		char *msg = g_strdup_printf("<a href=\"http://openstreetmap.org/?lat=%s&lon=%s&zoom=20\">http://openstreetmap.org/?lat=%s&lon=%s&zoom=20</a>", dbl2str(lat), dbl2str(lng), dbl2str(lat), dbl2str(lng));
+		conv_add_message(gc, who, msg, author, timestamp);
+		g_free(msg);
+	}
+}
+
+static void query_chat_sound(PurpleConnection *gc)
+{
+	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
+	char *who, *url, *author;
+	unsigned long timestamp;
+
+	if (waAPI_querychatsound(wconn->waAPI, &who, &url, &author, &timestamp)) {
+		purple_debug_info(WHATSAPP_ID, "Got chat sound from %s: %s\n", who, url);
+		char *msg = g_strdup_printf("<a href=\"%s\">%s</a>", url, url);
+		conv_add_message(gc, who, msg, author, timestamp);
+		g_free(msg);
+	}
+}
+
+static void query_chat_video(PurpleConnection *gc)
+{
+	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
+	char *who, *url, *author;
+	unsigned long timestamp;
+
+	if (waAPI_querychatvideo(wconn->waAPI, &who, &url, &author, &timestamp)) {
+		purple_debug_info(WHATSAPP_ID, "Got chat video from %s: %s\n", who, url);
+		char *msg = g_strdup_printf("<a href=\"%s\">%s</a>", url, url);
+		conv_add_message(gc, who, msg, author, timestamp);
+		g_free(msg);
+	}
+}
+
+static void query_status(PurpleConnection *gc)
+{
+	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
+	PurpleAccount *acc = purple_connection_get_account(gc);
+	char *who;
+	int status;
+
+	while (waAPI_querystatus(wconn->waAPI, &who, &status)) {
+		if (status == 1) {
+			purple_prpl_got_user_status(acc, who, "available", "message", "", NULL);
+		} else {
+			purple_prpl_got_user_status(acc, who, "unavailable", "message", "", NULL);
+		}
+	}
+}
+
+static void query_typing(PurpleConnection *gc)
+{
+	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
+	char *who;
+	int status;
+
+	while (waAPI_querytyping(wconn->waAPI, &who, &status)) {
+		if (status == 1) {
+			purple_debug_info(WHATSAPP_ID, "%s is typing\n", who);
+			serv_got_typing(gc, who, 0, PURPLE_TYPING);
+		} else {
+			purple_debug_info(WHATSAPP_ID, "%s is not typing\n", who);
+			serv_got_typing(gc, who, 0, PURPLE_NOT_TYPING);
+			serv_got_typing_stopped(gc, who);
+		}
+	}
+}
+
+static void query_icon(PurpleConnection *gc)
+{
+	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
+	PurpleAccount *acc = purple_connection_get_account(gc);
+	char *who, *icon, *hash;
+	int len;
+
+	while (waAPI_queryicon(wconn->waAPI, &who, &icon, &len, &hash)) {
+		purple_buddy_icons_set_for_user(acc, who, g_memdup(icon, len), len, hash);
+	}
+}
+
 static void waprpl_process_incoming_events(PurpleConnection * gc)
 {
 	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
@@ -372,86 +491,39 @@ static void waprpl_process_incoming_events(PurpleConnection * gc)
 		break;
 	};
 
-	char *msg, *who, *prev, *url, *author;
-	int status;
-	int size;
-	double lat, lng;
-	unsigned long timestamp;
-	/* Incoming messages */
-	while (1) {
+	/* Incoming messages. */
+	for (;;) {
 		int r = waAPI_querynext(wconn->waAPI);
+
+		if (r < 0)
+			break;
+
 		switch (r) {
 		case 0:
-		if (waAPI_querychat(wconn->waAPI, &who, &msg, &author, &timestamp)) {
-			purple_debug_info(WHATSAPP_ID, "Got chat message from %s: %s\n", who, msg);
-			conv_add_message(gc, who, msg, author, timestamp);
-		}
-		break;
+			query_chat_message(gc);
+			break;
 		case 1:
-		if (waAPI_querychatimage(wconn->waAPI, &who, &prev, &size, &url, &author, &timestamp)) {
-			purple_debug_info(WHATSAPP_ID, "Got image from %s: %s\n", who, url);
-			int imgid = purple_imgstore_add_with_id(g_memdup(prev, size), size, NULL);
-
-			char *msg = g_strdup_printf("<a href=\"%s\"><img id=\"%u\"></a><br/><a href=\"%s\">%s</a>", url, imgid, url, url);
-			conv_add_message(gc, who, msg, author, timestamp);
-			g_free(msg);
-		}
-		break;
+			query_chat_image(gc);
+			break;
 		case 2:
-		if (waAPI_querychatlocation(wconn->waAPI, &who, &prev, &size, &lat, &lng, &author, &timestamp)) {
-			purple_debug_info(WHATSAPP_ID, "Got geomessage from: %s Coordinates (%f %f)\n", who, (float)lat, (float)lng);
-			char *msg = g_strdup_printf("<a href=\"http://openstreetmap.org/?lat=%s&lon=%s&zoom=20\">http://openstreetmap.org/?lat=%s&lon=%s&zoom=20</a>", dbl2str(lat), dbl2str(lng), dbl2str(lat), dbl2str(lng));
-			conv_add_message(gc, who, msg, author, timestamp);
-			g_free(msg);
-		}
-		break;
+			query_chat_location(gc);
+			break;
 		case 3:
-		if (waAPI_querychatsound(wconn->waAPI, &who, &url, &author, &timestamp)) {
-			purple_debug_info(WHATSAPP_ID, "Got chat sound from %s: %s\n", who, url);
-			char *msg = g_strdup_printf("<a href=\"%s\">%s</a>", url, url);
-			conv_add_message(gc, who, msg, author, timestamp);
-			g_free(msg);
-		}
-		break;
+			query_chat_sound(gc);
+			break;
 		case 4:
-		if (waAPI_querychatvideo(wconn->waAPI, &who, &url, &author, &timestamp)) {
-			purple_debug_info(WHATSAPP_ID, "Got chat video from %s: %s\n", who, url);
-			char *msg = g_strdup_printf("<a href=\"%s\">%s</a>", url, url);
-			conv_add_message(gc, who, msg, author, timestamp);
-			g_free(msg);
-		}
-		break;
-		default: break;
+			query_chat_video(gc);
+			break;
+		default:
+			/* Unsupported message type. */
+			break;
 		};
-		if (r < 0) break;
 	}
 
-	/* User status change */
-	while (waAPI_querystatus(wconn->waAPI, &who, &status)) {
-		if (status == 1) {
-			purple_prpl_got_user_status(acc, who, "available", "message", "", NULL);
-		} else {
-			purple_prpl_got_user_status(acc, who, "unavailable", "message", "", NULL);
-		}
-	}
-	/* User typing info notify */
-	while (waAPI_querytyping(wconn->waAPI, &who, &status)) {
-		if (status == 1) {
-			purple_debug_info(WHATSAPP_ID, "%s is typing\n", who);
-			serv_got_typing(gc, who, 0, PURPLE_TYPING);
-		} else {
-			purple_debug_info(WHATSAPP_ID, "%s is not typing\n", who);
-			serv_got_typing(gc, who, 0, PURPLE_NOT_TYPING);
-			serv_got_typing_stopped(gc, who);
-		}
-	}
-
-	/* User profile picture */
-	char *icon, *hash;
-	int len;
-	while (waAPI_queryicon(wconn->waAPI, &who, &icon, &len, &hash)) {
-		purple_buddy_icons_set_for_user(acc, who, g_memdup(icon, len), len, hash);
-	}
+	/* Status changes, typing notices and profile pictures. */
+	query_status(gc);
+	query_typing(gc);
+	query_icon(gc);
 
 	/* Groups update */
 	if (waAPI_getgroupsupdated(wconn->waAPI)) {

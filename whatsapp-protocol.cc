@@ -940,6 +940,7 @@ public:
 	void SSLCloseCallback();
 	bool hasSSLConnection(std::string & host, int *port);
 	int uploadProgress(int &rid, int &bs);
+	int uploadComplete(int);
 
 	std::string generateHeaders(std::string auth, int content_length);
 };
@@ -1009,13 +1010,7 @@ public:
 	}
 	DataBuffer serialize() const
 	{
-		Tree request("request", makeAttr1("xmlns", "urn:xmpp:receipts"));
-		Tree notify("notify", makeAttr2("xmlns", "urn:xmpp:whatsapp", "name", author));
-		Tree xhash("x", makeAttr1("xmlns", "jabber:x:event"));
-		xhash.addChild(Tree("server"));
-
 		Tree tmedia("media", makeAttr4("type", "image", "url", url, "size", int2str(size), "file", "myfile.jpg"));
-
 		tmedia.setData(preview);	/* ICON DATA! */
 
 		std::string stime = int2str(t);
@@ -1024,14 +1019,11 @@ public:
 			attrs["to"] = from + "@" + server;
 		else
 			attrs["to"] = from + "@" + wc->whatsappserver;
-		attrs["type"] = "chat";
+		attrs["type"] = "media";
 		attrs["id"] = stime + "-" + id;
 		attrs["t"] = stime;
 
 		Tree mes("message", attrs);
-		mes.addChild(xhash);
-		mes.addChild(notify);
-		mes.addChild(request);
 		mes.addChild(tmedia);
 
 		return wc->serialize_tree(&mes);
@@ -1425,6 +1417,14 @@ int WhatsappConnection::uploadProgress(int &rid, int &bs)
 	bs = totalsize - sslbuffer.size();
 	if (bs < 0)
 		bs = 0;
+	return 1;
+}
+
+int WhatsappConnection::uploadComplete(int rid) {
+	for (unsigned int j = 0; j < uploadfile_queue.size(); j++)
+		if (rid == uploadfile_queue[j].rid)
+			return 0;
+
 	return 1;
 }
 
@@ -2604,6 +2604,7 @@ public:
 	void SSLCloseCallback();
 	bool hasSSLConnection(std::string & host, int *port);
 	int uploadProgress(int &rid, int &bs);
+	int uploadComplete(int);
 };
 
 WhatsappConnectionAPI::WhatsappConnectionAPI(std::string phone, std::string password, std::string nick)
@@ -2663,6 +2664,10 @@ int WhatsappConnectionAPI::sendImage(std::string to, int w, int h, unsigned int 
 int WhatsappConnectionAPI::uploadProgress(int &rid, int &bs)
 {
 	return connection->uploadProgress(rid, bs);
+}
+int WhatsappConnectionAPI::uploadComplete(int rid)
+{
+	return connection->uploadComplete(rid);
 }
 
 void WhatsappConnectionAPI::send_avatar(const std::string & avatar)

@@ -82,6 +82,7 @@ typedef struct {
 	void *wconn;
 	PurpleConnection *gc;
 	int ref_id;
+	int done, started;
 } wa_file_upload;
 
 typedef struct {
@@ -107,6 +108,7 @@ void waprpl_ssl_cerr_cb(PurpleSslConnection * gsc, PurpleSslErrorType error, gpo
 void waprpl_check_ssl_output(PurpleConnection * gc);
 void waprpl_ssl_input_cb(gpointer data, gint source, PurpleInputCondition cond);
 static void waprpl_set_status(PurpleAccount * acct, PurpleStatus * status);
+static void waprpl_check_complete_uploads(PurpleConnection * gc);
 
 unsigned int chatid_to_convo(const char *id)
 {
@@ -672,6 +674,8 @@ static void waprpl_check_output(PurpleConnection * gc)
 	}
 
 	check_ssl_requests(purple_connection_get_account(gc));
+	
+	waprpl_check_complete_uploads(gc);
 }
 
 static void waprpl_connect_cb(gpointer data, gint source, const gchar * error_message)
@@ -1107,6 +1111,22 @@ void waprpl_ssl_input_cb(gpointer data, gint source, PurpleInputCondition cond)
 	waprpl_check_ssl_output(gc);	/* The input data may generate responses! */
 }
 
+static void waprpl_check_complete_uploads(PurpleConnection * gc) {
+	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
+	
+	GList *xfers = purple_xfers_get_all();
+	while (xfers) {
+		PurpleXfer *xfer = xfers->data;
+		wa_file_upload *xinfo = (wa_file_upload *) xfer->data;
+		if (!xinfo->done && xinfo->started && waAPI_fileuploadcomplete(wconn->waAPI, xinfo->ref_id)) {
+			purple_debug_info("waprpl", "Upload complete\n");
+			purple_xfer_set_completed(xfer, TRUE);
+			xinfo->done = 1;
+		}
+		xfers = g_list_next(xfers);
+	}
+}
+
 /* Checks if the WA protocol has data to output and schedules a write handler */
 void waprpl_check_ssl_output(PurpleConnection * gc)
 {
@@ -1139,13 +1159,14 @@ void waprpl_check_ssl_output(PurpleConnection * gc)
 				purple_debug_info("waprpl", "Upload progress %d bytes done\n", bytes_sent);
 				purple_xfer_set_bytes_sent(xfer, bytes_sent);
 				purple_xfer_update_progress(xfer);
-				if (bytes_sent >= (signed)purple_xfer_get_size(xfer))
-					purple_xfer_set_completed(xfer, TRUE);
 				break;
 			}
 			xfers = g_list_next(xfers);
 		}
 	}
+	
+	// Check uploads to mark them as done :)
+	waprpl_check_complete_uploads(gc);
 }
 
 static void waprpl_ssl_connected_cb(gpointer data, PurpleSslConnection * gsc, PurpleInputCondition cond)
@@ -1218,6 +1239,7 @@ void waprpl_xfer_init(PurpleXfer * xfer)
 	purple_xfer_set_size(xfer, fs);
 
 	xfer_info->ref_id = waAPI_sendimage(wconn->waAPI, xinfo->to, 100, 100, fs, fp);
+	xfer_info->started = 1;
 	purple_debug_info(WHATSAPP_ID, "Transfer file %s at %s with size %zu (given ref %d)\n", fn, fp, fs, xfer_info->ref_id);
 
 	waprpl_check_output(xinfo->gc);
@@ -1253,6 +1275,8 @@ static PurpleXfer *waprpl_new_xfer(PurpleConnection * gc, const char *who)
 	xfer->data = xfer_info;
 	xfer_info->wconn = wconn;
 	xfer_info->gc = gc;
+	xfer_info->done = 0;
+	xfer_info->started = 0;
 
 	purple_xfer_set_init_fnc(xfer, waprpl_xfer_init);
 	purple_xfer_set_start_fnc(xfer, waprpl_xfer_start);

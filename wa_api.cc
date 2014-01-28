@@ -78,6 +78,7 @@ public:
 	int sendImage(std::string to, int w, int h, unsigned int size, const char *fp);
 
 	int uploadProgress(int &, int &);
+	int uploadComplete(int);
 	int sendSSLCallback(char *buffer, int maxbytes);
 	int sentSSLCallback(int bytessent);
 	void receiveSSLCallback(char *buffer, int bytesrecv);
@@ -250,6 +251,11 @@ int waAPI_fileuploadprogress(void *waAPI, int *rid, int *bs)
 	*rid = ridl;
 	*bs = bsl;
 	return r;
+}
+
+int waAPI_fileuploadcomplete(void *waAPI, int rid)
+{
+	return ((WhatsappConnectionAPI *) waAPI)->uploadComplete(rid);
 }
 
 void waAPI_sendtyping(void *waAPI, const char *who, int typing)

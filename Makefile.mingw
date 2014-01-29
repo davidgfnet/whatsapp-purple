@@ -48,6 +48,11 @@ install: $(LIBNAME)
 uninstall: $(LIBNAME)
 	rm $(PLUGIN_DIR_PURPLE)/$(LIBNAME)
 
+.PHONY: debug
+debug: CFLAGS += -g -DDEBUG
+debug: $(LIBNAME)
+
+
 .PHONY: clean
 clean:
 	-rm *.o

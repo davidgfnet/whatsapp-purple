@@ -730,7 +730,8 @@ public:
 		for (std::map < std::string, std::string >::iterator iter = attributes.begin(); iter != attributes.end(); iter++) {
 			ret += spacing + "at[" + iter->first + "]=" + iter->second + "\n";
 		}
-		ret += spacing + "Data: " + data + "\n";
+		std::string piece = data.substr(0,10) + " ...";
+		ret += spacing + "Data: " + piece + "\n";
 
 		for (unsigned int i = 0; i < children.size(); i++) {
 			ret += children[i].toString(sp + 1);
@@ -1869,6 +1870,7 @@ void WhatsappConnection::processIncomingData()
 
 	/* Now process the tree list! */
 	for (unsigned int i = 0; i < treelist.size(); i++) {
+		DEBUG_PRINT( treelist[i].toString() );
 		if (treelist[i].getTag() == "challenge") {
 			/* Generate a session key using the challege & the password */
 			assert(conn_status == SessionWaitingChallenge);
@@ -1898,9 +1900,7 @@ void WhatsappConnection::processIncomingData()
 			this->sendInitial();  // Seems to trigger an error IQ response
 			this->updateGroups();
 
-			/*std::cout << "Logged in!!!" << std::endl; */
-			/*std::cout << "Account " << phone << " status: " << account_status << " kind: " << account_type << */
-			/*      " expires: " << account_expiration << " creation: " << account_creation << std::endl; */
+			DEBUG_PRINT("Logged in!!!");
 		} else if (treelist[i].getTag() == "failure") {
 			if (conn_status == SessionWaitingAuthOK)
 				this->notifyError(errorAuth);
@@ -1929,6 +1929,7 @@ void WhatsappConnection::processIncomingData()
 			
 		} else if (treelist[i].getTag() == "message") {
 			/* Receives a message! */
+			DEBUG_PRINT("Received message stanza...");
 			if (treelist[i].hasAttribute("from") and
 				(treelist[i].hasAttributeValue("type", "text") or treelist[i].hasAttributeValue("type", "media"))) {
 				unsigned long long time = 0;
@@ -2216,7 +2217,7 @@ void WhatsappConnection::receiveMessage(const Message & m)
 	else
 		recv_messages.push_back(mc);
 
-	/*std::cout << "Received message type " << m.type() << " from " << m.from << " at " << m.t << std::endl; */
+	DEBUG_PRINT("Received message type " << m.type() << " from " << m.from << " at " << m.t);
 
 	/* Now add the contact in the list (to query the profile picture) */
 	if (contacts.find(m.from) == contacts.end())

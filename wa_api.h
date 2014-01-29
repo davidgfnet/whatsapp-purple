@@ -80,4 +80,12 @@ std::string md5raw(std::string target);
 std::string SHA256_file_b64(const char *filename);
 #endif
 
+#ifdef DEBUG
+#define DEBUG_PRINT(a) std::cout << a << std::endl;
+#else
+#define DEBUG_PRINT(a)
+#endif
+
+
+
 #endif

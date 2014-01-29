@@ -130,8 +130,10 @@ static void waprpl_tooltip_text(PurpleBuddy * buddy, PurpleNotifyUserInfo * info
 	else
 		status = "Available";
 	unsigned long long lseen = waAPI_getlastseen(wconn->waAPI, purple_buddy_get_name(buddy));
+	char * statusmsg = waAPI_getuserstatusstring(wconn->waAPI, purple_buddy_get_name(buddy));
 	purple_notify_user_info_add_pair_plaintext(info, "Status", status);
 	purple_notify_user_info_add_pair_plaintext(info, "Last seen on WhatsApp", purple_str_seconds_to_string(lseen));
+	purple_notify_user_info_add_pair_plaintext(info, "Status message", statusmsg);
 }
 
 static char *waprpl_status_text(PurpleBuddy * buddy)

@@ -2084,7 +2084,8 @@ void WhatsappConnection::processIncomingData()
 						this->addFullsizePicture(treelist[i].getAttribute("from"), t.getData());
 				}
 			}
-			if (treelist[i].hasAttribute("from") and treelist[i].hasAttribute("id") and treelist[i].hasAttribute("urn:xmpp:ping")) {
+			if (treelist[i].hasAttribute("from") and treelist[i].hasAttribute("id") and 
+				treelist[i].hasAttributeValue("xmlns","urn:xmpp:ping")) {
 				this->doPong(treelist[i].getAttribute("id"), treelist[i].getAttribute("from"));
 			}
 		}

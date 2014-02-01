@@ -3,6 +3,7 @@
  * WhatsApp API implementation in C++ for libpurple.
  * Written by David Guillen Fandos (david@davidgf.net) based 
  * on the sources of WhatsAPI PHP implementation.
+ * v1.4 changes based on WP7 sources
  *
  * Share and enjoy!
  *
@@ -63,7 +64,11 @@ std::string getDecodedExtended(int n, int n2);
 unsigned long long str2lng(std::string s)
 {
 	unsigned long long r;
+	#ifdef _WIN32
+	sscanf(s.c_str(), "%I64u", &r);
+	#else
 	sscanf(s.c_str(), "%llu", &r);
+	#endif
 	return r;
 }
 
@@ -1547,6 +1552,7 @@ void WhatsappConnection::addContacts(std::vector < std::string > clist)
 		user_changes.push_back(clist[i]);
 	}
 	/* Query the profile pictures */
+	bool qstatus = false;
 	for (std::map < std::string, Contact >::iterator iter = contacts.begin(); iter != contacts.end(); iter++) {
 		if (not iter->second.subscribed) {
 			iter->second.subscribed = true;
@@ -1554,10 +1560,12 @@ void WhatsappConnection::addContacts(std::vector < std::string > clist)
 			this->subscribePresence(iter->first + "@" + whatsappserver);
 			this->queryPreview(iter->first + "@" + whatsappserver);
 			this->getLast(iter->first + "@" + whatsappserver);
+			qstatus = true;
 		}
 	}
 	/* Query statuses */
-	this->queryStatuses();
+	if (qstatus)
+		this->queryStatuses();
 }
 
 unsigned char hexchars(char c1, char c2)

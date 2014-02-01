@@ -965,10 +965,6 @@ public:
 
 	DataBuffer serialize() const
 	{
-		Tree request("request", makeAttr1("xmlns", "urn:xmpp:receipts"));
-		Tree notify("notify", makeAttr2("xmlns", "urn:xmpp:whatsapp", "name", author));
-		Tree xhash("x", makeAttr1("xmlns", "jabber:x:event"));
-		xhash.addChild(Tree("server"));
 		Tree tbody("body");
 		tbody.setData(this->message);
 
@@ -983,9 +979,6 @@ public:
 		attrs["t"] = stime;
 
 		Tree mes("message", attrs);
-		mes.addChild(xhash);
-		mes.addChild(notify);
-		mes.addChild(request);
 		mes.addChild(tbody);
 
 		return wc->serialize_tree(&mes);
@@ -1306,18 +1299,12 @@ void WhatsappConnection::doLogin(std::string resource)
 	{
 		Tree p;
 		p.setTag("stream:features");
-		/*p.addChild(Tree("receipt_acks"));
-		p.addChild(Tree("w:profile:picture", makeAttr1("type", "all")));
-		p.addChild(Tree("w:profile:picture", makeAttr1("type", "group")));
-		p.addChild(Tree("notification", makeAttr1("type", "participant")));
-		p.addChild(Tree("status"));*/
 		first = first + serialize_tree(&p, false);
 	}
 
 	/* Send auth request */
 	{
 		std::map < std::string, std::string > auth;
-		//auth["xmlns"] = "urn:ietf:params:xml:ns:xmpp-sasl";
 		auth["mechanism"] = "WAUTH-2";
 		auth["user"] = phone;
 		Tree t("auth", auth);
@@ -2286,17 +2273,12 @@ void WhatsappConnection::notifyMyPresence()
 {
 	/* Send the nickname and the current status */
 	Tree pres("presence", makeAttr2("name", nickname, "type", mypresence));
-	//Tree pres("presence", makeAttr1("name", nickname));
 
 	outbuffer = outbuffer + serialize_tree(&pres);
 }
 
 void WhatsappConnection::sendInitial()
 {
-	//Tree iq("iq", makeAttr3("id", int2str(iqid++), "type", "get", "to", whatsappserver));
-	//Tree conf("config", makeAttr1("xmlns", "urn:xmpp:whatsapp:push"));
-	//iq.addChild(conf);
-	
 	Tree conf("config");
 	Tree iq("iq", makeAttr4("id", int2str(iqid++), "type", "get", "to", whatsappserver, "xmlns", "urn:xmpp:whatsapp:push"));
 	iq.addChild(conf);	
@@ -2529,7 +2511,6 @@ void WhatsappConnection::doPong(std::string id, std::string from)
 void WhatsappConnection::sendResponse()
 {
 	std::map < std::string, std::string > auth;
-	//auth["xmlns"] = "urn:ietf:params:xml:ns:xmpp-sasl";
 	Tree t("response", auth);
 
 	std::string response = phone + challenge_data + int2str(time(NULL));

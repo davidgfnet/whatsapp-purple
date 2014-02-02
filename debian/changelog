@@ -1,3 +1,13 @@
+pidgin-whatsapp (0.4-2) quantal; urgency=low
+
+  * Many bugfixes
+    - Fix for image upload (whenever we upload an image twice)
+    - Fix ping parsing, avoids disconnects
+    - Fixed a memory leak, this should alleviate memory consumption
+  * Some other bugs not affecting Unix-like platforms
+
+ -- David Guillen Fandos <david@davidgf.net>  Mon, 2 Feb 2014 23:40:00 +0200
+
 pidgin-whatsapp (0.4-1) quantal; urgency=low
 
   * Updated WhatsApp API to the newest version (v1.4)

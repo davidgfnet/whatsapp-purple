@@ -2156,6 +2156,8 @@ Tree WhatsappConnection::parse_tree(DataBuffer * data)
 			/* Remove hash */
 			decoded_data->popData(4); 
 			
+			delete decoded_data;
+			
 			return tt;
 		} else {
 			printf("Received crypted data before establishing crypted layer! Skipping!\n");

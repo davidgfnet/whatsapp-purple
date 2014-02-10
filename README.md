@@ -1,6 +1,8 @@
 whatsapp-purple
 ===============
 
+[![Build Status](https://travis-ci.org/davidgfnet/whatsapp-purple.png?branch=master)](https://travis-ci.org/davidgfnet/whatsapp-purple)
+
 WhatsApp protocol implementation for libpurple (Pidgin)
 
 Get a copy

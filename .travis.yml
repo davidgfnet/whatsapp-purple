@@ -5,8 +5,8 @@ compiler:
   - gcc
 
 before_script:
-  - sudo apt-get update
-  - sudo apt-get install libglib2.0-dev libpurple-dev
+  - sudo apt-get update -qq
+  - sudo apt-get install -qq libglib2.0-dev libpurple-dev
 
 script: make
 

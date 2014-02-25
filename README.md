@@ -1,7 +1,7 @@
 whatsapp-purple
 ===============
 
-WhatsApp protocol implementation for libpurple (Pidgin)
+WhatsApp*-compatible protocol implementation for libpurple (Pidgin)
 
 Get a copy
 ----------
@@ -65,3 +65,12 @@ enable the newly installed theme in the Pidgin preferences window:
 In order to get a proper backtrace, you can either use your package manager to
 install a debug package or rebuild the library with debug symbols using `make
 debug`.
+
+
+*Disclaimer
+-----------
+
+WhatsApp is a registered trademark of WhatsApp Inc registered in the U.S. and
+other countries. This project is an independent work and has not been authorized,
+sponsored, or otherwise approved by Whatsapp Inc. 
+

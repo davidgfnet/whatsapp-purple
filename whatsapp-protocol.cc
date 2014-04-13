@@ -855,12 +855,8 @@ private:
 	/* Upload */
 	std::vector < t_fileupload > uploadfile_queue;
 
-	/* HTTP interface */
-	std::string generateHttpAuth(std::string nonce);
-
 	/* SSL / HTTPS interface */
-	std::string sslnonce;
-	int sslstatus;		/* 0 none, 1/2 requesting A, 3/4 requesting Q */
+	int sslstatus;		/* 0 Idle, 1 sending request, 2 getting response */
 	/* 5/6 for image upload */
 
 	void receiveMessage(const Message & m);
@@ -887,8 +883,6 @@ private:
 	std::string generateUploadPOST(t_fileupload * fu);
 	void processUploadQueue();
 
-	void generateSyncARequest();
-	void generateSyncQRequest();
 	void updateContactStatuses(std::string json);
 	void updateFileUpload(std::string);
 
@@ -948,7 +942,6 @@ public:
 	int uploadProgress(int &rid, int &bs);
 	int uploadComplete(int);
 
-	std::string generateHeaders(std::string auth, int content_length);
 };
 
 class ChatMessage:public Message {
@@ -1141,32 +1134,6 @@ int WhatsappConnection::sendImage(std::string to, int w, int h, unsigned int siz
 	outbuffer = outbuffer + serialize_tree(&req);
 
 	return iqid;
-}
-
-void WhatsappConnection::generateSyncARequest()
-{
-	sslbuffer.clear();
-
-	std::string httpr = "POST /v2/sync/a HTTP/1.1\r\n" + generateHeaders(generateHttpAuth("0"), 0) + "\r\n";
-
-	sslbuffer.addData(httpr.c_str(), httpr.size());
-}
-
-void WhatsappConnection::generateSyncQRequest()
-{
-	sslbuffer.clear();
-
-	/* Query numbers with and without "+" */
-	/* Seems that american numbers do not like the + symbol */
-	std::string body = "ut=all&t=c";
-	for (std::map < std::string, Contact >::iterator iter = contacts.begin(); iter != contacts.end(); iter++) {
-		body += ("&u[]=" + iter->first);
-		body += ("&u[]=%2B" + iter->first);
-	}
-	std::string httpr = "POST /v2/sync/q HTTP/1.1\r\n" + generateHeaders(generateHttpAuth(sslnonce), body.size()) + "\r\n";
-	httpr += body;
-
-	sslbuffer.addData(httpr.c_str(), httpr.size());
 }
 
 WhatsappConnection::WhatsappConnection(std::string phone, std::string password, std::string nickname)
@@ -1383,22 +1350,22 @@ void WhatsappConnection::SSLCloseCallback()
 
 bool WhatsappConnection::hasSSLConnection(std::string & host, int *port)
 {
-	host = "sro.whatsapp.net";
+	host = "";
 	*port = 443;
 
-	if (sslstatus == 5)
+	if (sslstatus == 1)
 		for (unsigned int j = 0; j < uploadfile_queue.size(); j++)
 			if (uploadfile_queue[j].uploading) {
 				host = uploadfile_queue[j].host;
-				break;
+				return true;
 			}
 
-	return (sslstatus == 1 or sslstatus == 3 or sslstatus == 5);
+	return false;
 }
 
 int WhatsappConnection::uploadProgress(int &rid, int &bs)
 {
-	if (!(sslstatus == 5 or sslstatus == 6))
+	if (!(sslstatus == 1 or sslstatus == 2))
 		return 0;
 	int totalsize = 0;
 	for (unsigned int j = 0; j < uploadfile_queue.size(); j++)
@@ -1717,25 +1684,10 @@ void WhatsappConnection::updateFileUpload(std::string json)
 void WhatsappConnection::processSSLIncomingData()
 {
 	/* Parse HTTPS headers and JSON body */
-	if (sslstatus == 1 or sslstatus == 3 or sslstatus == 5)
+	if (sslstatus == 1)
 		sslstatus++;
 
 	if (sslstatus == 2) {
-		std::string toparse((char *)sslbuffer_in.getPtr(), sslbuffer_in.size());
-		if (toparse.find("nonce=\"") != std::string::npos) {
-			toparse = toparse.substr(toparse.find("nonce=\"") + 7);
-			if (toparse.find("\"") != std::string::npos) {
-				toparse = toparse.substr(0, toparse.find("\""));
-				sslnonce = toparse;
-				sslstatus = 4;
-
-				sslbuffer.clear();
-				sslbuffer_in.clear();
-				generateSyncQRequest();
-			}
-		}
-	}
-	if (sslstatus == 4 or sslstatus == 6) {
 		/* Look for the first line, to be 200 OK */
 		std::string toparse((char *)sslbuffer_in.getPtr(), sslbuffer_in.size());
 		if (toparse.find("\r\n") != std::string::npos) {
@@ -1756,10 +1708,7 @@ void WhatsappConnection::processSSLIncomingData()
 					unsigned int contentlength = str2int(clen);
 					if (contentlength == content.size()) {
 						/* Now we can proceed to parse the JSON */
-						if (sslstatus == 4)
-							updateContactStatuses(content);
-						else
-							updateFileUpload(content);
+						updateFileUpload(content);
 						sslstatus = 0;
 					}
 				}
@@ -1836,7 +1785,7 @@ void WhatsappConnection::processUploadQueue()
 
 				sslbuffer.addData(postq.c_str(), postq.size());
 
-				sslstatus = 5;
+				sslstatus = 1;
 				break;
 			}
 		}
@@ -2524,24 +2473,6 @@ void WhatsappConnection::sendResponse()
 	outbuffer = outbuffer + serialize_tree(&t, false);
 }
 
-std::string WhatsappConnection::generateHeaders(std::string auth, int content_length)
-{
-	std::string h = "User-Agent: WhatsApp/2.4.7 S40Version/14.26 Device/Nokia302\r\n" "Accept: text/json\r\n" "Content-Type: application/x-www-form-urlencoded\r\n" "Authorization: " + auth + "\r\n" "Accept-Encoding: identity\r\n" "Content-Length: " + int2str(content_length) + "\r\n";
-	return h;
-}
-
-std::string WhatsappConnection::generateHttpAuth(std::string nonce)
-{
-	/* cnonce is a 10 ascii char random string */
-	std::string cnonce;
-	for (int i = 0; i < 10; i++)
-		cnonce += ('a' + (rand() % 25));
-
-	std::string credentials = phone + ":s.whatsapp.net:" + base64_decode(password);
-	std::string response = md5hex(md5hex(md5raw(credentials) + ":" + nonce + ":" + cnonce) + ":" + nonce + ":00000001:" + cnonce + ":auth:" + md5hex("AUTHENTICATE:WAWA/s.whatsapp.net"));
-
-	return "X-WAWA: username=\"" + phone + "\",digest-uri=\"WAWA/s.whatsapp.net\"" + ",realm=\"s.whatsapp.net\",nonce=\"" + nonce + "\",cnonce=\"" + cnonce + "\",nc=\"00000001\",qop=\"auth\",digest-uri=\"WAWA/s.whatsapp.net\"," + "response=\"" + response + "\",charset=\"utf-8\"";
-}
 
 class WhatsappConnectionAPI {
 private:

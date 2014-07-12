@@ -1,3 +1,10 @@
+pidgin-whatsapp (0.5) quantal; urgency=low
+
+  * Some minor cleanups
+  * Removed official WhatsApp logos due to copyright issues
+
+ -- David Guillen Fandos <david@davidgf.net>  Sat, 12 Jul 2014 14:15:00 +0200
+
 pidgin-whatsapp (0.4-2) quantal; urgency=low
 
   * Many bugfixes

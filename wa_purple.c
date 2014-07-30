@@ -277,30 +277,6 @@ static PurpleChat *blist_find_chat_by_convo(PurpleConnection *gc, int convo)
 	return blist_find_chat_by_hasht_cond(gc, hasht_cmp_convo, &convo);
 }
 
-PurpleConversation *get_open_combo(const char *who, PurpleConnection * gc)
-{
-	PurpleAccount *acc = purple_connection_get_account(gc);
-	if (isgroup(who)) {
-		/* Search fot the combo */
-		PurpleChat *ch = blist_find_chat_by_id(gc, who);
-		GHashTable *hasht = purple_chat_get_components(ch);
-		int convo_id = chatid_to_convo(who);
-		PurpleConversation *convo = purple_find_chat(gc, convo_id);
-
-		/* Create a window if it's not open yet */
-		if (!convo) {
-			waprpl_chat_join(gc, hasht);
-			convo = purple_find_chat(gc, convo_id);
-		}
-		return convo;
-	} else {
-		/* Search for the combo */
-		PurpleConversation *convo = purple_find_conversation_with_account(PURPLE_CONV_TYPE_IM, who, acc);
-		if (!convo)
-			convo = purple_conversation_new(PURPLE_CONV_TYPE_IM, acc, who);
-		return convo;
-	}
-}
 
 static void conv_add_participants(PurpleConversation * conv, const char *part, const char *owner)
 {
@@ -312,6 +288,42 @@ static void conv_add_participants(PurpleConversation * conv, const char *part, c
 		purple_conv_chat_add_user(purple_conversation_get_chat_data(conv), *p, "", PURPLE_CBFLAGS_NONE | (!strcmp(owner, *p) ? PURPLE_CBFLAGS_FOUNDER : 0), FALSE);
 
 	g_strfreev(plist);
+}
+
+PurpleConversation *get_open_combo(const char *who, PurpleConnection * gc)
+{
+	PurpleAccount *acc = purple_connection_get_account(gc);
+	if (isgroup(who)) {
+		/* Search fot the combo */
+		PurpleChat *ch = blist_find_chat_by_id(gc, who);
+		GHashTable *hasht = purple_chat_get_components(ch);
+		int convo_id = chatid_to_convo(who);
+		const char *groupname = g_hash_table_lookup(hasht, "subject");
+		PurpleConversation *convo = purple_find_chat(gc, convo_id);
+		
+		/* Create a window if it's not open yet */
+		if (!convo) {
+			waprpl_chat_join(gc, hasht);
+			convo = purple_find_chat(gc, convo_id);
+		}
+		else if (purple_conv_chat_has_left(PURPLE_CONV_CHAT(convo))) {
+			char *subject, *owner, *part;
+			whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
+			if (waAPI_getgroupinfo(wconn->waAPI, (char*)who, &subject, &owner, &part)) {
+				convo = serv_got_joined_chat(gc, convo_id, groupname);
+				purple_debug_info(WHATSAPP_ID, "group info ID(%s) SUBJECT(%s) OWNER(%s)\n", who, subject, owner);
+				conv_add_participants(convo, part, owner);
+			}
+		}
+		
+		return convo;
+	} else {
+		/* Search for the combo */
+		PurpleConversation *convo = purple_find_conversation_with_account(PURPLE_CONV_TYPE_IM, who, acc);
+		if (!convo)
+			convo = purple_conversation_new(PURPLE_CONV_TYPE_IM, acc, who);
+		return convo;
+	}
 }
 
 static void conv_add_message(PurpleConnection * gc, const char *who, const char *msg, const char *author, unsigned long timestamp)
@@ -494,41 +506,7 @@ static void waprpl_process_incoming_events(PurpleConnection * gc)
 	default:
 		break;
 	};
-
-	/* Incoming messages. */
-	for (;;) {
-		int r = waAPI_querynext(wconn->waAPI);
-
-		if (r < 0)
-			break;
-
-		switch (r) {
-		case 0:
-			query_chat_message(gc);
-			break;
-		case 1:
-			query_chat_image(gc);
-			break;
-		case 2:
-			query_chat_location(gc);
-			break;
-		case 3:
-			query_chat_sound(gc);
-			break;
-		case 4:
-			query_chat_video(gc);
-			break;
-		default:
-			/* Unsupported message type. */
-			break;
-		};
-	}
-
-	/* Status changes, typing notices and profile pictures. */
-	query_status(gc);
-	query_typing(gc);
-	query_icon(gc);
-
+	
 	/* Groups update */
 	if (waAPI_getgroupsupdated(wconn->waAPI)) {
 
@@ -597,6 +575,40 @@ static void waprpl_process_incoming_events(PurpleConnection * gc)
 
 		g_strfreev(gplist);
 	}
+
+	/* Incoming messages. */
+	for (;;) {
+		int r = waAPI_querynext(wconn->waAPI);
+
+		if (r < 0)
+			break;
+
+		switch (r) {
+		case 0:
+			query_chat_message(gc);
+			break;
+		case 1:
+			query_chat_image(gc);
+			break;
+		case 2:
+			query_chat_location(gc);
+			break;
+		case 3:
+			query_chat_sound(gc);
+			break;
+		case 4:
+			query_chat_video(gc);
+			break;
+		default:
+			/* Unsupported message type. */
+			break;
+		};
+	}
+
+	/* Status changes, typing notices and profile pictures. */
+	query_status(gc);
+	query_typing(gc);
+	query_icon(gc);
 }
 
 static void waprpl_output_cb(gpointer data, gint source, PurpleInputCondition cond)

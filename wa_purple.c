@@ -7,7 +7,7 @@
  *
  * Whatsapp is a free implementation of the WhatsApp protocol for libpurple.
  * The implementation is not 100% complete. Currently supported features include
- * message send and receive and profile pictures. In order to be able to login 
+ * message send and receive and profile pictures. In order to be able to login
  * you need your WhatsApp password, which is not easy to know. As of Jun. 2012
  * the password was either the IMEI or the MAC addres, but latest versions
  * of the protocol changed the password so now it's server-generated.
@@ -64,7 +64,7 @@
 #define sys_write write
 #endif
 
-const char default_resource[] = "Android-2.11.151-443";
+const char default_resource[] = "Android-2.31.151-443";
 
 #define WHATSAPP_ID "prpl-whatsapp"
 static PurplePlugin *_whatsapp_protocol = NULL;
@@ -73,7 +73,7 @@ static PurplePlugin *_whatsapp_protocol = NULL;
 #define WHATSAPP_STATUS_AWAY     "away"
 #define WHATSAPP_STATUS_OFFLINE  "offline"
 
-#define WHATSAPP_DEFAULT_SERVER "c3.whatsapp.net"
+#define WHATSAPP_DEFAULT_SERVER "c2.whatsapp.net"
 #define WHATSAPP_DEFAULT_PORT   443
 
 typedef struct {
@@ -300,7 +300,7 @@ PurpleConversation *get_open_combo(const char *who, PurpleConnection * gc)
 		int convo_id = chatid_to_convo(who);
 		const char *groupname = g_hash_table_lookup(hasht, "subject");
 		PurpleConversation *convo = purple_find_chat(gc, convo_id);
-		
+
 		/* Create a window if it's not open yet */
 		if (!convo) {
 			waprpl_chat_join(gc, hasht);
@@ -315,7 +315,7 @@ PurpleConversation *get_open_combo(const char *who, PurpleConnection * gc)
 				conv_add_participants(convo, part, owner);
 			}
 		}
-		
+
 		return convo;
 	} else {
 		/* Search for the combo */
@@ -506,7 +506,7 @@ static void waprpl_process_incoming_events(PurpleConnection * gc)
 	default:
 		break;
 	};
-	
+
 	/* Groups update */
 	if (waAPI_getgroupsupdated(wconn->waAPI)) {
 
@@ -688,7 +688,7 @@ static void waprpl_check_output(PurpleConnection * gc)
 	}
 
 	check_ssl_requests(purple_connection_get_account(gc));
-	
+
 	waprpl_check_complete_uploads(gc);
 }
 
@@ -960,7 +960,7 @@ static void waprpl_get_info(PurpleConnection * gc, const char *username)
 		g_free(profile_image);
 
 	purple_notify_userinfo(gc, username, info, NULL, NULL);
-	
+
 	waprpl_check_output(gc);
 }
 
@@ -1127,7 +1127,7 @@ void waprpl_ssl_input_cb(gpointer data, gint source, PurpleInputCondition cond)
 
 static void waprpl_check_complete_uploads(PurpleConnection * gc) {
 	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
-	
+
 	GList *xfers = purple_xfers_get_all();
 	while (xfers) {
 		PurpleXfer *xfer = xfers->data;
@@ -1178,7 +1178,7 @@ void waprpl_check_ssl_output(PurpleConnection * gc)
 			xfers = g_list_next(xfers);
 		}
 	}
-	
+
 	// Check uploads to mark them as done :)
 	waprpl_check_complete_uploads(gc);
 }
@@ -1187,7 +1187,7 @@ static void waprpl_ssl_connected_cb(gpointer data, PurpleSslConnection * gsc, Pu
 {
 	PurpleConnection *gc = data;
 	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
-	if (!wconn) return; // The account has disconnected 
+	if (!wconn) return; // The account has disconnected
 
 	purple_debug_info("waprpl", "SSL connection stablished\n");
 

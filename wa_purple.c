@@ -64,7 +64,7 @@
 #define sys_write write
 #endif
 
-const char default_resource[] = "Android-2.11.151-443";
+const char default_resource[] = "Android-2.31.151-443";
 
 #define WHATSAPP_ID "prpl-whatsapp"
 static PurplePlugin *_whatsapp_protocol = NULL;

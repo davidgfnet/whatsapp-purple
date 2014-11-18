@@ -831,6 +831,7 @@ private:
 	std::string nickname;
 	std::string whatsappserver, whatsappservergroup;
 	std::string mypresence, mymessage;
+	bool sendRead;
 
 	/* Various account info */
 	std::string account_type, account_status, account_expiration, account_creation;
@@ -879,7 +880,6 @@ private:
 	void sendInitial();
 	void notifyError(ErrorCode err);
 	DataBuffer generateResponse(std::string from, std::string type, std::string id);
-	DataBuffer notificationResponse(std::string from, std::string type, std::string id);
 	std::string generateUploadPOST(t_fileupload * fu);
 	void processUploadQueue();
 
@@ -1090,14 +1090,11 @@ public:
 
 DataBuffer WhatsappConnection::generateResponse(std::string from, std::string type, std::string id)
 {
-	Tree mes("receipt", makeAttr2("to", from, "id", id));
-
-	return serialize_tree(&mes);
-}
-
-DataBuffer WhatsappConnection::notificationResponse(std::string from, std::string type, std::string id)
-{
-	Tree mes("receipt", makeAttr3("to", from, "id", id, "type", type));
+	if (type == "") { // Auto 
+		if (sendRead) type = "read";
+		else type = "delivery";
+	}
+	Tree mes("receipt", makeAttr4("to", from, "id", id, "type", type, "t", int2str(1)));
 
 	return serialize_tree(&mes);
 }
@@ -1156,6 +1153,7 @@ WhatsappConnection::WhatsappConnection(std::string phone, std::string password, 
 	this->gw3 = 0;
 	this->sslstatus = 0;
 	this->frame_seq = 0;
+	this->sendRead = true;
 
 	/* Trim password spaces */
 	while (password.size() > 0 and password[0] == ' ')
@@ -1264,8 +1262,8 @@ void WhatsappConnection::doLogin(std::string resource)
 
 	/* Send features */
 	{
-		Tree p;
-		p.setTag("stream:features");
+		Tree p("stream:features");
+		p.addChild(Tree("readreceipts"));
 		first = first + serialize_tree(&p, false);
 	}
 
@@ -1912,7 +1910,7 @@ void WhatsappConnection::processIncomingData()
 			/* Generate response for the messages */
 			if (treelist[i].hasAttribute("type") and treelist[i].hasAttribute("from")) { //FIXME
 				DataBuffer reply = generateResponse(treelist[i].getAttribute("from"),
-								    treelist[i].getAttribute("type"),
+								    "",
 								    treelist[i].getAttribute("id")
 								    );
 				outbuffer = outbuffer + reply;
@@ -2219,6 +2217,11 @@ void WhatsappConnection::addFullsizePicture(std::string from, std::string pictur
 
 void WhatsappConnection::setMyPresence(std::string s, std::string msg)
 {
+	sendRead = (s == "available");
+	if (s == "available-noread") {
+		s = "available";
+	}
+
 	if (s != mypresence) {
 		mypresence = s;
 		notifyMyPresence();

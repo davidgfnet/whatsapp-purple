@@ -914,6 +914,9 @@ static GList *waprpl_status_types(PurpleAccount * acct)
 	type = purple_status_type_new_with_attrs(PURPLE_STATUS_AVAILABLE, "available", NULL, TRUE, TRUE, FALSE, "message", "Message", purple_value_new(PURPLE_TYPE_STRING), NULL);
 	types = g_list_prepend(types, type);
 
+	type = purple_status_type_new_with_attrs(PURPLE_STATUS_UNAVAILABLE, "available-noread", NULL, TRUE, TRUE, FALSE, "message", "Message", purple_value_new(PURPLE_TYPE_STRING), NULL);
+	types = g_list_prepend(types, type);
+
 	type = purple_status_type_new_with_attrs(PURPLE_STATUS_AWAY, "unavailable", NULL, TRUE, TRUE, FALSE, "message", "Message", purple_value_new(PURPLE_TYPE_STRING), NULL);
 	types = g_list_prepend(types, type);
 

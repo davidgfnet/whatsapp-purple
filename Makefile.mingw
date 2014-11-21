@@ -8,10 +8,13 @@ CXX_SRCS = whatsapp-protocol.cc wa_api.cc
 
 C_OBJS = $(C_SRCS:.c=.o)
 CXX_OBJS = $(CXX_SRCS:.cc=.o)
+RESOURCES = libwhatsapp.res
 
 STRIP = strip
 CC = i686-w64-mingw32-gcc
 CXX = i686-w64-mingw32-g++
+STRIP = i686-w64-mingw32-strip
+RES = i686-w64-mingw32-windres
 LD = $(CXX)
 CFLAGS_PURPLE = $(shell mingw32-pkg-config --cflags purple)
 CFLAGS = \
@@ -32,9 +35,12 @@ LDFLAGS = -shared
 	$(CC) -c $(CFLAGS) -o $@ $<
 %.o: %.cc
 	$(CXX) -c $(CFLAGS) -o $@ $<
+%.res: %.rc
+	$(RES) $< -O coff -o $@
 
-$(LIBNAME): $(C_OBJS) $(CXX_OBJS)
+$(LIBNAME): $(C_OBJS) $(CXX_OBJS) $(RESOURCES)
 	$(LD) $(LDFLAGS) -o $@ $^ $(LIBS_PURPLE)
+	$(STRIP) -s $@
 
 PLUGIN_DIR_PURPLE:=$(shell mingw32-pkg-config --variable=plugindir purple)
 DATA_ROOT_DIR_PURPLE:=$(shell mingw32-pkg-config --variable=datarootdir purple)
@@ -59,5 +65,6 @@ debug: $(LIBNAME)
 .PHONY: clean
 clean:
 	-rm *.o
+	-rm $(RESOURCES)
 	-rm $(LIBNAME)
 

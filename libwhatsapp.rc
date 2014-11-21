@@ -1,0 +1,23 @@
+1 VERSIONINFO
+FILEVERSION     0,5,1,0
+PRODUCTVERSION  0,5,1,0
+BEGIN
+  BLOCK "StringFileInfo"
+  BEGIN
+    BLOCK "040904B0"
+    BEGIN
+      VALUE "CompanyName", "davidgf.net"
+      VALUE "FileDescription", "Whatsapp plugin for libpurple (pidgin)"
+      VALUE "FileVersion", "0.5.1"
+      VALUE "InternalName", "whatsapp4pidgin"
+      VALUE "LegalCopyright", "Copyright 2014 David Guillen Fandos"
+      VALUE "OriginalFilename", "libwhatsapp.dll"
+      VALUE "ProductName", "Whatsapp for Purple"
+      VALUE "ProductVersion", "0.5.1"
+    END
+  END
+  BLOCK "VarFileInfo"
+  BEGIN
+    VALUE "Translation", 0x409, 1200
+  END
+END

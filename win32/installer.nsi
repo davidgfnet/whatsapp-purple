@@ -77,8 +77,8 @@ Section "MainSection" SEC01
 SectionEnd
 
 Section -AdditionalIcons
-  CreateDirectory "$SMPROGRAMS\whatsapp4pidgin"
-  CreateShortCut "$SMPROGRAMS\whatsapp4pidgin\Uninstall.lnk" "$INSTDIR\whatsapp4pidgin-uninst.exe"
+  CreateDirectory "$SMPROGRAMS\WhatsApp Plugin for Pidgin"
+  CreateShortCut "$SMPROGRAMS\WhatsApp Plugin for Pidgin\Uninstall.lnk" "$INSTDIR\whatsapp4pidgin-uninst.exe"
 SectionEnd
 
 Section -Post

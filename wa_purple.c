@@ -64,7 +64,7 @@
 #define sys_write write
 #endif
 
-const char default_resource[] = "Android-2.31.151-443";
+const char default_resource[] = "WP7-2.31.151-443";
 
 #define WHATSAPP_ID "prpl-whatsapp"
 static PurplePlugin *_whatsapp_protocol = NULL;
@@ -73,7 +73,7 @@ static PurplePlugin *_whatsapp_protocol = NULL;
 #define WHATSAPP_STATUS_AWAY     "away"
 #define WHATSAPP_STATUS_OFFLINE  "offline"
 
-#define WHATSAPP_DEFAULT_SERVER "c3.whatsapp.net"
+#define WHATSAPP_DEFAULT_SERVER "c2.whatsapp.net"
 #define WHATSAPP_DEFAULT_PORT   443
 
 typedef struct {

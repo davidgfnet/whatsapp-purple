@@ -81,11 +81,6 @@ std::string SHA256_file_b64(const char *filename);
 #endif
 
 #define WHATSAPP_ID "prpl-whatsapp"
-#ifdef DEBUG
-#define DEBUG_PRINT(a) std::cout << a << std::endl;
-#else
-#define DEBUG_PRINT(a)
-#endif
 
 
 

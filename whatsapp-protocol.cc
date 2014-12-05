@@ -9,7 +9,6 @@
  *
  */
 
-#include <iostream>
 #include <map>
 #include <vector>
 #include <map>
@@ -1814,7 +1813,7 @@ void WhatsappConnection::processIncomingData()
 
 	/* Now process the tree list! */
 	for (unsigned int i = 0; i < treelist.size(); i++) {
-		DEBUG_PRINT( treelist[i].toString() );
+		purple_debug_info(WHATSAPP_ID, "%s\n", treelist[i].toString().c_str());
 		if (treelist[i].getTag() == "challenge") {
 			/* Generate a session key using the challege & the password */
 			assert(conn_status == SessionWaitingChallenge);
@@ -1844,7 +1843,7 @@ void WhatsappConnection::processIncomingData()
 			this->sendInitial();  // Seems to trigger an error IQ response
 			this->updateGroups();
 
-			DEBUG_PRINT("Logged in!!!");
+			purple_debug_info(WHATSAPP_ID, "Logged in!!!\n");
 		} else if (treelist[i].getTag() == "failure") {
 			if (conn_status == SessionWaitingAuthOK)
 				this->notifyError(errorAuth);
@@ -1879,7 +1878,7 @@ void WhatsappConnection::processIncomingData()
 			
 		} else if (treelist[i].getTag() == "message") {
 			/* Receives a message! */
-			DEBUG_PRINT("Received message stanza...");
+			purple_debug_info(WHATSAPP_ID, "Received message stanza...\n");
 			if (treelist[i].hasAttribute("from") and
 				(treelist[i].hasAttributeValue("type", "text") or treelist[i].hasAttributeValue("type", "media"))) {
 				unsigned long long time = 0;
@@ -2034,7 +2033,7 @@ void WhatsappConnection::processIncomingData()
 	}
 
 	if (gq_stat == 8 and recv_messages_delay.size() != 0) {
-		DEBUG_PRINT ("Delayed messages -> Messages");
+		purple_debug_info(WHATSAPP_ID, "Delayed messages -> Messages\n");
 		for (unsigned int i = 0; i < recv_messages_delay.size(); i++) {
 			recv_messages.push_back(recv_messages_delay[i]);
 		}
@@ -2169,11 +2168,11 @@ void WhatsappConnection::receiveMessage(const Message & m)
 	
 	if (isgroup(m.from) and gq_stat != 8)	{/* Delay the group message deliver if we do not have the group list */
 		recv_messages_delay.push_back(mc);
-		DEBUG_PRINT("Received delayed message!");
+		purple_debug_info(WHATSAPP_ID, "Received delayed message!\n");
 	}else
 		recv_messages.push_back(mc);
 
-	DEBUG_PRINT("Received message type " << m.type() << " from " << m.from << " at " << m.t);
+	purple_debug_info(WHATSAPP_ID, "Received message type %d from %s at %llu\n", m.type(), m.from.c_str(), m.t);
 
 	/* Now add the contact in the list (to query the profile picture) */
 	if (contacts.find(m.from) == contacts.end())

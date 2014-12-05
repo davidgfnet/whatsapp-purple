@@ -66,7 +66,6 @@
 
 const char default_resource[] = "WP7-2.11.596-443";
 
-#define WHATSAPP_ID "prpl-whatsapp"
 static PurplePlugin *_whatsapp_protocol = NULL;
 
 #define WHATSAPP_STATUS_ONLINE   "online"

@@ -730,7 +730,7 @@ public:
 	std::string toString(int sp = 0)
 	{
 		std::string ret;
-		std::string spacing(' ', sp);
+		std::string spacing(sp, ' ');
 		ret += spacing + "Tag: " + tag + "\n";
 		for (std::map < std::string, std::string >::iterator iter = attributes.begin(); iter != attributes.end(); iter++) {
 			ret += spacing + "at[" + iter->first + "]=" + iter->second + "\n";

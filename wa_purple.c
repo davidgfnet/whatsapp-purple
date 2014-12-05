@@ -554,7 +554,7 @@ static void waprpl_process_incoming_events(PurpleConnection * gc)
 			if (!ch) {
 				char *sub, *own;
 				waAPI_getgroupinfo(wconn->waAPI, gpid, &sub, &own, 0);
-				purple_debug_info("waprpl", "New group found %s %s\n", gpid, sub);
+				purple_debug_info(WHATSAPP_ID, "New group found %s %s\n", gpid, sub);
 
 				GHashTable *htable = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
 				g_hash_table_insert(htable, g_strdup("subject"), g_strdup(sub));
@@ -716,7 +716,7 @@ static void waprpl_login(PurpleAccount * acct)
 {
 	PurpleConnection *gc = purple_account_get_connection(acct);
 
-	purple_debug_info("waprpl", "logging in %s\n", purple_account_get_username(acct));
+	purple_debug_info(WHATSAPP_ID, "logging in %s\n", purple_account_get_username(acct));
 
 	purple_connection_update_progress(gc, "Connecting", 0, 4);
 
@@ -1136,7 +1136,7 @@ static void waprpl_check_complete_uploads(PurpleConnection * gc) {
 		PurpleXfer *xfer = xfers->data;
 		wa_file_upload *xinfo = (wa_file_upload *) xfer->data;
 		if (!xinfo->done && xinfo->started && waAPI_fileuploadcomplete(wconn->waAPI, xinfo->ref_id)) {
-			purple_debug_info("waprpl", "Upload complete\n");
+			purple_debug_info(WHATSAPP_ID, "Upload complete\n");
 			purple_xfer_set_completed(xfer, TRUE);
 			xinfo->done = 1;
 		}
@@ -1173,7 +1173,7 @@ void waprpl_check_ssl_output(PurpleConnection * gc)
 			PurpleXfer *xfer = xfers->data;
 			wa_file_upload *xinfo = (wa_file_upload *) xfer->data;
 			if (xinfo->ref_id == rid) {
-				purple_debug_info("waprpl", "Upload progress %d bytes done\n", bytes_sent);
+				purple_debug_info(WHATSAPP_ID, "Upload progress %d bytes done\n", bytes_sent);
 				purple_xfer_set_bytes_sent(xfer, bytes_sent);
 				purple_xfer_update_progress(xfer);
 				break;
@@ -1192,7 +1192,7 @@ static void waprpl_ssl_connected_cb(gpointer data, PurpleSslConnection * gsc, Pu
 	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
 	if (!wconn) return; // The account has disconnected 
 
-	purple_debug_info("waprpl", "SSL connection stablished\n");
+	purple_debug_info(WHATSAPP_ID, "SSL connection stablished\n");
 
 	wconn->sslfd = gsc->fd;
 	wconn->sslrh = purple_input_add(wconn->sslfd, PURPLE_INPUT_READ, waprpl_ssl_input_cb, gc);
@@ -1230,7 +1230,7 @@ void check_ssl_requests(PurpleAccount * acct)
 	char *host;
 	int port;
 	if (wconn->gsc == 0 && waAPI_hassslconnection(wconn->waAPI, &host, &port) > 0) {
-		purple_debug_info("waprpl", "Establishing SSL connection to %s:%d\n", host, port);
+		purple_debug_info(WHATSAPP_ID, "Establishing SSL connection to %s:%d\n", host, port);
 
 		PurpleSslConnection *sslc = purple_ssl_connect(acct, host, port, waprpl_ssl_connected_cb, waprpl_ssl_cerr_cb, gc);
 		if (sslc == 0) {

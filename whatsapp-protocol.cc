@@ -728,21 +728,35 @@ public:
 		return false;
 	}
 
-	std::string toString(int sp = 0)
+	void toDebugInfo(const char* functionname, int sp = 0)
 	{
-		std::string ret;
-		std::string spacing(sp, ' ');
-		ret += spacing + "Tag: " + tag + "\n";
-		for (std::map < std::string, std::string >::iterator iter = attributes.begin(); iter != attributes.end(); iter++) {
-			ret += spacing + "at[" + iter->first + "]=" + iter->second + "\n";
+		if (sp == 0) {
+			purple_debug_info(WHATSAPP_ID, "%s\n", functionname);
 		}
-		std::string piece = data.substr(0,10) + " ...";
-		ret += spacing + "Data: " + piece + "\n";
+
+		std::string ret;
+		ret = std::string(sp + 2, ' ') + "tag[" + tag + "]";
+		ret += " attr_cnt=" + int2str(attributes.size());
+		ret += " child_cnt=" + int2str(children.size());
+
+		std::string d;
+		d = data;
+		for (unsigned int i = 0; i < d.size(); i++) {
+			if (d[i] < 32 || d[i] > 126)
+				d[i] = '.';
+		}
+		ret += " data='" + d + "'";
+
+		purple_debug_info(WHATSAPP_ID, "%s\n", ret.c_str());
+
+		for (std::map < std::string, std::string >::iterator iter = attributes.begin(); iter != attributes.end(); iter++) {
+			ret = std::string(sp + 4, ' ') + "attr[" + iter->first + "]=[" + iter->second + "]";
+			purple_debug_info(WHATSAPP_ID, "%s\n", ret.c_str());
+		}
 
 		for (unsigned int i = 0; i < children.size(); i++) {
-			ret += children[i].toString(sp + 1);
+			children[i].toDebugInfo(functionname, sp + 6);
 		}
-		return ret;
 	}
 };
 
@@ -1813,7 +1827,7 @@ void WhatsappConnection::processIncomingData()
 
 	/* Now process the tree list! */
 	for (unsigned int i = 0; i < treelist.size(); i++) {
-		purple_debug_info(WHATSAPP_ID, "%s\n", treelist[i].toString().c_str());
+		treelist[i].toDebugInfo("receive processIncomingData");
 		if (treelist[i].getTag() == "challenge") {
 			/* Generate a session key using the challege & the password */
 			assert(conn_status == SessionWaitingChallenge);

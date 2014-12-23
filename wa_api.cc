@@ -47,9 +47,11 @@ public:
 	void sentCallback(int len);
 	bool hasDataToSend();
 
+	bool queryReceivedMessage(char *msgid, int * type);
+	void getMessageId(char * msgid);
 	void addContacts(std::vector < std::string > clist);
-	void sendChat(std::string to, std::string message);
-	void sendGroupChat(std::string to, std::string message);
+	void sendChat(std::string id, std::string to, std::string message);
+	void sendGroupChat(std::string id, std::string to, std::string message);
 	bool query_chat(std::string & from, std::string & message, std::string & author, unsigned long &t);
 	bool query_chatimages(std::string & from, std::string & preview, std::string & url, std::string & author, unsigned long &t);
 	bool query_chatlocations(std::string & from, double &lat, double &lng, std::string & preview, std::string & author, unsigned long &t);
@@ -130,6 +132,12 @@ int waAPI_getgroupinfo(void *waAPI, char *id, char **subject, char **owner, char
 		*p = g_strdup(part.c_str());
 
 	return 1;
+}
+
+int waAPI_queryreceivedmsg(void *waAPI, char * id, int * type) {
+	if (((WhatsappConnectionAPI *) waAPI)->queryReceivedMessage(id, type))
+		return 1;
+	return 0;
 }
 
 void waAPI_creategroup(void *waAPI, const char *subject)
@@ -229,14 +237,14 @@ void waAPI_delete(void *waAPI)
 	delete((WhatsappConnectionAPI *) waAPI);
 }
 
-void waAPI_sendim(void *waAPI, const char *who, const char *message)
+void waAPI_sendim(void *waAPI, const char *id, const char *who, const char *message)
 {
-	((WhatsappConnectionAPI *) waAPI)->sendChat(std::string(who), std::string(message));
+	((WhatsappConnectionAPI *) waAPI)->sendChat(id, who, message);
 }
 
-void waAPI_sendchat(void *waAPI, const char *who, const char *message)
+void waAPI_sendchat(void *waAPI, const char *id, const char *who, const char *message)
 {
-	((WhatsappConnectionAPI *) waAPI)->sendGroupChat(std::string(who), std::string(message));
+	((WhatsappConnectionAPI *) waAPI)->sendGroupChat(id, who, message);
 }
 
 int waAPI_sendimage(void *waAPI, const char *who, int w, int h, unsigned int size, const char *fp)
@@ -422,6 +430,10 @@ int waAPI_querytyping(void *waAPI, char **who, int *stat)
 int waAPI_loginstatus(void *waAPI)
 {
 	return ((WhatsappConnectionAPI *) waAPI)->loginStatus();
+}
+
+void waAPI_getmsgid(void *waAPI, char * msgid) {
+	((WhatsappConnectionAPI *) waAPI)->getMessageId(msgid);
 }
 
 void waAPI_addcontact(void *waAPI, const char *phone)

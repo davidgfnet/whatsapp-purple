@@ -847,6 +847,9 @@ private:
 	std::vector < Message * >recv_messages, recv_messages_delay;
 	std::vector < std::string > user_changes, user_icons, user_typing;
 
+	/* Reception queue */
+	std::vector < std::pair<std::string, int> > received_messages;
+
 	void processIncomingData();
 	void processSSLIncomingData();
 	DataBuffer serialize_tree(Tree * tree, bool crypt = true);
@@ -898,9 +901,11 @@ public:
 	void sentCallback(int len);
 	bool hasDataToSend();
 
+	bool queryReceivedMessage(char *msgid, int * type);
+	void getMessageId(char * msgid);
 	void addContacts(std::vector < std::string > clist);
-	void sendChat(std::string to, std::string message);
-	void sendGroupChat(std::string to, std::string message);
+	void sendChat(std::string msgid, std::string to, std::string message);
+	void sendGroupChat(std::string msgid, std::string to, std::string message);
 	bool query_chat(std::string & from, std::string & message, std::string & author, unsigned long &t);
 	bool query_chatimages(std::string & from, std::string & preview, std::string & url, std::string & author, unsigned long &t);
 	bool query_chatsounds(std::string & from, std::string & url, std::string & author, unsigned long &t);
@@ -968,7 +973,7 @@ public:
 		else
 			attrs["to"] = from + "@" + wc->whatsappserver;
 		attrs["type"] = "text";
-		attrs["id"] = stime + "-" + id;
+		attrs["id"] = id;
 		attrs["t"] = stime;
 
 		Tree mes("message", attrs);
@@ -1012,7 +1017,7 @@ public:
 		else
 			attrs["to"] = from + "@" + wc->whatsappserver;
 		attrs["type"] = "media";
-		attrs["id"] = stime + "-" + id;
+		attrs["id"] = id;
 		attrs["t"] = stime;
 
 		Tree mes("message", attrs);
@@ -1475,17 +1480,36 @@ void WhatsappConnection::send_avatar(const std::string & avatar)
 	outbuffer = outbuffer + serialize_tree(&req);
 }
 
-void WhatsappConnection::sendChat(std::string to, std::string message)
+bool WhatsappConnection::queryReceivedMessage(char *msgid, int * type)
 {
-	ChatMessage msg(this, to, time(NULL), int2str(msgcounter++), message, nickname);
+	if (received_messages.size() == 0) return false;
+
+	strcpy(msgid, received_messages[0].first.c_str());
+	*type = received_messages[0].second;
+	received_messages.erase(received_messages.begin());
+
+	return true;
+}
+
+void WhatsappConnection::getMessageId(char * msgid)
+{
+	unsigned int t = time(NULL);
+	unsigned int mid = msgcounter++;
+
+	sprintf(msgid, "%u-%u", t, mid);
+}
+
+void WhatsappConnection::sendChat(std::string msgid, std::string to, std::string message)
+{
+	ChatMessage msg(this, to, time(NULL), msgid, message, nickname);
 	DataBuffer buf = msg.serialize();
 
 	outbuffer = outbuffer + buf;
 }
 
-void WhatsappConnection::sendGroupChat(std::string to, std::string message)
+void WhatsappConnection::sendGroupChat(std::string msgid, std::string to, std::string message)
 {
-	ChatMessage msg(this, to, time(NULL), int2str(msgcounter++), message, nickname);
+	ChatMessage msg(this, to, time(NULL), msgid, message, nickname);
 	msg.server = "g.us";
 	DataBuffer buf = msg.serialize();
 
@@ -1861,6 +1885,10 @@ void WhatsappConnection::processIncomingData()
 				/* If the nofitication comes from a group, assume we have to reload groups ;) */
 				updateGroups();
 			}
+		} else if (treelist[i].getTag() == "ack") {
+			std::string id = treelist[i].getAttribute("id");
+			received_messages.push_back( std::make_pair(id,0) );
+
 		} else if (treelist[i].getTag() == "receipt") {
 			std::string id = treelist[i].getAttribute("id");
 			std::string type = treelist[i].getAttribute("type");
@@ -1868,6 +1896,11 @@ void WhatsappConnection::processIncomingData()
 			
 			Tree mes("ack", makeAttr3("class", "receipt", "type", type, "id", id));
 			outbuffer = outbuffer + serialize_tree(&mes);
+
+			// Add reception package to queue
+			int rtype = 1;
+			if (type == "read") rtype = 2;
+			received_messages.push_back( std::make_pair(id,rtype) );
 			
 		} else if (treelist[i].getTag() == "chatstate") {
 			if (treelist[i].hasChild("composing"))
@@ -2500,9 +2533,11 @@ public:
 	void sentCallback(int len);
 	bool hasDataToSend();
 
+	bool queryReceivedMessage(char *msgid, int * type);
+	void getMessageId(char * msgid);
 	void addContacts(std::vector < std::string > clist);
-	void sendChat(std::string to, std::string message);
-	void sendGroupChat(std::string to, std::string message);
+	void sendChat(std::string msgid, std::string to, std::string message);
+	void sendGroupChat(std::string msgid, std::string to, std::string message);
 	bool query_chat(std::string & from, std::string & message, std::string & author, unsigned long &t);
 	bool query_chatimages(std::string & from, std::string & preview, std::string & url, std::string & author, unsigned long &t);
 	bool query_chatsounds(std::string & from, std::string & url, std::string & author, unsigned long &t);
@@ -2670,14 +2705,24 @@ bool WhatsappConnectionAPI::query_status(std::string & from, int &status)
 	return connection->query_status(from, status);
 }
 
-void WhatsappConnectionAPI::sendChat(std::string to, std::string message)
+void WhatsappConnectionAPI::getMessageId(char * msgid)
 {
-	connection->sendChat(to, message);
+	connection->getMessageId(msgid);
 }
 
-void WhatsappConnectionAPI::sendGroupChat(std::string to, std::string message)
+bool WhatsappConnectionAPI::queryReceivedMessage(char * msgid, int * type)
 {
-	connection->sendGroupChat(to, message);
+	return connection->queryReceivedMessage(msgid, type);
+}
+
+void WhatsappConnectionAPI::sendChat(std::string msgid, std::string to, std::string message)
+{
+	connection->sendChat(msgid, to, message);
+}
+
+void WhatsappConnectionAPI::sendGroupChat(std::string msgid, std::string to, std::string message)
+{
+	connection->sendGroupChat(msgid, to, message);
 }
 
 int WhatsappConnectionAPI::loginStatus() const

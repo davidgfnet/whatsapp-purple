@@ -605,6 +605,17 @@ static void waprpl_process_incoming_events(PurpleConnection * gc)
 		};
 	}
 
+	while (1) {
+		int typer;
+		char msgid[128];
+		if (!waAPI_queryreceivedmsg(wconn->waAPI, msgid, &typer))
+			break;
+
+		purple_debug_info(WHATSAPP_ID, "Received message %s type: %d\n", msgid, typer);
+		purple_signal_emit(purple_connection_get_prpl(gc), "whatsapp-message-received", gc, msgid, typer);
+	}
+
+
 	/* Status changes, typing notices and profile pictures. */
 	query_status(gc);
 	query_typing(gc);
@@ -780,7 +791,13 @@ static int waprpl_send_im(PurpleConnection * gc, const char *who, const char *me
 	char *plain;
 
 	purple_markup_html_to_xhtml(message, NULL, &plain);
-	waAPI_sendim(wconn->waAPI, who, plain);
+
+	char msgid[128];
+	waAPI_getmsgid(wconn->waAPI, msgid);
+
+	purple_signal_emit(purple_connection_get_prpl(gc), "whatsapp-sending-message", gc, msgid, who, message);
+
+	waAPI_sendim(wconn->waAPI, msgid, who, plain);
 	g_free(plain);
 
 	waprpl_check_output(gc);
@@ -799,7 +816,13 @@ static int waprpl_send_chat(PurpleConnection * gc, int id, const char *message, 
 	char *plain;
 
 	purple_markup_html_to_xhtml(message, NULL, &plain);
-	waAPI_sendchat(wconn->waAPI, chat_id, plain);
+
+	char msgid[128];
+	waAPI_getmsgid(wconn->waAPI, msgid);
+
+	purple_signal_emit(purple_connection_get_prpl(gc), "whatsapp-sending-message", gc, msgid, chat_id, message);
+
+	waAPI_sendchat(wconn->waAPI, msgid, chat_id, plain);
 	g_free(plain);
 
 	waprpl_check_output(gc);
@@ -1425,6 +1448,24 @@ static void waprpl_init(PurplePlugin * plugin)
 	prpl_info.protocol_options = g_list_append(prpl_info.protocol_options, option);
 
 	_whatsapp_protocol = plugin;
+
+	// Some signals which can be caught by plugins
+	purple_signal_register(plugin, "whatsapp-sending-message",
+			purple_marshal_VOID__POINTER_POINTER_POINTER_POINTER,
+			purple_value_new(PURPLE_TYPE_UNKNOWN), 4,
+			purple_value_new(PURPLE_TYPE_SUBTYPE, PURPLE_SUBTYPE_CONNECTION),
+			purple_value_new(PURPLE_TYPE_STRING), /* id */
+			purple_value_new(PURPLE_TYPE_STRING), /* who */
+			purple_value_new(PURPLE_TYPE_STRING)  /* message */
+	);
+	purple_signal_register(plugin, "whatsapp-message-received",
+			purple_marshal_VOID__POINTER_POINTER_UINT,
+			purple_value_new(PURPLE_TYPE_UNKNOWN), 3,
+			purple_value_new(PURPLE_TYPE_SUBTYPE, PURPLE_SUBTYPE_CONNECTION),
+			purple_value_new(PURPLE_TYPE_STRING),  /* id */
+			purple_value_new(PURPLE_TYPE_INT)      /* reception-types */
+	);
+
 }
 
 static PurplePluginInfo info = {

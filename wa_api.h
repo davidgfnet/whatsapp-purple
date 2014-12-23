@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+	int waAPI_queryreceivedmsg(void *waAPI, char * id, int * type);
 	int waAPI_sendcb(void *waAPI, void *buffer, int maxbytes);
 	void waAPI_senddone(void *waAPI, int bytessent);
 	void waAPI_input(void *waAPI, const void *buffer, int bytesrecv);
@@ -22,8 +23,9 @@ extern "C" {
 	void waAPI_login(void *waAPI, const char *ua);
 	void *waAPI_create(const char *username, const char *password, const char *nickname);
 	void waAPI_delete(void *waAPI);
-	void waAPI_sendim(void *waAPI, const char *who, const char *message);
-	void waAPI_sendchat(void *waAPI, const char *who, const char *message);
+	void waAPI_getmsgid(void *waAPI, char * msgid);
+	void waAPI_sendim(void *waAPI, const char *id, const char *who, const char *message);
+	void waAPI_sendchat(void *waAPI, const char *id, const char *who, const char *message);
 	int waAPI_sendimage(void *waAPI, const char *who, int w, int h, unsigned int size, const char *fp);
 	int waAPI_loginstatus(void *waAPI);
 	void waAPI_addcontact(void *waAPI, const char *phone);

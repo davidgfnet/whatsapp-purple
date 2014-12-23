@@ -1,3 +1,13 @@
+pidgin-whatsapp (0.6) trusty; urgency=low
+
+  * Minor fixes on groups support
+  * Changed some default values to get better compatibility
+  * Implemented mesage read (blue tick) support
+  * Fixed some upload issues (usually hangs during upload)
+  * Added support for plugins to display sent message reception
+
+ -- David Guillen Fandos <david@davidgf.net>  Tue, 23 Dec 2014 23:20:00 +0200
+
 pidgin-whatsapp (0.5) quantal; urgency=low
 
   * Some minor cleanups

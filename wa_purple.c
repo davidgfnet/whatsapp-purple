@@ -474,11 +474,8 @@ static void query_icon(PurpleConnection *gc)
 	}
 }
 
-static void waprpl_process_incoming_events(PurpleConnection * gc)
+static void waprpl_update_progress(PurpleConnection *gc, whatsapp_connection *wconn)
 {
-	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
-	PurpleAccount *acc = purple_connection_get_account(gc);
-
 	switch (waAPI_loginstatus(wconn->waAPI)) {
 	case 0:
 		purple_connection_update_progress(gc, "Connecting", 0, 4);
@@ -506,7 +503,17 @@ static void waprpl_process_incoming_events(PurpleConnection * gc)
 	default:
 		break;
 	};
-	
+}
+
+static void waprpl_process_incoming_events(PurpleConnection * gc)
+{
+	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
+	PurpleAccount *acc = purple_connection_get_account(gc);
+
+	if (!wconn->connected) {
+		waprpl_update_progress(gc, wconn);
+	}
+
 	/* Groups update */
 	if (waAPI_getgroupsupdated(wconn->waAPI)) {
 

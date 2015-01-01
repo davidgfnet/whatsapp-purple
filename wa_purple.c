@@ -490,18 +490,18 @@ static void waprpl_process_incoming_events(PurpleConnection * gc)
 		purple_connection_update_progress(gc, "Awaiting response", 2, 4);
 		break;
 	case 3:
-		purple_connection_update_progress(gc, "Connection established", 3, 4);
-		purple_connection_set_state(gc, PURPLE_CONNECTED);
+		if (!wconn->connected) {
+			purple_connection_update_progress(gc, "Connection established", 3, 4);
+			purple_connection_set_state(gc, PURPLE_CONNECTED);
 
-		if (!wconn->connected)
+			PurpleAccount *account = purple_connection_get_account(gc);
+			PurpleStatus *status = purple_account_get_active_status(account);
+
 			waprpl_insert_contacts(gc);
+			waprpl_set_status(account, status);
 
-		wconn->connected = 1;
-
-		PurpleAccount *account = purple_connection_get_account(gc);
-		PurpleStatus *status = purple_account_get_active_status(account);
-		waprpl_set_status(account, status);
-
+			wconn->connected = 1;
+		}
 		break;
 	default:
 		break;

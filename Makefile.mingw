@@ -18,6 +18,7 @@ RES = i686-w64-mingw32-windres
 LD = $(CXX)
 CFLAGS_PURPLE = $(shell mingw32-pkg-config --cflags purple)
 CFLAGS = \
+    -Wno-unused-parameter \
     -O2 \
     -m32 \
     -Wall \

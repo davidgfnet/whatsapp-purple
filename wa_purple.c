@@ -58,10 +58,12 @@
 #ifdef _WIN32
 #define sys_read  wpurple_read
 #define sys_write wpurple_write
+#define sys_close wpurple_close
 #else
 #include <unistd.h>
 #define sys_read  read
 #define sys_write write
+#define sys_close close
 #endif
 
 const char default_resource[] = "WP7-2.11.596-443";
@@ -775,7 +777,7 @@ static void waprpl_close(PurpleConnection * gc)
 		purple_input_remove(wconn->wh);
 
 	if (wconn->fd >= 0)
-		close(wconn->fd);
+		sys_close(wconn->fd);
 
 	if (wconn->waAPI)
 		waAPI_delete(wconn->waAPI);
@@ -1349,12 +1351,12 @@ static PurplePluginProtocolInfo prpl_info = {
 	NULL,			/* user_splits, initialized in waprpl_init() */
 	NULL,			/* protocol_options, initialized in waprpl_init() */
 	{			/* icon_spec, a PurpleBuddyIconSpec */
-		"png",			/* format */
+		"jpg",			/* format */
 		1,			/* min_width */
 		1,			/* min_height */
-		512,			/* max_width */
-		512,			/* max_height */
-		64000,			/* max_filesize */
+		640,			/* max_width */
+		640,			/* max_height */
+		32000,			/* max_filesize */
 		PURPLE_ICON_SCALE_SEND,	/* scale_rules */
 	},
 	waprpl_list_icon,	/* list_icon */

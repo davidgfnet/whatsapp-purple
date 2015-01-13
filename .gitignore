@@ -11,3 +11,8 @@
 *.lai
 *.la
 *.a
+
+# Compiled windows files
+*.dll
+*.exe
+*.res

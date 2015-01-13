@@ -730,7 +730,7 @@ public:
 	std::string toString(int sp = 0)
 	{
 		std::string ret;
-		std::string spacing(' ', sp);
+		std::string spacing(sp, ' ');
 		ret += spacing + "Tag: " + tag + "\n";
 		for (std::map < std::string, std::string >::iterator iter = attributes.begin(); iter != attributes.end(); iter++) {
 			ret += spacing + "at[" + iter->first + "]=" + iter->second + "\n";
@@ -1469,11 +1469,10 @@ void WhatsappConnection::queryFullSize(std::string user)
 
 void WhatsappConnection::send_avatar(const std::string & avatar)
 {
-	Tree pic("picture", makeAttr2("type", "image", "xmlns", "w:profile:picture"));
-	Tree prev("picture", makeAttr1("type", "preview"));
-	pic.setData(avatar);
-	prev.setData(avatar);
-	Tree req("iq", makeAttr3("id", int2str(iqid++), "type", "set", "to", phone + "@" + whatsappserver));
+	Tree pic("picture"); pic.setData(avatar);
+	Tree prev("picture", makeAttr1("type", "preview")); prev.setData(avatar);
+
+	Tree req("iq", makeAttr4("id", int2str(iqid++), "type", "set", "to", whatsappserver, "xmlns", "w:profile:picture"));
 	req.addChild(pic);
 	req.addChild(prev);
 
@@ -2075,7 +2074,13 @@ void WhatsappConnection::processIncomingData()
 
 DataBuffer WhatsappConnection::serialize_tree(Tree * tree, bool crypt)
 {
+	DEBUG_PRINT( tree->toString() );
+
 	DataBuffer data = write_tree(tree);
+	if (data.size() > 65535) {
+		std::cerr << "Skipping huge tree! " << data.size() << std::endl;
+		return DataBuffer();
+	}
 	unsigned char flag = 0;
 	if (crypt) {
 		data = data.encodedBuffer(this->out, &this->session_key[20*1], true, this->frame_seq++);

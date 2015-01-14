@@ -10,6 +10,16 @@ C_OBJS = $(C_SRCS:.c=.o)
 CXX_OBJS = $(CXX_SRCS:.cc=.o)
 RESOURCES = libwhatsapp.res
 
+PIDGIN_INCLUDE_WIN32_DEV= -I $(PIDGIN_DEV_ROOT)/pidgin/libpurple/ \
+                          -I $(PIDGIN_DEV_ROOT)/win32-dev/gtk_2_0-2.14/include/glib-2.0/ \
+                          -I $(PIDGIN_DEV_ROOT)/win32-dev/gtk_2_0-2.14/lib/glib-2.0/include/
+
+PIDGIN_LIB_WIN32_DEV= -L $(PIDGIN_DEV_ROOT)/win32-dev/gtk_2_0-2.14/lib/ \
+                      -L $(PIDGIN_DEV_ROOT)/pidgin/libpurple/ \
+                      -lglib-2.0 -lpurple
+
+
+
 STRIP = strip
 CC = i686-w64-mingw32-gcc
 CXX = i686-w64-mingw32-g++
@@ -27,10 +37,11 @@ CFLAGS = \
     -DPURPLE_PLUGINS \
     -DPIC \
     $(CFLAGS_PURPLE) \
-    $(EXTRAINCLUDES)
+    $(EXTRAINCLUDES) \
+    $(PIDGIN_INCLUDE_WIN32_DEV)
 
-LIBS_PURPLE = $(shell mingw32-pkg-config --libs purple)  -static-libgcc -static-libstdc++ $(EXTRALIBS)
-LDFLAGS = -shared
+LIBS_PURPLE = $(shell mingw32-pkg-config --libs purple) $(EXTRALIBS)
+LDFLAGS = -shared 
 
 %.o: %.c
 	$(CC) -c $(CFLAGS) -o $@ $<
@@ -40,8 +51,8 @@ LDFLAGS = -shared
 	$(RES) $< -O coff -o $@
 
 $(LIBNAME): $(C_OBJS) $(CXX_OBJS) $(RESOURCES)
-	$(LD) $(LDFLAGS) -o $@ $^ $(LIBS_PURPLE)
-	$(STRIP) -s $@
+	$(LD) $(LDFLAGS) -o $@ $^ $(LIBS_PURPLE) $(PIDGIN_LIB_WIN32_DEV) -static-libgcc -static-libstdc++ 
+	$(STRIP) --strip-debug --discard-locals $@
 
 PLUGIN_DIR_PURPLE:=$(shell mingw32-pkg-config --variable=plugindir purple)
 DATA_ROOT_DIR_PURPLE:=$(shell mingw32-pkg-config --variable=datarootdir purple)
@@ -65,7 +76,7 @@ debug: $(LIBNAME)
 
 .PHONY: clean
 clean:
-	-rm *.o
-	-rm $(RESOURCES)
-	-rm $(LIBNAME)
+	-rm -f *.o
+	-rm -f $(RESOURCES)
+	-rm -f $(LIBNAME)
 

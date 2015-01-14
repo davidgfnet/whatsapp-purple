@@ -42,38 +42,69 @@ InstallDir "$PROGRAMFILES\whatsapp4pidgin"
 InstallDirRegKey HKEY_LOCAL_MACHINE SOFTWARE\whatsapp4pidgin "Install_Dir"
 
 Var "PidginDir"
+var "DllName"
 
 ShowInstDetails show
 ShowUnInstDetails show
 
+!macro !defineifexist _VAR_NAME _FILE_NAME
+	!tempfile _TEMPFILE
+	!ifdef NSIS_WIN32_MAKENSIS
+		; Windows - cmd.exe
+		!system 'if exist "${_FILE_NAME}" echo !define ${_VAR_NAME} > "${_TEMPFILE}"'
+	!else
+		; Posix - sh
+		!system 'if [ -e "${_FILE_NAME}" ]; then echo "!define ${_VAR_NAME}" > "${_TEMPFILE}"; fi'
+	!endif
+	!include '${_TEMPFILE}'
+	!delfile '${_TEMPFILE}'
+	!undef _TEMPFILE
+!macroend
+!define !defineifexist "!insertmacro !defineifexist"
+
 Section "MainSection" SEC01
     ;InstallDir "$PROGRAMFILES\Pidgin\plugins"
 
-    ; uninstall previous pidgin-otr install if found.
-    Call UnInstOld
-    ;Check for pidgin installation
-    Call GetPidginInstPath
-    WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "SOFTWARE\whatsapp4pidgin" "pidgindir" "$PidginDir"
-	SetOutPath "$PidginDir\pixmaps\pidgin\protocols\16"
-	SetOverwrite on
-	File /oname=whatsapp.png "whatsapp16.png"
-	
-	SetOutPath "$PidginDir\pixmaps\pidgin\protocols\22"
-	SetOverwrite on
-	File /oname=whatsapp.png "whatsapp22.png"
-	
-	SetOutPath "$PidginDir\pixmaps\pidgin\protocols\48"
-	SetOverwrite on
-	File /oname=whatsapp.png "whatsapp48.png"
-	
+  ${!defineifexist} PIDGIN_PLUGIN "whatsapp-pidgin-plugin.dll"
+
+  ; uninstall previous pidgin-otr install if found.
+  Call UnInstOld
+  ;Check for pidgin installation
+  Call GetPidginInstPath
+  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "SOFTWARE\whatsapp4pidgin" "pidgindir" "$PidginDir"
+  SetOutPath "$PidginDir\pixmaps\pidgin\protocols\16"
+  SetOverwrite on
+  File /oname=whatsapp.png "whatsapp16.png"
+
+  SetOutPath "$PidginDir\pixmaps\pidgin\protocols\22"
+  SetOverwrite on
+  File /oname=whatsapp.png "whatsapp22.png"
+
+  SetOutPath "$PidginDir\pixmaps\pidgin\protocols\48"
+  SetOverwrite on
+  File /oname=whatsapp.png "whatsapp48.png"
+
+  SetOutPath "$INSTDIR"
+  SetOverwrite on
+  File "libwhatsapp.dll"
+
+  !ifdef PIDGIN_PLUGIN
     SetOutPath "$INSTDIR"
     SetOverwrite on
-    File "libwhatsapp.dll"
-    ; move to pidgin plugin directory, check if not busy (pidgin is running)
+    File "whatsapp-pidgin-plugin.dll"
+    !echo "Adding WhatsApp plugin for Pidgin as well!"
+
+    StrCpy $DllName "whatsapp-pidgin-plugin.dll"
     call CopyDLL
-    ; hard part is done, do the rest now.
-    SetOverwrite on
-    File "installer.nsi"
+  !endif
+
+  ; move to pidgin plugin directory, check if not busy (pidgin is running)
+  StrCpy $DllName "libwhatsapp.dll"
+  call CopyDLL
+
+  ; hard part is done, do the rest now.
+  SetOverwrite on
+  File "installer.nsi"
 SectionEnd
 
 Section -AdditionalIcons
@@ -102,30 +133,40 @@ Function un.onInit
 FunctionEnd
 
 Section Uninstall
+
   Delete "$INSTDIR\whatsapp4pidgin-uninst.exe"
   Delete "$INSTDIR\installer.nsi"
   Delete "$SMPROGRAMS\whatsapp4pidgin\Uninstall.lnk"
   RMDir "$SMPROGRAMS\whatsapp4pidgin"
   RMDir "$INSTDIR"
   
-	ReadRegStr $PidginDir HKLM Software\whatsapp4pidgin "pidgindir"
-	IfFileExists "$PidginDir\plugins\libwhatsapp.dll" dodelete
+  ReadRegStr $PidginDir HKLM Software\whatsapp4pidgin "pidgindir"
+  IfFileExists "$PidginDir\plugins\libwhatsapp.dll" dodelete
   ReadRegStr $PidginDir HKCU Software\whatsapp4pidgin "pidgindir"
-	IfFileExists "$PidginDir\plugins\libwhatsapp.dll" dodelete
+  IfFileExists "$PidginDir\plugins\libwhatsapp.dll" dodelete
 	
   ReadRegStr $PidginDir HKLM Software\whatsapp4pidgin "pidgindir"
-	IfFileExists "$PidginDir\plugins\libwhatsapp.dll" dodelete
+  IfFileExists "$PidginDir\plugins\libwhatsapp.dll" dodelete
   ReadRegStr $PidginDir HKCU Software\whatsapp4pidgin "pidgindir"
-	IfFileExists "$PidginDir\plugins\libwhatsapp.dll" dodelete
+  IfFileExists "$PidginDir\plugins\libwhatsapp.dll" dodelete
   MessageBox MB_OK|MB_ICONINFORMATION "Could not find pidgin plugin directory, libwhatsapp.dll not uninstalled!" IDOK ok
+
 dodelete:
-	Delete "$PidginDir\plugins\libwhatsapp.dll"
-	Delete "$PidginDir\pixmaps\pidgin\protocols\16\whatsapp.png"
-	Delete "$PidginDir\pixmaps\pidgin\protocols\22\whatsapp.png"
-	Delete "$PidginDir\pixmaps\pidgin\protocols\48\whatsapp.png"
+  Delete "$PidginDir\plugins\libwhatsapp.dll"
+  !ifdef PIDGIN_PLUGIN
+    Delete "$PidginDir\plugins\whatsapp-pidgin-plugin.dll"
+  !endif
+  Delete "$PidginDir\pixmaps\pidgin\protocols\16\whatsapp.png"
+  Delete "$PidginDir\pixmaps\pidgin\protocols\22\whatsapp.png"
+  Delete "$PidginDir\pixmaps\pidgin\protocols\48\whatsapp.png"
 	
 	IfFileExists "$PidginDir\plugins\libwhatsapp.dll" 0 +2
 	MessageBox MB_OK|MB_ICONINFORMATION "libwhatsapp.dll is busy. Probably Pidgin is still running. Please delete $PidginDir\plugins\libwhatsapp.dll manually."
+  !ifdef PIDGIN_PLUGIN
+    IfFileExists "$PidginDir\plugins\whatsapp-pidgin-plugin.dll" 0 +2
+    MessageBox MB_OK|MB_ICONINFORMATION "whatsapp-pidgin-plugin.dll is busy. Probably Pidgin is still running. Please delete $PidginDir\plugins\whatsapp-pidgin-plugin.dll manually."
+  !endif
+
 
   DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}"
   DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "SOFTWARE\whatsapp4pidgin\pidgindir"
@@ -174,16 +215,16 @@ Function CopyDLL
 SetOverwrite try
 ClearErrors
 ; 3 hours wasted so you guys don't need a reboot!
-IfFileExists "$PidginDir\plugins\libwhatsapp.dll" 0 copy ; remnant or uninstall prev version failed
-Delete "$PidginDir\plugins\libwhatsapp.dll"
+IfFileExists "$PidginDir\plugins\$DllName" 0 copy ; remnant or uninstall prev version failed
+Delete "$PidginDir\plugins\$DllName"
 copy:
 ClearErrors
-Rename "$INSTDIR\libwhatsapp.dll" "$PidginDir\plugins\libwhatsapp.dll"
+Rename "$INSTDIR\$DllName" "$PidginDir\plugins\$DllName"
 IfErrors dllbusy
 	Return
 dllbusy:
-	MessageBox MB_RETRYCANCEL "libwhatsapp.dll is busy. Please close Pidgin (including tray icon) and try again" IDCANCEL cancel
-	Delete "$PidginDir\plugins\libwhatsapp.dll"
+	MessageBox MB_RETRYCANCEL "$DllName is busy. Please close Pidgin (including tray icon) and try again" IDCANCEL cancel
+	Delete "$PidginDir\plugins\$DllName"
 	Goto copy
 	Return
 cancel:

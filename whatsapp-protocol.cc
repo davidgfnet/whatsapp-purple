@@ -53,6 +53,7 @@ struct t_fileupload {
 };
 
 std::string base64_decode(std::string const &encoded_string);
+std::string base64_encode(unsigned char const* bytes_to_encode, unsigned int in_len);
 unsigned long long str2lng(std::string s);
 std::string int2str(unsigned int num);
 int str2int(std::string s);
@@ -1490,7 +1491,7 @@ void WhatsappConnection::send_avatar(const std::string & avatar)
 	Tree pic("picture"); pic.setData(avatar);
 	Tree prev("picture", makeAttr1("type", "preview")); prev.setData(avatar);
 
-	Tree req("iq", makeAttr4("id", int2str(iqid++), "type", "set", "to", whatsappserver, "xmlns", "w:profile:picture"));
+	Tree req("iq", makeAttr4("id", "set_photo_"+int2str(iqid++), "type", "set", "to", phone + "@" + whatsappserver, "xmlns", "w:profile:picture"));
 	req.addChild(pic);
 	req.addChild(prev);
 
@@ -2872,3 +2873,46 @@ std::string base64_decode(std::string const &encoded_string)
 
 	return ret;
 }
+
+
+std::string base64_encode(unsigned char const* bytes_to_encode, unsigned int in_len) {
+  std::string ret;
+  int i = 0;
+  int j = 0;
+  unsigned char char_array_3[3];
+  unsigned char char_array_4[4];
+
+  while (in_len--) {
+    char_array_3[i++] = *(bytes_to_encode++);
+    if (i == 3) {
+      char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
+      char_array_4[1] = ((char_array_3[0] & 0x03) << 4) + ((char_array_3[1] & 0xf0) >> 4);
+      char_array_4[2] = ((char_array_3[1] & 0x0f) << 2) + ((char_array_3[2] & 0xc0) >> 6);
+      char_array_4[3] = char_array_3[2] & 0x3f;
+
+      for(i = 0; (i <4) ; i++)
+        ret += base64_chars[char_array_4[i]];
+      i = 0;
+    }
+  }
+
+  if (i)
+  {
+    for(j = i; j < 3; j++)
+      char_array_3[j] = '\0';
+
+    char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
+    char_array_4[1] = ((char_array_3[0] & 0x03) << 4) + ((char_array_3[1] & 0xf0) >> 4);
+    char_array_4[2] = ((char_array_3[1] & 0x0f) << 2) + ((char_array_3[2] & 0xc0) >> 6);
+    char_array_4[3] = char_array_3[2] & 0x3f;
+
+    for (j = 0; (j < i + 1); j++)
+      ret += base64_chars[char_array_4[j]];
+
+  }
+
+  return ret;
+
+}
+
+

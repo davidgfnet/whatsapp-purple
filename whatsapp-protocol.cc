@@ -547,6 +547,22 @@ public:
 				return s;
 			return "";
 		}
+		else if (type == 255) {
+			// Some sort of number encoding (using 4 bit)
+			int nbyte = readInt(1);
+			int size = nbyte & 0x7f;
+			int numnibbles = size*2 - ((nbyte&0x80) ? 1 : 0);
+
+			std::string rawd = readRawString(size);
+			std::string s;
+			for (int i = 0; i < numnibbles; i++) {
+				char c = (rawd[i/2] >> (4-((i&1)<<2))) & 0xF;
+				if (c < 10) s += (c+'0');
+				else s += (c-10+'-');
+			}
+
+			return s;
+		}
 		return "";
 	}
 	void putRawString(std::string s)
@@ -586,6 +602,8 @@ public:
 			putInt(s.size(), 3);
 			addData(s.c_str(), s.size());
 		}
+		// TODO: Use nibble encoding to encode numbers,
+		// phones and timestamps
 	}
 	bool isList()
 	{
@@ -1258,7 +1276,7 @@ void WhatsappConnection::doLogin(std::string resource)
 
 	{
 		std::map < std::string, std::string > auth;
-		first.addData("WA\1\4", 4);
+		first.addData("WA\1\5", 4);
 		auth["resource"] = resource;
 		auth["to"] = whatsappserver;
 		Tree t("start", auth);

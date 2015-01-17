@@ -16,79 +16,8 @@
 #include <map>
 #include <stdio.h>
 
-class WhatsappConnection;
-
-class Group {
-public:
-	Group(std::string id, std::string subject, std::string owner)
-	{
-		this->id = id;
-		this->subject = subject;
-		this->owner = owner;
-	}
-	~Group()
-	{
-	}
-	std::string id, subject, owner;
-	std::vector < std::string > participants;
-};
-
-class WhatsappConnectionAPI {
-private:
-	WhatsappConnection * connection;
-
-public:
-	WhatsappConnectionAPI(std::string phone, std::string password, std::string nick);
-	~WhatsappConnectionAPI();
-
-	void doLogin(std::string);
-	void receiveCallback(const char *data, int len);
-	int sendCallback(char *data, int len);
-	void sentCallback(int len);
-	bool hasDataToSend();
-
-	bool queryReceivedMessage(char *msgid, int * type);
-	void getMessageId(char * msgid);
-	void addContacts(std::vector < std::string > clist);
-	void sendChat(std::string id, std::string to, std::string message);
-	void sendGroupChat(std::string id, std::string to, std::string message);
-	bool query_chat(std::string & from, std::string & message, std::string & author, unsigned long &t);
-	bool query_chatimages(std::string & from, std::string & preview, std::string & url, std::string & author, unsigned long &t);
-	bool query_chatlocations(std::string & from, double &lat, double &lng, std::string & preview, std::string & author, unsigned long &t);
-	bool query_chatsounds(std::string & from, std::string & url, std::string & author, unsigned long &t);
-	bool query_chatvideos(std::string & from, std::string & url, std::string & author, unsigned long &t);
-	bool query_status(std::string & from, int &stat);
-	bool query_typing(std::string & from, int &status);
-	bool query_icon(std::string & from, std::string & icon, std::string & hash);
-	bool query_avatar(std::string user, std::string & icon);
-	int query_next();
-	void account_info(unsigned long long &creation, unsigned long long &freeexp, std::string & status);
-	void send_avatar(const std::string & avatar);
-	int getuserstatus(const std::string & who);
-	std::string getuserstatusstring(const std::string & who);
-	unsigned long long getlastseen(const std::string & who);
-	std::map < std::string, Group > getGroups();
-	bool groupsUpdated();
-	void leaveGroup(std::string group);
-	void addGroup(std::string subject);
-	void manageParticipant(std::string, std::string, std::string);
-
-	void notifyTyping(std::string who, int status);
-	void setMyPresence(std::string s, std::string msg);
-
-	int loginStatus() const;
-	int sendImage(std::string to, int w, int h, unsigned int size, const char *fp);
-
-	int uploadProgress(int &, int &);
-	int uploadComplete(int);
-	int sendSSLCallback(char *buffer, int maxbytes);
-	int sentSSLCallback(int bytessent);
-	void receiveSSLCallback(char *buffer, int bytesrecv);
-	bool hasSSLDataToSend();
-	bool closeSSLConnection();
-	void SSLCloseCallback();
-	bool hasSSLConnection(std::string & host, int *port);
-};
+#include "contacts.h"
+#include "whatsapp_api.h"
 
 char *waAPI_getgroups(void *waAPI)
 {

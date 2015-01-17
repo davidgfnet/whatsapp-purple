@@ -6,14 +6,14 @@
 #include <vector>
 #include <map>
 #include "wacommon.h"
+#include "databuffer.h"
+#include "contacts.h"
 
 class ChatMessage;
 class ImageMessage;
 class Message;
 class RC4Decoder;
-class DataBuffer;
-class Contact;
-class Group;
+class Tree;
 
 struct t_fileupload {
 	std::string to, from;

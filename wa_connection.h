@@ -120,17 +120,13 @@ public:
 	void sentCallback(int len);
 	bool hasDataToSend();
 
+	Message * getReceivedMessage();
 	bool queryReceivedMessage(char *msgid, int * type);
+
 	void getMessageId(char * msgid);
 	void addContacts(std::vector < std::string > clist);
 	void sendChat(std::string msgid, std::string to, std::string message);
 	void sendGroupChat(std::string msgid, std::string to, std::string message);
-	bool query_chat(std::string & from, std::string & message, std::string & author, unsigned long &t);
-	bool query_chatimages(std::string & from, std::string & preview, std::string & url, std::string & author, unsigned long &t);
-	bool query_chatsounds(std::string & from, std::string & url, std::string & author, unsigned long &t);
-	bool query_chatvideos(std::string & from, std::string & url, std::string & author, unsigned long &t);
-	bool query_chatlocations(std::string & from, double &lat, double &lng, std::string & prev, std::string & author, unsigned long &t);
-	int query_next();
 	bool query_status(std::string & from, int &status);
 	bool query_icon(std::string & from, std::string & icon, std::string & hash);
 	bool query_avatar(std::string user, std::string & icon);

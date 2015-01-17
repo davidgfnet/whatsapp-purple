@@ -47,10 +47,6 @@ unsigned long long WhatsappConnectionAPI::getlastseen(const std::string & who)
 	return connection->getlastseen(who);
 }
 
-int WhatsappConnectionAPI::query_next() {
-	return connection->query_next();
-}
-
 int WhatsappConnectionAPI::sendImage(std::string to, int w, int h, unsigned int size, const char *fp)
 {
 	return connection->sendImage(to, w, h, size, fp);
@@ -98,30 +94,6 @@ void WhatsappConnectionAPI::notifyTyping(std::string who, int status)
 std::string WhatsappConnectionAPI::getuserstatusstring(const std::string & who)
 {
 	return connection->getuserstatusstring(who);
-}
-
-bool WhatsappConnectionAPI::query_chatimages(std::string & from, std::string & preview, std::string & url, std::string & author, unsigned long &t)
-{
-	return connection->query_chatimages(from, preview, url, author, t);
-}
-
-bool WhatsappConnectionAPI::query_chatsounds(std::string & from, std::string & url, std::string & author, unsigned long &t)
-{
-	return connection->query_chatsounds(from, url, author, t);
-}
-bool WhatsappConnectionAPI::query_chatvideos(std::string & from, std::string & url, std::string & author, unsigned long &t)
-{
-	return connection->query_chatvideos(from, url, author, t);
-}
-
-bool WhatsappConnectionAPI::query_chat(std::string & from, std::string & msg, std::string & author, unsigned long &t)
-{
-	return connection->query_chat(from, msg, author, t);
-}
-
-bool WhatsappConnectionAPI::query_chatlocations(std::string & from, double &lat, double &lng, std::string & prev, std::string & author, unsigned long &t)
-{
-	return connection->query_chatlocations(from, lat, lng, prev, author, t);
 }
 
 bool WhatsappConnectionAPI::query_status(std::string & from, int &status)
@@ -224,4 +196,7 @@ bool WhatsappConnectionAPI::hasSSLConnection(std::string & host, int *port)
 	return connection->hasSSLConnection(host, port);
 }
 
+Message * WhatsappConnectionAPI::getReceivedMessage() {
+	return connection->getReceivedMessage();
+}
 

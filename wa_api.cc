@@ -16,8 +16,10 @@
 #include <map>
 #include <stdio.h>
 
+#include "wa_api.h"
 #include "contacts.h"
 #include "whatsapp_api.h"
+#include "message.h"
 
 char *waAPI_getgroups(void *waAPI)
 {
@@ -200,25 +202,6 @@ void waAPI_sendtyping(void *waAPI, const char *who, int typing)
 	((WhatsappConnectionAPI *) waAPI)->notifyTyping(std::string(who), typing);
 }
 
-int waAPI_querynext(void *waAPI)
-{
-	return ((WhatsappConnectionAPI *) waAPI)->query_next();
-}
-
-int waAPI_querychat(void *waAPI, char **who, char **message, char **author, unsigned long *timestamp)
-{
-	std::string f, m, a;
-	unsigned long t;
-	if (((WhatsappConnectionAPI *) waAPI)->query_chat(f, m, a, t)) {
-		*who = g_strdup(f.c_str());
-		*message = g_strdup(m.c_str());
-		*author = g_strdup(a.c_str());
-		*timestamp = t;
-		return 1;
-	}
-	return 0;
-}
-
 void waAPI_accountinfo(void *waAPI, unsigned long long *creation, unsigned long long *freeexpires, char **status)
 {
 	std::string st;
@@ -229,65 +212,35 @@ void waAPI_accountinfo(void *waAPI, unsigned long long *creation, unsigned long 
 	*status = g_strdup(st.c_str());
 }
 
-int waAPI_querychatimage(void *waAPI, char **who, char **image, int *imglen, char **url, char **author, unsigned long *timestamp)
-{
-	std::string fr, im, ur, auth;
-	unsigned long t;
-	if (((WhatsappConnectionAPI *) waAPI)->query_chatimages(fr, im, ur, auth, t)) {
-		*who = g_strdup(fr.c_str());
-		*image = (char *)g_memdup(im.c_str(), im.size());
-		*imglen = im.size();
-		*url = g_strdup(ur.c_str());
-		*author = g_strdup(auth.c_str());
-		*timestamp = t;
-		return 1;
-	}
-	return 0;
-}
+int waAPI_querymsg(void *waAPI, t_message * msg) {
+	WhatsappConnectionAPI * wa = (WhatsappConnectionAPI *)waAPI;
 
-int waAPI_querychatsound(void *waAPI, char **who, char **url, char **author, unsigned long *timestamp)
-{
-	std::string fr, ur, auth;
-	unsigned long t;
-	if (((WhatsappConnectionAPI *) waAPI)->query_chatsounds(fr, ur, auth, t)) {
-		*who = g_strdup(fr.c_str());
-		*url = g_strdup(ur.c_str());
-		*author = g_strdup(auth.c_str());
-		*timestamp = t;
-		return 1;
-	}
-	return 0;
-}
-int waAPI_querychatvideo(void *waAPI, char **who, char **url, char **author, unsigned long *timestamp)
-{
-	std::string fr, ur, auth;
-	unsigned long t;
-	if (((WhatsappConnectionAPI *) waAPI)->query_chatvideos(fr, ur, auth, t)) {
-		*who = g_strdup(fr.c_str());
-		*url = g_strdup(ur.c_str());
-		*author = g_strdup(auth.c_str());
-		*timestamp = t;
-		return 1;
-	}
-	return 0;
-}
+	Message * m = wa->getReceivedMessage();
+	if (m == NULL) return 0;
 
-int waAPI_querychatlocation(void *waAPI, char **who, char **image, int *imglen, double *lat, double *lng, char **author, unsigned long *timestamp)
-{
-	std::string fr, im, auth;
-	unsigned long t;
-	double la, ln;
-	if (((WhatsappConnectionAPI *) waAPI)->query_chatlocations(fr, la, ln, im, auth, t)) {
-		*who = g_strdup(fr.c_str());
-		*lat = la;
-		*lng = ln;
-		*image = (char *)g_memdup(im.c_str(), im.size());
-		*imglen = im.size();
-		*author = g_strdup(auth.c_str());
-		*timestamp = t;
-		return 1;
+	memset(msg,0,sizeof(t_message));
+	msg->type   = m->type();
+	msg->who    = g_strdup(m->from.c_str());
+	msg->author = g_strdup(m->author.c_str());
+	msg->t      = m->t;
+
+	if (msg->type == CHAT_MESSAGE)
+		msg->message = g_strdup(((ChatMessage*)m)->message.c_str());
+	if (msg->type == IMAGE_MESSAGE || msg->type == SOUND_MESSAGE || msg->type == VIDEO_MESSAGE)
+		msg->url = g_strdup(((MediaMessage*)m)->url.c_str());
+	if (msg->type == IMAGE_MESSAGE) {
+		std::string r = (((ImageMessage*)m)->preview.c_str());
+		msg->image = g_strdup(r.c_str());
+		msg->imagelen = r.size();
 	}
-	return 0;
+	if (msg->type == LOCAT_MESSAGE) {
+		msg->lat = ((LocationMessage*)m)->latitude;
+		msg->lng = ((LocationMessage*)m)->longitude;
+	}
+
+	delete m;
+
+	return 1;
 }
 
 int waAPI_querystatus(void *waAPI, char **who, int *stat)

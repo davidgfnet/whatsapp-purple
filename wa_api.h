@@ -15,7 +15,24 @@
 extern "C" {
 #endif
 
+typedef struct {
+	int type;
+
+	char * who;
+	char * message;
+	char * author;
+	unsigned long t;
+
+	char * image;
+	int imagelen;
+	char * url;
+
+	double lat, lng;
+} t_message;
+
 	int waAPI_queryreceivedmsg(void *waAPI, char * id, int * type);
+	int waAPI_querymsg(void *waAPI, t_message * msg);
+
 	int waAPI_sendcb(void *waAPI, void *buffer, int maxbytes);
 	void waAPI_senddone(void *waAPI, int bytessent);
 	void waAPI_input(void *waAPI, const void *buffer, int bytesrecv);
@@ -30,11 +47,6 @@ extern "C" {
 	int waAPI_loginstatus(void *waAPI);
 	void waAPI_addcontact(void *waAPI, const char *phone);
 	void waAPI_delcontact(void *waAPI, const char *phone);
-	int waAPI_querychat(void *waAPI, char **who, char **message, char **author, unsigned long *timestamp);
-	int waAPI_querychatimage(void *waAPI, char **who, char **image, int *imglen, char **url, char **author, unsigned long *timestamp);
-	int waAPI_querychatlocation(void *waAPI, char **who, char **image, int *imglen, double *lat, double *lng, char **author, unsigned long *timestamp);
-	int waAPI_querychatsound(void *waAPI, char **who, char **url, char **author, unsigned long *timestamp);
-	int waAPI_querychatvideo(void *waAPI, char **who, char **url, char **author, unsigned long *timestamp);
 	int waAPI_querystatus(void *waAPI, char **who, int *stat);
 	int waAPI_querynext(void *waAPI);
 	void waAPI_sendtyping(void *waAPI, const char *who, int typing);

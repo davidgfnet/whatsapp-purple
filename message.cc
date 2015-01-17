@@ -2,6 +2,7 @@
 #include "message.h"
 #include "wacommon.h"
 #include "wa_connection.h"
+#include "tree.h"
 
 Message::Message(const WhatsappConnection * wc, const std::string from, const unsigned long long time, const std::string id, const std::string author)
 {
@@ -17,6 +18,14 @@ Message::Message(const WhatsappConnection * wc, const std::string from, const un
 	this->author = getusername(author);
 }
 
+MediaMessage::MediaMessage(const WhatsappConnection * wc, const std::string from, const unsigned long long time,
+	const std::string id, const std::string author,
+	const std::string url, const std::string hash, const std::string filetype)
+: Message(wc, from, time, id, author) {
+	this->url = url;
+	this->hash = hash;
+	this->filetype = filetype;
+}
 
 ChatMessage::ChatMessage(const WhatsappConnection * wc, const std::string from, const unsigned long long time,
 	const std::string id, const std::string message, const std::string author) : 
@@ -56,16 +65,13 @@ ImageMessage::ImageMessage(const WhatsappConnection * wc, const std::string from
 	const std::string id, const std::string author, const std::string url, const unsigned int width,
 	const unsigned int height, const unsigned int size, const std::string encoding, const std::string hash,
 	const std::string filetype, const std::string preview)
-	:Message(wc, from, time, id, author)
+	:MediaMessage(wc, from, time, id, author, url, hash, filetype)
 {
 
-	this->url = url;
 	this->width = width;
 	this->height = height;
 	this->size = size;
 	this->encoding = encoding;
-	this->hash = hash;
-	this->filetype = filetype;
 	this->preview = preview;
 }
 
@@ -99,10 +105,8 @@ Message *ImageMessage::copy() const
 SoundMessage::SoundMessage(const WhatsappConnection * wc, const std::string from, const unsigned long long time,
 	const std::string id, const std::string author, const std::string url, const std::string hash,
 	const std::string filetype)
-	:Message(wc, from, time, id, author)
+	:MediaMessage(wc, from, time, id, author, url, hash, filetype)
 {
-	this->url = url;
-	this->filetype = filetype;
 }
 
 Message * SoundMessage::copy() const
@@ -114,10 +118,8 @@ Message * SoundMessage::copy() const
 VideoMessage::VideoMessage(const WhatsappConnection * wc, const std::string from, const unsigned long long time,
 	const std::string id, const std::string author, const std::string url, const std::string hash,
 	const std::string filetype)
-	:Message(wc, from, time, id, author)
+	:MediaMessage(wc, from, time, id, author, url, hash, filetype)
 {
-	this->url = url;
-	this->filetype = filetype;
 }
 
 Message * VideoMessage::copy() const

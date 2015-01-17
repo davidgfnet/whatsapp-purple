@@ -1215,100 +1215,14 @@ void WhatsappConnection::notifyError(ErrorCode err)
 
 }
 
-// Returns an integer indicating the next message type (sorting by timestamp)
-int WhatsappConnection::query_next() {
-	int res = -1;
-	unsigned int cur_ts = ~0;
-	for (unsigned int i = 0; i < recv_messages.size(); i++) {
-		if (recv_messages[i]->t < cur_ts) {
-			cur_ts = recv_messages[i]->t;
-			res = recv_messages[i]->type();
-		}
-	}
-	return res;
-}
-
-bool WhatsappConnection::query_chat(std::string & from, std::string & message, std::string & author, unsigned long &t)
+Message* WhatsappConnection::getReceivedMessage()
 {
-	for (unsigned int i = 0; i < recv_messages.size(); i++) {
-		if (recv_messages[i]->type() == 0) {
-			from = recv_messages[i]->from;
-			t = recv_messages[i]->t;
-			message = ((ChatMessage *) recv_messages[i])->message;
-			author = ((ChatMessage *) recv_messages[i])->author;
-			delete recv_messages[i];
-			recv_messages.erase(recv_messages.begin() + i);
-			return true;
-		}
+	if (recv_messages.size()) {
+		Message * ret = recv_messages[0];
+		recv_messages.erase(recv_messages.begin() + 0);
+		return ret;
 	}
-	return false;
-}
-
-bool WhatsappConnection::query_chatimages(std::string & from, std::string & preview, std::string & url, std::string & author, unsigned long &t)
-{
-	for (unsigned int i = 0; i < recv_messages.size(); i++) {
-		if (recv_messages[i]->type() == 1) {
-			from = recv_messages[i]->from;
-			t = recv_messages[i]->t;
-			preview = ((ImageMessage *) recv_messages[i])->preview;
-			url = ((ImageMessage *) recv_messages[i])->url;
-			author = ((ImageMessage *) recv_messages[i])->author;
-			delete recv_messages[i];
-			recv_messages.erase(recv_messages.begin() + i);
-			return true;
-		}
-	}
-	return false;
-}
-
-bool WhatsappConnection::query_chatsounds(std::string & from, std::string & url, std::string & author, unsigned long &t)
-{
-	for (unsigned int i = 0; i < recv_messages.size(); i++) {
-		if (recv_messages[i]->type() == 3) {
-			from = recv_messages[i]->from;
-			t = recv_messages[i]->t;
-			url = ((SoundMessage *) recv_messages[i])->url;
-			author = ((SoundMessage *) recv_messages[i])->author;
-			delete recv_messages[i];
-			recv_messages.erase(recv_messages.begin() + i);
-			return true;
-		}
-	}
-	return false;
-}
-
-bool WhatsappConnection::query_chatvideos(std::string & from, std::string & url, std::string & author, unsigned long &t)
-{
-	for (unsigned int i = 0; i < recv_messages.size(); i++) {
-		if (recv_messages[i]->type() == 4) {
-			from = recv_messages[i]->from;
-			t = recv_messages[i]->t;
-			url = ((VideoMessage *) recv_messages[i])->url;
-			author = ((VideoMessage *) recv_messages[i])->author;
-			delete recv_messages[i];
-			recv_messages.erase(recv_messages.begin() + i);
-			return true;
-		}
-	}
-	return false;
-}
-
-bool WhatsappConnection::query_chatlocations(std::string & from, double &lat, double &lng, std::string & prev, std::string & author, unsigned long &t)
-{
-	for (unsigned int i = 0; i < recv_messages.size(); i++) {
-		if (recv_messages[i]->type() == 2) {
-			from = recv_messages[i]->from;
-			t = recv_messages[i]->t;
-			prev = ((LocationMessage *) recv_messages[i])->preview;
-			lat = ((LocationMessage *) recv_messages[i])->latitude;
-			lng = ((LocationMessage *) recv_messages[i])->longitude;
-			author = ((LocationMessage *) recv_messages[i])->author;
-			delete recv_messages[i];
-			recv_messages.erase(recv_messages.begin() + i);
-			return true;
-		}
-	}
-	return false;
+	return NULL;
 }
 
 int WhatsappConnection::getuserstatus(const std::string & who)

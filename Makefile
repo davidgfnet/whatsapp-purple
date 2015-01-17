@@ -28,6 +28,7 @@ CFLAGS = \
     $(ARCHFLAGS) \
     -O2 \
     -Wall \
+    -Wno-unused-function \
     -fPIC \
     -DPURPLE_PLUGINS \
     -DPIC \

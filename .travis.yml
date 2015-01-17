@@ -5,8 +5,10 @@ compiler:
   - gcc
 
 before_script:
+  - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test 
   - sudo apt-get update -qq
-  - sudo apt-get install -qq libglib2.0-dev libpurple-dev g++-4.7
+  - sudo apt-get install -qq libglib2.0-dev libpurple-dev g++-4.8 gcc-4.8
+  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 90
 
 script: make
 

@@ -153,9 +153,8 @@ void WhatsappConnection::updateGroups()
 
 void WhatsappConnection::manageParticipant(std::string group, std::string participant, std::string command)
 {
-	Tree part("participant", makeAttr1("jid", participant));
 	Tree iq(command);
-	iq.addChild(part);
+	iq.addChild(Tree("participant", makeAttr1("jid", participant)));
 	Tree req("iq", makeAttr4("id", int2str(iqid++), "type", "set", "to", group + "@g.us", "xmlns", "w:g"));
 	req.addChild(iq);
 
@@ -164,9 +163,8 @@ void WhatsappConnection::manageParticipant(std::string group, std::string partic
 
 void WhatsappConnection::leaveGroup(std::string group)
 {
-	Tree gr("group", makeAttr1("id", group + "@g.us"));
 	Tree iq("leave");
-	iq.addChild(gr);
+	iq.addChild(Tree("group", makeAttr1("id", group + "@g.us")));
 	Tree req("iq", makeAttr4("id", int2str(iqid++), "type", "set", "to", "g.us", "xmlns", "w:g"));
 	req.addChild(iq);
 

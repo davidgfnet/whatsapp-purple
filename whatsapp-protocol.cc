@@ -738,20 +738,15 @@ void WhatsappConnection::processIncomingData()
 {
 	/* Parse the data and create as many Trees as possible */
 	std::vector < Tree > treelist;
-	try {
-		if (inbuffer.size() >= 3) {
-			/* Consume as many trees as possible */
+	if (inbuffer.size() >= 3) {
+		/* Consume as many trees as possible */
+		bool ok;
+		do {
 			Tree t;
-			do {
-				t = parse_tree(&inbuffer);
-				if (t.getTag() != "treeerr")
-					treelist.push_back(t);
-			} while (t.getTag() != "treeerr" and inbuffer.size() >= 3);
-		}
-	}
-	catch(int n) {
-		printf("In stream error! Need to handle this properly...\n");
-		return;
+			ok = parse_tree(&inbuffer, t);
+			if (ok)
+				treelist.push_back(t);
+		} while (ok and inbuffer.size() >= 3);
 	}
 
 	/* Now process the tree list! */
@@ -840,12 +835,11 @@ void WhatsappConnection::processIncomingData()
 				std::string id = treelist[i].getAttribute("id");
 				std::string author = treelist[i].getAttribute("participant");
 
-				Tree t = treelist[i].getChild("body");
-				if (t.getTag() != "treeerr") {
+				Tree t;
+				if (treelist[i].getChild("body", t)) {
 					this->receiveMessage(ChatMessage(this, from, time, id, t.getData(), author));
 				}
-				t = treelist[i].getChild("media");
-				if (t.getTag() != "treeerr") {
+				if (treelist[i].getChild("media", t)) {
 					if (t.hasAttributeValue("type", "image")) {
 						this->receiveMessage(ImageMessage(this, from, time, id, author, t.getAttribute("url"), str2int(t.getAttribute("width")), str2int(t.getAttribute("height")), str2int(t.getAttribute("size")), t.getAttribute("encoding"), t.getAttribute("filehash"), t.getAttribute("mimetype"), t.getData()));
 					} else if (t.hasAttributeValue("type", "location")) {
@@ -881,22 +875,19 @@ void WhatsappConnection::processIncomingData()
 				gq_stat |= 4;
 
 			if (treelist[i].hasAttributeValue("type", "result") and treelist[i].hasAttribute("from")) {
-				Tree t = treelist[i].getChild("query");
-				if (t.getTag() != "treeerr") {
+				Tree t;
+				if (treelist[i].getChild("query", t)) {
 					if (t.hasAttribute("seconds")) {
 						this->notifyLastSeen(treelist[i].getAttribute("from"), t.getAttribute("seconds"));
 					}
 				}
-				t = treelist[i].getChild("picture");
-				if (t.getTag() != "treeerr") {
+				if (treelist[i].getChild("picture", t)) {
 					if (t.hasAttributeValue("type", "preview"))
 						this->addPreviewPicture(treelist[i].getAttribute("from"), t.getData());
 					if (t.hasAttributeValue("type", "image"))
 						this->addFullsizePicture(treelist[i].getAttribute("from"), t.getData());
 				}
-
-				t = treelist[i].getChild("media");
-				if (t.getTag() != "treeerr") {
+				if (treelist[i].getChild("media", t)) {
 					for (unsigned int j = 0; j < uploadfile_queue.size(); j++) {
 						if (uploadfile_queue[j].rid == str2int(treelist[i].getAttribute("id"))) {
 							/* Queue to upload the file */
@@ -913,8 +904,7 @@ void WhatsappConnection::processIncomingData()
 					}
 				}
 
-				t = treelist[i].getChild("duplicate");
-				if (t.getTag() != "treeerr") {
+				if (treelist[i].getChild("duplicate", t)) {
 					for (unsigned int j = 0; j < uploadfile_queue.size(); j++) {
 						if (uploadfile_queue[j].rid == str2int(treelist[i].getAttribute("id"))) {
 							/* Generate a fake JSON and process directly */
@@ -928,8 +918,7 @@ void WhatsappConnection::processIncomingData()
 				}
 
 				// Status result
-				t = treelist[i].getChild("status");
-				if (t.getTag() != "treeerr") {
+				if (treelist[i].getChild("status", t)) {
 					std::vector < Tree > childs = t.getChildren();
 					for (unsigned int j = 0; j < childs.size(); j++) {
 						if (childs[j].getTag() == "user") {
@@ -969,8 +958,7 @@ void WhatsappConnection::processIncomingData()
 					}
 				}
 
-				t = treelist[i].getChild("group");
-				if (t.getTag() != "treeerr") {
+				if (treelist[i].getChild("group", t)) {
 					if (t.hasAttributeValue("type", "preview"))
 						this->addPreviewPicture(treelist[i].getAttribute("from"), t.getData());
 					if (t.hasAttributeValue("type", "image"))
@@ -1047,12 +1035,12 @@ DataBuffer WhatsappConnection::write_tree(Tree * tree)
 	return bout;
 }
 
-Tree WhatsappConnection::parse_tree(DataBuffer * data)
+bool WhatsappConnection::parse_tree(DataBuffer * data, Tree & t)
 {
 	int bflag = (data->getInt(1) & 0xF0) >> 4;
 	int bsize = data->getInt(2, 1);
 	if (bsize > data->size() - 3) {
-		return Tree("treeerr");	/* Next message incomplete, return consumed data */
+		return false; /* Next message incomplete, return consumed data */
 	}
 	data->popData(3);
 
@@ -1061,7 +1049,7 @@ Tree WhatsappConnection::parse_tree(DataBuffer * data)
 		if (this->in != NULL) {
 			DataBuffer *decoded_data = data->decodedBuffer(this->in, bsize, false);
 
-			Tree tt = read_tree(decoded_data);
+			bool res = read_tree(decoded_data, t);
 
 			/* Call recursive */
 			data->popData(bsize);	/* Pop data unencrypted for next parsing! */
@@ -1071,18 +1059,18 @@ Tree WhatsappConnection::parse_tree(DataBuffer * data)
 			
 			delete decoded_data;
 			
-			return tt;
+			return res;
 		} else {
 			printf("Received crypted data before establishing crypted layer! Skipping!\n");
 			data->popData(bsize);
-			return Tree("treeerr");
+			return false;
 		}
 	} else {
-		return read_tree(data);
+		return read_tree(data, t);
 	}
 }
 
-Tree WhatsappConnection::read_tree(DataBuffer * data)
+bool WhatsappConnection::read_tree(DataBuffer * data, Tree & tt)
 {
 	int lsize = data->readListSize();
 	int type = data->getInt(1);
@@ -1091,10 +1079,11 @@ Tree WhatsappConnection::read_tree(DataBuffer * data)
 		Tree t;
 		t.readAttributes(data, lsize);
 		t.setTag("start");
-		return t;
+		tt = t;
+		return true;
 	} else if (type == 2) {
 		data->popData(1);
-		return Tree("treeerr");	/* No data in this tree... */
+		return false;
 	}
 
 	Tree t;
@@ -1102,7 +1091,8 @@ Tree WhatsappConnection::read_tree(DataBuffer * data)
 	t.readAttributes(data, lsize);
 
 	if ((lsize & 1) == 1) {
-		return t;
+		tt = t;
+		return true;
 	}
 
 	if (data->isList()) {
@@ -1111,7 +1101,8 @@ Tree WhatsappConnection::read_tree(DataBuffer * data)
 		t.setData(data->readString());
 	}
 
-	return t;
+	tt = t;
+	return true;
 }
 
 static int isgroup(const std::string user)

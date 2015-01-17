@@ -97,16 +97,17 @@ std::string Tree::getAttribute(std::string at)
 	return "";
 }
 
-Tree Tree::getChild(std::string tag)
+bool Tree::getChild(std::string tag, Tree & t)
 {
 	for (unsigned int i = 0; i < children.size(); i++) {
-		if (children[i].getTag() == tag)
-			return children[i];
-		Tree t = children[i].getChild(tag);
-		if (t.getTag() != "treeerr")
-			return t;
+		if (children[i].getTag() == tag) {
+			t = children[i];
+			return true;
+		}
+		if (children[i].getChild(tag, t))
+			return true;
 	}
-	return Tree("treeerr");
+	return false;
 }
 
 bool Tree::hasChild(std::string tag)

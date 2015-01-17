@@ -22,7 +22,7 @@ public:
 	std::string getData() { return data; }
 	std::string getTag() { return tag; }
 	std::vector < Tree > getChildren();
-	Tree getChild(std::string tag);
+	bool getChild(std::string tag, Tree & t);
 	std::map < std::string, std::string > &getAttributes();
 	std::string getAttribute(std::string at);
 

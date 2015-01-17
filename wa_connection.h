@@ -73,7 +73,7 @@ private:
 	void processSSLIncomingData();
 	DataBuffer serialize_tree(Tree * tree, bool crypt = true);
 	DataBuffer write_tree(Tree * tree);
-	Tree parse_tree(DataBuffer * data);
+	bool parse_tree(DataBuffer * data, Tree & t);
 
 	/* Upload */
 	std::vector < t_fileupload > uploadfile_queue;
@@ -109,7 +109,7 @@ private:
 	void updateFileUpload(std::string);
 
 public:
-	Tree read_tree(DataBuffer * data);
+	bool read_tree(DataBuffer * data, Tree & tt);
 
 	WhatsappConnection(std::string phone, std::string password, std::string nick);
 	~WhatsappConnection();

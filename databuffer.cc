@@ -333,7 +333,9 @@ std::vector < Tree > DataBuffer::readList(WhatsappConnection * c)
 	std::vector < Tree > l;
 	int size = readListSize();
 	while (size--) {
-		l.push_back(c->read_tree(this));
+		Tree t;
+		if (c->read_tree(this, t))
+			l.push_back(t);
 	}
 	return l;
 }

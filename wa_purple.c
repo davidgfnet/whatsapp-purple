@@ -557,7 +557,6 @@ static void waprpl_process_incoming_events(PurpleConnection * gc)
 		purple_signal_emit(purple_connection_get_prpl(gc), "whatsapp-message-received", gc, msgid, typer);
 	}
 
-
 	/* Status changes, typing notices and profile pictures. */
 	query_status(gc);
 	query_typing(gc);

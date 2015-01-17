@@ -48,7 +48,6 @@ typedef struct {
 	void waAPI_addcontact(void *waAPI, const char *phone);
 	void waAPI_delcontact(void *waAPI, const char *phone);
 	int waAPI_querystatus(void *waAPI, char **who, int *stat);
-	int waAPI_querynext(void *waAPI);
 	void waAPI_sendtyping(void *waAPI, const char *who, int typing);
 	void waAPI_setmypresence(void *waAPI, const char *st, const char *msg);
 	int waAPI_queryicon(void *waAPI, char **who, char **icon, int *len, char **hash);

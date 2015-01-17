@@ -1036,9 +1036,9 @@ bool WhatsappConnection::parse_tree(DataBuffer * data, Tree & t)
 {
 	int bflag = (data->getInt(1) & 0xF0) >> 4;
 	int bsize = data->getInt(2, 1);
-	if (bsize > data->size() - 3) {
+	if (bsize > data->size() - 3)
 		return false; /* Next message incomplete, return consumed data */
-	}
+
 	data->popData(3);
 
 	if (bflag & 8) {
@@ -1047,15 +1047,9 @@ bool WhatsappConnection::parse_tree(DataBuffer * data, Tree & t)
 			DataBuffer *decoded_data = data->decodedBuffer(this->in, bsize, false);
 
 			bool res = read_tree(decoded_data, t);
-
-			/* Call recursive */
-			data->popData(bsize);	/* Pop data unencrypted for next parsing! */
-			
-			/* Remove hash */
-			decoded_data->popData(4); 
-			
 			delete decoded_data;
-			
+
+			data->popData(bsize);	/* Pop data unencrypted for next parsing! */
 			return res;
 		} else {
 			data->popData(bsize);

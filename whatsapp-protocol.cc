@@ -203,7 +203,6 @@ void WhatsappConnection::doLogin(std::string resource)
 	/* Send auth request */
 	{
 		Tree t("auth", makeAttr2("mechanism","WAUTH-2", "user",phone));
-		t.forceDataWrite();
 		first = first + serialize_tree(&t, false);
 	}
 
@@ -1012,7 +1011,7 @@ DataBuffer WhatsappConnection::write_tree(Tree * tree)
 		len += tree->getAttributes().size() * 2;
 	if (tree->getChildren().size() != 0)
 		len++;
-	if (tree->getData().size() != 0 or tree->forcedData())
+	if (tree->getData().size() != 0)
 		len++;
 
 	bout.writeListSize(len);
@@ -1022,7 +1021,7 @@ DataBuffer WhatsappConnection::write_tree(Tree * tree)
 		bout.putString(tree->getTag());
 	tree->writeAttributes(&bout);
 
-	if (tree->getData().size() > 0 or tree->forcedData())
+	if (tree->getData().size() > 0)
 		bout.putRawString(tree->getData());
 	if (tree->getChildren().size() > 0) {
 		bout.writeListSize(tree->getChildren().size());
@@ -1061,7 +1060,6 @@ bool WhatsappConnection::parse_tree(DataBuffer * data, Tree & t)
 			
 			return res;
 		} else {
-			printf("Received crypted data before establishing crypted layer! Skipping!\n");
 			data->popData(bsize);
 			return false;
 		}

@@ -5,28 +5,16 @@
 Tree::Tree(std::string tag)
 {
 	this->tag = tag;
-	forcedata = false;
 }
 
 Tree::Tree(std::string tag, std::map < std::string, std::string > attributes)
 {
 	this->tag = tag;
 	this->attributes = attributes;
-	forcedata = false;
 }
 
 Tree::~Tree()
 {
-}
-
-void Tree::forceDataWrite()
-{
-	forcedata = true;
-}
-
-bool Tree::forcedData() const
-{
-	return forcedata;
 }
 
 void Tree::addChild(Tree t)

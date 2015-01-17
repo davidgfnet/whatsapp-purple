@@ -13,7 +13,6 @@ private:
 	std::map < std::string, std::string > attributes;
 	std::vector < Tree > children;
 	std::string tag, data;
-	bool forcedata;
 public:
 	Tree(std::string tag = "");
 	Tree(std::string tag, std::map < std::string, std::string > attributes);
@@ -38,9 +37,6 @@ public:
 	bool hasAttributeValue(std::string at, std::string val);
 	bool hasAttribute(std::string at);
 	bool hasChild(std::string tag);
-
-	void forceDataWrite();
-	bool forcedData() const;
 
 	std::string toString(int sp = 0);
 };

@@ -5,6 +5,7 @@
 #include <string>
 #include <map>
 #include <stdlib.h>
+#include <stdio.h>
 
 static unsigned long long str2lng(std::string s)
 {

@@ -1,0 +1,172 @@
+
+#ifndef __WACONNECTION__H__
+#define __WACONNECTION__H__
+
+#include <string>
+#include <vector>
+#include <map>
+#include "wacommon.h"
+
+class ChatMessage;
+class ImageMessage;
+class Message;
+class RC4Decoder;
+class DataBuffer;
+class Contact;
+class Group;
+
+struct t_fileupload {
+	std::string to, from;
+	std::string file, hash;
+	int rid;
+	std::string type;
+	std::string uploadurl, host;
+	bool uploading;
+	int totalsize;
+};
+
+
+class WhatsappConnection {
+	friend class ChatMessage;
+	friend class ImageMessage;
+	friend class Message;
+private:
+
+	enum SessionStatus { SessionNone = 0, SessionConnecting = 1, SessionWaitingChallenge = 2, SessionWaitingAuthOK = 3, SessionConnected = 4 };
+	enum ErrorCode { errorAuth, errorUnknown };
+
+	/* Current dissection classes */
+	RC4Decoder * in, *out;
+	unsigned char session_key[20*4]; // V1.4 update
+	unsigned int frame_seq;
+	DataBuffer inbuffer, outbuffer;
+	DataBuffer sslbuffer, sslbuffer_in;
+	std::string challenge_data, challenge_response;
+	std::string phone, password;
+	SessionStatus conn_status;
+
+	/* State stuff */
+	unsigned int msgcounter, iqid;
+	std::string nickname;
+	std::string whatsappserver, whatsappservergroup;
+	std::string mypresence, mymessage;
+	bool sendRead;
+
+	/* Various account info */
+	std::string account_type, account_status, account_expiration, account_creation;
+
+	/* Groups stuff */
+	std::map < std::string, Group > groups;
+	int gq_stat;
+	int gw1, gw2, gw3;
+	bool groups_updated;
+
+	/* Contacts & msg */
+	std::map < std::string, Contact > contacts;
+	std::vector < Message * >recv_messages, recv_messages_delay;
+	std::vector < std::string > user_changes, user_icons, user_typing;
+
+	/* Reception queue */
+	std::vector < std::pair<std::string, int> > received_messages;
+
+	void processIncomingData();
+	void processSSLIncomingData();
+	DataBuffer serialize_tree(Tree * tree, bool crypt = true);
+	DataBuffer write_tree(Tree * tree);
+	Tree parse_tree(DataBuffer * data);
+
+	/* Upload */
+	std::vector < t_fileupload > uploadfile_queue;
+
+	/* SSL / HTTPS interface */
+	int sslstatus;		/* 0 Idle, 1 sending request, 2 getting response */
+	/* 5/6 for image upload */
+
+	void receiveMessage(const Message & m);
+	void notifyPresence(std::string from, std::string presence);
+	void notifyLastSeen(std::string from, std::string seconds);
+	void addPreviewPicture(std::string from, std::string picture);
+	void addFullsizePicture(std::string from, std::string picture);
+	void sendResponse();
+	void doPong(std::string id, std::string from);
+	void subscribePresence(std::string user);
+	void getLast(std::string user);
+	void queryPreview(std::string user);
+	void queryFullSize(std::string user);
+	void gotTyping(std::string who, std::string tstat);
+	void updateGroups();
+	void queryStatuses();
+
+	void notifyMyMessage();
+	void notifyMyPresence();
+	void sendInitial();
+	void notifyError(ErrorCode err);
+	DataBuffer generateResponse(std::string from, std::string type, std::string id);
+	std::string generateUploadPOST(t_fileupload * fu);
+	void processUploadQueue();
+
+	void updateContactStatuses(std::string json);
+	void updateFileUpload(std::string);
+
+public:
+	Tree read_tree(DataBuffer * data);
+
+	WhatsappConnection(std::string phone, std::string password, std::string nick);
+	~WhatsappConnection();
+
+	void doLogin(std::string);
+	void receiveCallback(const char *data, int len);
+	int sendCallback(char *data, int len);
+	void sentCallback(int len);
+	bool hasDataToSend();
+
+	bool queryReceivedMessage(char *msgid, int * type);
+	void getMessageId(char * msgid);
+	void addContacts(std::vector < std::string > clist);
+	void sendChat(std::string msgid, std::string to, std::string message);
+	void sendGroupChat(std::string msgid, std::string to, std::string message);
+	bool query_chat(std::string & from, std::string & message, std::string & author, unsigned long &t);
+	bool query_chatimages(std::string & from, std::string & preview, std::string & url, std::string & author, unsigned long &t);
+	bool query_chatsounds(std::string & from, std::string & url, std::string & author, unsigned long &t);
+	bool query_chatvideos(std::string & from, std::string & url, std::string & author, unsigned long &t);
+	bool query_chatlocations(std::string & from, double &lat, double &lng, std::string & prev, std::string & author, unsigned long &t);
+	int query_next();
+	bool query_status(std::string & from, int &status);
+	bool query_icon(std::string & from, std::string & icon, std::string & hash);
+	bool query_avatar(std::string user, std::string & icon);
+	bool query_typing(std::string & from, int &status);
+	void send_avatar(const std::string & avatar);
+	void account_info(unsigned long long &creation, unsigned long long &freeexp, std::string & status);
+	int getuserstatus(const std::string & who);
+	std::string getuserstatusstring(const std::string & who);
+	unsigned long long getlastseen(const std::string & who);
+
+	void manageParticipant(std::string group, std::string participant, std::string command);
+	void leaveGroup(std::string group);
+
+	void notifyTyping(std::string who, int status);
+	void setMyPresence(std::string s, std::string msg);
+	std::map < std::string, Group > getGroups();
+	bool groupsUpdated();
+	void addGroup(std::string subject);
+
+	int loginStatus() const
+	{
+		return ((int)conn_status) - 1;
+	}
+	int sendImage(std::string to, int w, int h, unsigned int size, const char *fp);
+
+	int sendSSLCallback(char *buffer, int maxbytes);
+	int sentSSLCallback(int bytessent);
+	void receiveSSLCallback(char *buffer, int bytesrecv);
+	bool hasSSLDataToSend();
+	bool closeSSLConnection();
+	void SSLCloseCallback();
+	bool hasSSLConnection(std::string & host, int *port);
+	int uploadProgress(int &rid, int &bs);
+	int uploadComplete(int);
+
+};
+
+#endif
+

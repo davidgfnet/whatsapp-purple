@@ -14,7 +14,7 @@ endif
 all: $(LIBNAME)
 
 C_SRCS = wa_purple.c
-CXX_SRCS = whatsapp-protocol.cc wa_api.cc
+CXX_SRCS = whatsapp-protocol.cc wa_api.cc rc4.cc keygen.cc tree.cc databuffer.cc message.cc
 
 C_OBJS = $(C_SRCS:.c=.o)
 CXX_OBJS = $(CXX_SRCS:.cc=.o)
@@ -33,13 +33,15 @@ CFLAGS = \
     -DPIC \
     $(CFLAGS_PURPLE)
 
+CXXFLAGS=-std=c++11
+
 LIBS_PURPLE = $(shell pkg-config --libs purple)
 LDFLAGS =  $(ARCHFLAGS) -shared -pipe 
 
 %.o: %.c
 	$(CC) -c $(CFLAGS) -o $@ $<
 %.o: %.cc
-	$(CXX) -c $(CFLAGS) -o $@ $<
+	$(CXX) -c $(CFLAGS) $(CXXFLAGS) -o $@ $<
 
 $(LIBNAME): $(C_OBJS) $(CXX_OBJS) 
 	$(LD) $(LDFLAGS) -o $@ $^ $(LIBS_PURPLE)

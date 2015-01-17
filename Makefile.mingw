@@ -4,7 +4,7 @@ LIBNAME = libwhatsapp.dll
 all: $(LIBNAME)
 
 C_SRCS = wa_purple.c
-CXX_SRCS = whatsapp-protocol.cc wa_api.cc
+CXX_SRCS = whatsapp-protocol.cc wa_api.cc rc4.cc keygen.cc tree.cc databuffer.cc message.cc
 
 C_OBJS = $(C_SRCS:.c=.o)
 CXX_OBJS = $(CXX_SRCS:.cc=.o)
@@ -28,6 +28,7 @@ RES = i686-w64-mingw32-windres
 LD = $(CXX)
 CFLAGS_PURPLE = $(shell mingw32-pkg-config --cflags purple)
 CFLAGS = \
+    -std=c++11 \
     -Wno-unused-parameter \
     -O2 \
     -m32 \

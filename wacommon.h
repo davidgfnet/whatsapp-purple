@@ -34,19 +34,23 @@ static int str2int(std::string s)
 
 static double str2dbl(std::string s)
 {
-  // Manual parsing. we assume dot as separator :)
-  int i1,i2;
-  sscanf(s.c_str(), "%d.%d", &i1, &i2);
-	double d;
-  int i3 = i2;
-  int n = 1;
-  while (i3 > 0) {
-    i3 /= 10;
-    n *= 10;
-  }
+  double f = (s[0] == '-') ? -1 : 1;
+  while (s.size() > 0 && !(s[0] >= '0' && s[0] <= '9'))
+    s = s.substr(1);
 
-  d = i1 + ((double)i2)/n;
-	return d;
+  int i1 = atoi(s.c_str());
+  do {
+    s = s.substr(1);
+  } while (s.size() > 0 && s[0] >= '0' && s[0] <= '9');
+  s = s.substr(1);
+  int i2 = atoi(s.c_str());
+
+  double d = i2;
+  while (d > 1.0f || d < -1.0f)
+    d /= 10;
+  d += i1;
+
+  return d*f;
 }
 
 static std::string getusername(std::string user)

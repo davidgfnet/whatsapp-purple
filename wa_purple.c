@@ -342,7 +342,7 @@ static void conv_add_message(PurpleConnection * gc, const char *who, const char 
 static char * dbl2str(double num) {
 	double a,b;
 	b = modf (num, &a);
-	return g_strdup_printf("%d.%d", (int)a, (int)(b*100000000.0f));
+	return g_strdup_printf("%d.%08d", (int)a, (int)(b*100000000.0f));
 }
 
 static int str_array_find(gchar **haystack, const gchar *needle)
@@ -523,11 +523,13 @@ static void waprpl_process_incoming_events(PurpleConnection * gc)
 		case 2: {
 			purple_debug_info(WHATSAPP_ID, "Got geomessage from: %s Coordinates (%f %f)\n", 
 				m.who, (float)m.lat, (float)m.lng);
+			char * lat = dbl2str(m.lat);
+			char * lng = dbl2str(m.lng);
 			char *msg = g_strdup_printf("<a href=\"http://openstreetmap.org/?lat=%s&lon=%s&zoom=20\">"
 				"http://openstreetmap.org/?lat=%s&lon=%s&zoom=20</a>", 
-				dbl2str(m.lat), dbl2str(m.lng), dbl2str(m.lat), dbl2str(m.lng));
+				lat, lng, lat, lng);
 			conv_add_message(gc, m.who, msg, m.author, m.t);
-			g_free(msg);
+			g_free(msg); g_free(lng); g_free(lat);
 			} break;
 		case 3: {
 			purple_debug_info(WHATSAPP_ID, "Got chat sound from %s: %s\n", m.who, m.url);

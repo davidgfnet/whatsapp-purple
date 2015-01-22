@@ -10,12 +10,12 @@ C_OBJS = $(C_SRCS:.c=.o)
 CXX_OBJS = $(CXX_SRCS:.cc=.o)
 RESOURCES = libwhatsapp.res
 
-PIDGIN_INCLUDE_WIN32_DEV= -I $(PIDGIN_DEV_ROOT)/pidgin/libpurple/ \
-                          -I $(PIDGIN_DEV_ROOT)/win32-dev/gtk_2_0-2.14/include/glib-2.0/ \
-                          -I $(PIDGIN_DEV_ROOT)/win32-dev/gtk_2_0-2.14/lib/glib-2.0/include/
+PIDGIN_INCLUDE_WIN32_DEV= -I "$(PIDGIN_DEV_ROOT)/pidgin/libpurple/" \
+                          -I "$(PIDGIN_DEV_ROOT)/win32-dev/gtk_2_0-2.14/include/glib-2.0/" \
+                          -I "$(PIDGIN_DEV_ROOT)/win32-dev/gtk_2_0-2.14/lib/glib-2.0/include/"
 
-PIDGIN_LIB_WIN32_DEV= -L $(PIDGIN_DEV_ROOT)/win32-dev/gtk_2_0-2.14/lib/ \
-                      -L $(PIDGIN_DEV_ROOT)/pidgin/libpurple/ \
+PIDGIN_LIB_WIN32_DEV= -L "$(PIDGIN_DEV_ROOT)/win32-dev/gtk_2_0-2.14/lib/" \
+                      -L "$(PIDGIN_DEV_ROOT)/pidgin/libpurple/" \
                       -lglib-2.0 -lpurple
 
 

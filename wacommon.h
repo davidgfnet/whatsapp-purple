@@ -20,14 +20,14 @@ static unsigned long long str2lng(std::string s)
 	return r;
 }
 
-static std::string int2str(unsigned int num)
+static std::string i2s(unsigned int num)
 {
 	char temp[512];
 	sprintf(temp, "%d", num);
 	return std::string(temp);
 }
 
-static int str2int(std::string s)
+static int a2i(const std::string & s)
 {
 	int d;
 	sscanf(s.c_str(), "%d", &d);

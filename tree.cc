@@ -73,15 +73,15 @@ bool Tree::hasAttributeValue(std::string at, std::string val)
 	return false;
 }
 
-bool Tree::hasAttribute(std::string at)
+bool Tree::hasAttribute(const std::string & at) const
 {
 	return (attributes.find(at) != attributes.end());
 }
 
-std::string Tree::getAttribute(std::string at)
+std::string Tree::getAtr(const std::string & at) const
 {
 	if (hasAttribute(at))
-		return (attributes[at]);
+		return (attributes.at(at));
 	return "";
 }
 

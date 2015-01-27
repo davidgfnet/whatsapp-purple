@@ -39,7 +39,7 @@ DataBuffer ChatMessage::serialize() const
 	Tree tbody("body");
 	tbody.setData(this->message);
 
-	std::string stime = int2str(t);
+	std::string stime = i2s(t);
 	std::map < std::string, std::string > attrs;
 	if (server.size())
 		attrs["to"] = from + "@" + server;
@@ -77,10 +77,10 @@ ImageMessage::ImageMessage(const WhatsappConnection * wc, const std::string from
 
 DataBuffer ImageMessage::serialize() const
 {
-	Tree tmedia("media", makeAttr4("type", "image", "url", url, "size", int2str(size), "file", "myfile.jpg"));
+	Tree tmedia("media", makeAttr4("type", "image", "url", url, "size", i2s(size), "file", "myfile.jpg"));
 	tmedia.setData(preview);	/* ICON DATA! */
 
-	std::string stime = int2str(t);
+	std::string stime = i2s(t);
 	std::map < std::string, std::string > attrs;
 	if (server.size())
 		attrs["to"] = from + "@" + server;

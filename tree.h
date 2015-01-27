@@ -23,7 +23,8 @@ public:
 	std::vector < Tree > getChildren();
 	bool getChild(std::string tag, Tree & t);
 	std::map < std::string, std::string > &getAttributes();
-	std::string getAttribute(std::string at);
+	std::string getAtr(const std::string & at) const;
+	std::string operator[](const std::string & at) const { return getAtr(at); }
 
 	void setTag(std::string tag) { this->tag = tag; }
 	void setAttributes(std::map < std::string, std::string > attributes);
@@ -35,7 +36,7 @@ public:
 	void writeAttributes(DataBuffer * data);
 
 	bool hasAttributeValue(std::string at, std::string val);
-	bool hasAttribute(std::string at);
+	bool hasAttribute(const std::string & at) const;
 	bool hasChild(std::string tag);
 
 	std::string toString(int sp = 0);

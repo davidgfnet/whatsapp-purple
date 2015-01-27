@@ -6,6 +6,8 @@
 #include <map>
 #include <stdlib.h>
 #include <stdio.h>
+#include <sstream>
+#include <locale>
 
 static unsigned long long str2lng(std::string s)
 {
@@ -34,23 +36,11 @@ static int str2int(std::string s)
 
 static double str2dbl(std::string s)
 {
-  double f = (s[0] == '-') ? -1 : 1;
-  while (s.size() > 0 && !(s[0] >= '0' && s[0] <= '9'))
-    s = s.substr(1);
-
-  int i1 = atoi(s.c_str());
-  do {
-    s = s.substr(1);
-  } while (s.size() > 0 && s[0] >= '0' && s[0] <= '9');
-  s = s.substr(1);
-  int i2 = atoi(s.c_str());
-
-  double d = i2;
-  while (d > 1.0f || d < -1.0f)
-    d /= 10;
-  d += i1;
-
-  return d*f;
+	float longitude = 0.0f;
+	std::istringstream istr(s);
+	istr.imbue(std::locale("C"));
+	istr >> longitude;
+	return longitude;
 }
 
 static std::string getusername(std::string user)

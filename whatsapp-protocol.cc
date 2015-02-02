@@ -1039,7 +1039,18 @@ bool WhatsappConnection::parse_tree(DataBuffer * data, Tree & t)
 		if (this->in != NULL) {
 			DataBuffer *decoded_data = data->decodedBuffer(this->in, bsize, false);
 
-			bool res = read_tree(decoded_data, t);
+			bool res;
+			if (bflag & 4) {
+				DataBuffer *decomp_data = decoded_data->decompressedBuffer();
+				if (decomp_data != NULL) {
+					res = read_tree(decomp_data, t);
+					delete decomp_data;
+				}
+				else
+					res = false;
+			} else {
+				res = read_tree(decoded_data, t);
+			}
 			delete decoded_data;
 
 			data->popData(bsize);	/* Pop data unencrypted for next parsing! */

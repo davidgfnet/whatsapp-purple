@@ -8,6 +8,10 @@
 #include "tree.h"
 #include "wa_connection.h"
 
+extern "C" {
+	size_t tinfl_decompress_mem_to_mem(void *pOut_buf, size_t out_buf_len, const void *pSrc_buf, size_t src_buf_len, int flags);
+}
+
 // This changed to a huffman-like encoding. Therefore we can use one or two bytes...
 static bool getDecoded(int n, std::string & res)
 {
@@ -97,6 +101,18 @@ DataBuffer *DataBuffer::decodedBuffer(RC4Decoder * decoder, int clength, bool do
 	DataBuffer *deco = new DataBuffer(this->buffer, clength);
 	decoder->cipher(&deco->buffer[0], clength - 4);
 	return deco;
+}
+
+DataBuffer *DataBuffer::decompressedBuffer()
+{
+	int ressize = this->size()*2;
+	char dbuf[ressize];
+	size_t outsize = tinfl_decompress_mem_to_mem(dbuf, ressize, this->buffer, this->size(), 1);
+
+	if (outsize >= 0)
+		return new DataBuffer(dbuf, outsize);
+	
+	return NULL;
 }
 
 DataBuffer DataBuffer::encodedBuffer(RC4Decoder * decoder, unsigned char *key, bool dout, unsigned int seq)

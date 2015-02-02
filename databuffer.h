@@ -23,6 +23,7 @@ public:
 
 	DataBuffer *decodedBuffer(RC4Decoder * decoder, int clength, bool dout);
 	DataBuffer encodedBuffer(RC4Decoder * decoder, unsigned char *key, bool dout, unsigned int seq);
+	DataBuffer *decompressedBuffer();
 
 	void *getPtr();
 	int getInt(int nbytes, int offset = 0);

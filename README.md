@@ -9,9 +9,15 @@ Get a copy
 ----------
 
 To get meaningful instructions on how to use this (if you are a user, not a 
-developer) please go to https://davidgf.net/whatsapp/
+developer) please go to https://davidgf.net/whatsapp/ (Instructions for Ubuntu,
+Fedora and Windows are provided).
 
-Instructions for Ubuntu, Fedora and Windows are provided.
+Official binary sources (provided by davidgfnet):
+
+Ubuntu: https://launchpad.net/~whatsapp-purple/+archive/ubuntu/ppa
+Fedora: https://copr.fedoraproject.org/coprs/davidgf/whatsapp-purple/
+Windows: http://gosell.it/product/whatsapp-for-pidgin-20
+
 
 Building
 --------

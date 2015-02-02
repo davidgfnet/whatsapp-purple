@@ -8,11 +8,10 @@ WhatsApp protocol implementation for libpurple (Pidgin)
 Get a copy
 ----------
 
-Ubuntu users can use the Launchpad repository:
-https://launchpad.net/~whatsapp-purple/+archive/ppa/
+To get meaningful instructions on how to use this (if you are a user, not a 
+developer) please go to https://davidgf.net/whatsapp/
 
-Windows users can find a copy at the nightly builds server:
-http://davidgf.net/nightly/whatsapp-purple/win32/
+Instructions for Ubuntu, Fedora and Windows are provided.
 
 Building
 --------
@@ -20,14 +19,6 @@ Building
 Just run `make` (if you have to choose between 32 and 64 bit, run `make
 ARCH=i686` or `make ARCH=x86_64`). `Makefile.mingw` is the Makefile for 32-bit
 Windows.
-
-Binaries
---------
-
-Check http://davidgf.net/nightly/whatsapp-purple/ for nightly builds ;)
-
-For experimental builds (branch `pu`) check
-http://davidgf.net/nightly/whatsapp-purple-experimental/
 
 FAQ
 ---
@@ -39,6 +30,7 @@ additional leading zeros, e.g. `4917012345678`), as for the password there are
 many ways to get it. You can either sniff it or just ask for a new one. Check
 these links here:
 
+* https://davidgf.net/whatsapp/pwd.html
 * https://github.com/venomous0x/WhatsAPI#faq
 * https://github.com/shirioko/MissVenom
 * http://blog.philippheckel.com/2013/07/05/how-to-sniff-the-whatsapp-password-from-your-android-phone-or-iphone/

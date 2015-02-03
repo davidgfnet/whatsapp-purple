@@ -229,8 +229,8 @@ int waAPI_querymsg(void *waAPI, t_message * msg) {
 	if (msg->type == IMAGE_MESSAGE || msg->type == SOUND_MESSAGE || msg->type == VIDEO_MESSAGE)
 		msg->url = g_strdup(((MediaMessage*)m)->url.c_str());
 	if (msg->type == IMAGE_MESSAGE) {
-		std::string r = (((ImageMessage*)m)->preview.c_str());
-		msg->image = g_strdup(r.c_str());
+		std::string r = (((ImageMessage*)m)->preview);
+		msg->image = (char*)g_memdup(r.c_str(), r.size());
 		msg->imagelen = r.size();
 	}
 	if (msg->type == LOCAT_MESSAGE) {

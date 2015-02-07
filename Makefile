@@ -63,9 +63,9 @@ DATA_ROOT_DIR_PURPLE:=$(shell pkg-config --variable=datarootdir purple)
 .PHONY: install
 install: $(LIBNAME)
 	install -D $(LIBNAME) $(DESTDIR)$(PLUGIN_DIR_PURPLE)/$(LIBNAME)
-	install -D whatsapp16.png $(DESTDIR)$(DATA_ROOT_DIR_PURPLE)/pixmaps/pidgin/protocols/16/whatsapp.png
-	install -D whatsapp22.png $(DESTDIR)$(DATA_ROOT_DIR_PURPLE)/pixmaps/pidgin/protocols/22/whatsapp.png
-	install -D whatsapp48.png $(DESTDIR)$(DATA_ROOT_DIR_PURPLE)/pixmaps/pidgin/protocols/48/whatsapp.png
+	install -D -m 644 whatsapp16.png $(DESTDIR)$(DATA_ROOT_DIR_PURPLE)/pixmaps/pidgin/protocols/16/whatsapp.png
+	install -D -m 644 whatsapp22.png $(DESTDIR)$(DATA_ROOT_DIR_PURPLE)/pixmaps/pidgin/protocols/22/whatsapp.png
+	install -D -m 644 whatsapp48.png $(DESTDIR)$(DATA_ROOT_DIR_PURPLE)/pixmaps/pidgin/protocols/48/whatsapp.png
 
 .PHONY: uninstall
 uninstall: $(LIBNAME)

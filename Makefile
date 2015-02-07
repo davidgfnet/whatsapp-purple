@@ -24,20 +24,22 @@ CC = gcc
 CXX = g++
 LD = $(CXX)
 CFLAGS_PURPLE = $(shell pkg-config --cflags purple)
-CFLAGS = \
+CFLAGS ?= \
     $(ARCHFLAGS) \
     -O2 \
     -Wall \
-    -Wno-unused-function \
+    -Wno-unused-function
+CFLAGS += \
     -fPIC \
     -DPURPLE_PLUGINS \
     -DPIC \
     $(CFLAGS_PURPLE)
 
-CXXFLAGS=-std=c++11
+CXXFLAGS += -std=c++11
 
 LIBS_PURPLE = $(shell pkg-config --libs purple)
-LDFLAGS =  $(ARCHFLAGS) -shared -pipe 
+LDFLAGS ?= $(ARCHFLAGS)
+LDFLAGS += -shared -pipe
 
 %.o: %.c
 	$(CC) -c $(CFLAGS) -o $@ $<

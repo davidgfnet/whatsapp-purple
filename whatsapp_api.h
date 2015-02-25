@@ -38,6 +38,10 @@ public:
 	void sendGroupChat(std::string msgid, std::string to, std::string message);
 	int sendImage(std::string to, int w, int h, unsigned int size, const char *fp);
 
+	// Privacy
+	void updatePrivacy(const std::string &, const std::string &, const std::string &);
+	void queryPrivacy(std::string &, std::string &, std::string &);
+
 	void addContacts(std::vector < std::string > clist);
 	bool query_status(std::string & from, int &status);
 	bool query_icon(std::string & from, std::string & icon, std::string & hash);

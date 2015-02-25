@@ -212,6 +212,19 @@ void waAPI_accountinfo(void *waAPI, unsigned long long *creation, unsigned long 
 	*status = g_strdup(st.c_str());
 }
 
+void waAPI_queryprivacy(void *waAPI, char * last, char * profile, char* status) {
+	std::string slast, sprofile, sstatus;
+	((WhatsappConnectionAPI *) waAPI)->queryPrivacy(slast, sprofile, sstatus);
+
+	strcpy(last, slast.c_str());
+	strcpy(profile, sprofile.c_str());
+	strcpy(status, sstatus.c_str());
+}
+
+void waAPI_setprivacy(void *waAPI, const char * last, const char * profile, const char* status) {
+	((WhatsappConnectionAPI *) waAPI)->updatePrivacy(last, profile, status);
+}
+
 int waAPI_querymsg(void *waAPI, t_message * msg) {
 	WhatsappConnectionAPI * wa = (WhatsappConnectionAPI *)waAPI;
 

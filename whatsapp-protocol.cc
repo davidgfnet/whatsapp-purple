@@ -195,6 +195,7 @@ void WhatsappConnection::doLogin(std::string resource)
 	{
 		Tree p("stream:features");
 		p.addChild(Tree("readreceipts"));
+		p.addChild(Tree("privacy"));
 		first = first + serialize_tree(&p, false);
 	}
 
@@ -766,14 +767,15 @@ void WhatsappConnection::processIncomingData()
 			/* Notifies the success of the auth */
 			conn_status = SessionConnected;
 			if (treelist[i].hasAttribute("status"))
-				this->account_status = treelist[i].getAttributes()["status"];
+				this->account_status = treelist[i]["status"];
 			if (treelist[i].hasAttribute("kind"))
-				this->account_type = treelist[i].getAttributes()["kind"];
+				this->account_type = treelist[i]["kind"];
 			if (treelist[i].hasAttribute("expiration"))
-				this->account_expiration = treelist[i].getAttributes()["expiration"];
+				this->account_expiration = treelist[i]["expiration"];
 			if (treelist[i].hasAttribute("creation"))
-				this->account_creation = treelist[i].getAttributes()["creation"];
+				this->account_creation = treelist[i]["creation"];
 
+			this->updatePrivacy();
 			this->notifyMyPresence();
 			this->sendInitial();  // Seems to trigger an error IQ response
 			this->updateGroups();
@@ -953,6 +955,18 @@ void WhatsappConnection::processIncomingData()
 						this->addPreviewPicture(treelist[i]["from"], t.getData());
 					if (t.hasAttributeValue("type", "image"))
 						this->addFullsizePicture(treelist[i]["from"], t.getData());
+				}
+
+				if (treelist[i].getChild("privacy", t)) {
+					std::vector < Tree > childs = t.getChildren();
+					for (unsigned int j = 0; j < childs.size(); j++) {
+						if (childs[j].hasAttributeValue("name","last"))
+							this->show_last_seen = childs[j]["value"];
+						if (childs[j].hasAttributeValue("name","status"))
+							this->show_status_msg = childs[j]["value"];
+						if (childs[j].hasAttributeValue("name","profile"))
+							this->show_profile_pic = childs[j]["value"];
+					}
 				}
 			}
 			if (treelist[i].hasAttribute("from") and treelist[i].hasAttribute("id") and 
@@ -1204,6 +1218,45 @@ void WhatsappConnection::notifyMyMessage()
 
 	outbuffer = outbuffer + serialize_tree(&mes);
 }
+
+void WhatsappConnection::updatePrivacy(
+	const std::string & show_last_seen,
+	const std::string & show_profile_pic,
+	const std::string & show_status_msg) {
+
+	std::cout << "LLL " << show_last_seen << std::endl;
+
+	Tree last   ("category", makeAttr2("name", "last",    "value", show_last_seen));
+	Tree profile("category", makeAttr2("name", "profile", "value", show_profile_pic));
+	Tree status ("category", makeAttr2("name", "status",  "value", show_status_msg));
+
+	Tree mes("iq", makeAttr4("to", whatsappserver, "type", "set", "id", i2s(iqid++), "xmlns", "privacy"));
+	Tree priv("privacy");
+	priv.addChild(last); priv.addChild(profile); priv.addChild(status);
+	mes.addChild(priv);
+
+	outbuffer = outbuffer + serialize_tree(&mes);
+}
+
+void WhatsappConnection::queryPrivacy(
+	std::string & show_last_seen,
+	std::string & show_profile_pic,
+	std::string & show_status_msg) {
+
+	this->updatePrivacy();
+
+	show_last_seen = this->show_last_seen;
+	show_profile_pic = this->show_profile_pic;
+	show_status_msg = this->show_status_msg;
+}
+
+void WhatsappConnection::updatePrivacy() {
+	Tree mes("iq", makeAttr4("to", whatsappserver, "type", "get", "id", i2s(iqid++), "xmlns", "privacy"));
+	mes.addChild(Tree("privacy"));
+
+	outbuffer = outbuffer + serialize_tree(&mes);
+}
+
 
 void WhatsappConnection::notifyError(ErrorCode err)
 {

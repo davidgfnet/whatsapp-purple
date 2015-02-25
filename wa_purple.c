@@ -52,6 +52,7 @@
 #include "status.h"
 #include "util.h"
 #include "version.h"
+#include "request.h"
 
 #include "wa_api.h"
 
@@ -182,12 +183,77 @@ static void waprpl_show_accountinfo(PurplePluginAction * action)
 	g_free(cr);
 }
 
+const char * priv_opt[3]      = {"all", "contacts", "none" };
+const char * priv_opt_nice[3] = {"Everybody", "Only contacts", "No one" };
+
+const char * priv_type[3]      = {"last", "profile", "status" };
+const char * priv_type_nice[3] = {"Last seen", "Profile picture", "Status message" };
+
+static void waprpl_update_privacy(PurpleConnection *gc, PurpleRequestFields *fields) {
+	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
+
+	int i,j;
+	char priv[3][30];
+	for (i = 0; i < 3; i++) {
+		PurpleRequestField * field = purple_request_fields_get_field(fields, priv_type[i]);
+		GList *sel = purple_request_field_list_get_selected (field);
+		for (j = 0; j < 3; j++)
+			if (strcmp(sel->data, priv_opt_nice[j]) == 0)
+				strcpy(priv[i], priv_opt[j]);
+	}
+
+	waAPI_setprivacy(wconn->waAPI, priv[0], priv[1], priv[2]);
+	waprpl_check_output(gc);
+}
+
+/* Show privacy settings */
+static void waprpl_show_privacy(PurplePluginAction * action)
+{
+	PurpleConnection *gc = (PurpleConnection *) action->context;
+	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
+	if (!wconn)
+		return;
+
+	char priv[3][30];
+	waAPI_queryprivacy(wconn->waAPI, priv[0], priv[1], priv[2]);
+
+	PurpleRequestField *field;
+
+	PurpleRequestFields *fields = purple_request_fields_new();
+	PurpleRequestFieldGroup *group = purple_request_field_group_new(NULL);
+	purple_request_fields_add_group(fields, group);
+
+	int i,j;
+	for (j = 0; j < 3; j++) {
+		field = purple_request_field_list_new(priv_type[j], priv_type_nice[j]);
+		for (i = 0; i < 3; i++) {
+			purple_request_field_list_add(field, priv_opt_nice[i], g_strdup(priv_opt[i]));
+			if (strcmp(priv_opt[i], priv[j]) == 0)
+				purple_request_field_list_add_selected(field, priv_opt_nice[i]);
+		}
+		purple_request_field_group_add_field(group, field);
+	}
+
+	purple_request_fields(gc, "Edit privacy settings", "Edit privacy settings",
+						NULL, fields, 
+						"Save", G_CALLBACK(waprpl_update_privacy),
+						"Cancel", NULL,
+						purple_connection_get_account(gc), NULL, NULL,
+						gc);
+}
+
 static GList *waprpl_actions(PurplePlugin * plugin, gpointer context)
 {
 	PurplePluginAction *act;
+	GList *actions = NULL;
 
 	act = purple_plugin_action_new("Show account information ...", waprpl_show_accountinfo);
-	return g_list_append(NULL, act);
+	actions = g_list_append(actions, act);
+
+	act = purple_plugin_action_new("Set privacy ...", waprpl_show_privacy);
+	actions = g_list_append(actions, act);
+
+	return actions;
 }
 
 static int isgroup(const char *user)

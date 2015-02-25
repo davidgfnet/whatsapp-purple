@@ -200,3 +200,13 @@ Message * WhatsappConnectionAPI::getReceivedMessage() {
 	return connection->getReceivedMessage();
 }
 
+void WhatsappConnectionAPI::updatePrivacy(const std::string & a, const std::string & b, const std::string & c) {
+	connection->updatePrivacy(a,b,c);
+}
+
+void WhatsappConnectionAPI::queryPrivacy(std::string & a, std::string & b, std::string & c) {
+	connection->queryPrivacy(a,b,c);
+}
+
+
+

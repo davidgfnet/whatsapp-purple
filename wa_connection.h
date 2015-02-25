@@ -55,6 +55,9 @@ private:
 	/* Various account info */
 	std::string account_type, account_status, account_expiration, account_creation;
 
+	/* Privacy */
+	std::string show_last_seen, show_profile_pic, show_status_msg;
+
 	/* Groups stuff */
 	std::map < std::string, Group > groups;
 	int gq_stat;
@@ -84,6 +87,8 @@ private:
 
 	void receiveMessage(const Message & m);
 	void notifyPresence(std::string from, std::string presence);
+	void updatePrivacy();
+
 	void notifyLastSeen(std::string from, std::string seconds);
 	void addPreviewPicture(std::string from, std::string picture);
 	void addFullsizePicture(std::string from, std::string picture);
@@ -122,6 +127,9 @@ public:
 
 	Message * getReceivedMessage();
 	bool queryReceivedMessage(char *msgid, int * type);
+
+	void updatePrivacy(const std::string &, const std::string &, const std::string &);
+	void queryPrivacy(std::string &, std::string &, std::string &);
 
 	void getMessageId(char * msgid);
 	void addContacts(std::vector < std::string > clist);

@@ -1172,7 +1172,7 @@ void WhatsappConnection::setMyPresence(std::string s, std::string msg)
 	}
 	if (msg != mymessage) {
 		mymessage = msg;
-		notifyMyMessage();	/*TODO */
+		notifyMyMessage();
 	}
 }
 
@@ -1196,14 +1196,11 @@ void WhatsappConnection::sendInitial()
 void WhatsappConnection::notifyMyMessage()
 {
 	/* Send the status message */
-	Tree xhash("x", makeAttr1("xmlns", "jabber:x:event"));
-	xhash.addChild(Tree("server"));
-	Tree tbody("body");
-	tbody.setData(this->mymessage);
+	Tree status("status");
+	status.setData(this->mymessage);
 
-	Tree mes("message", makeAttr3("to", "s.us", "type", "chat", "id", i2s(time(NULL)) + "-" + i2s(iqid++)));
-	mes.addChild(xhash);
-	mes.addChild(tbody);
+	Tree mes("iq", makeAttr4("to", whatsappserver, "type", "set", "id", i2s(time(NULL)) + "-" + i2s(iqid++), "xmlns", "status"));
+	mes.addChild(status);
 
 	outbuffer = outbuffer + serialize_tree(&mes);
 }

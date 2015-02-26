@@ -21,6 +21,7 @@ public:
 	// Login/Auth functions
 	void doLogin(std::string);
 	int loginStatus() const;
+	int getErrors(std::string & reason);
 
 	// Data transfer
 	void receiveCallback(const char *data, int len);

@@ -184,6 +184,7 @@ void WhatsappConnection::doLogin(std::string resource)
 {
 	/* Send stream init */
 	DataBuffer first;
+	error_queue.clear();
 
 	{
 		first.addData("WA\1\5", 4);
@@ -782,10 +783,14 @@ void WhatsappConnection::processIncomingData()
 
 			DEBUG_PRINT("Logged in!!!");
 		} else if (treelist[i].getTag() == "failure") {
+			std::string reason = "unknown";
+			if (treelist[i].hasChild("not-authorized"))
+				reason = "not-authorized";
+
 			if (conn_status == SessionWaitingAuthOK)
-				this->notifyError(errorAuth);
+				this->notifyError(errorAuth, reason);
 			else
-				this->notifyError(errorUnknown);
+				this->notifyError(errorUnknown, reason);
 		} else if (treelist[i].getTag() == "notification") {
 			DataBuffer reply = generateResponse( treelist[i]["from"], treelist[i]["type"], treelist[i]["id"] );
 			outbuffer = outbuffer + reply;
@@ -1258,9 +1263,19 @@ void WhatsappConnection::updatePrivacy() {
 }
 
 
-void WhatsappConnection::notifyError(ErrorCode err)
+void WhatsappConnection::notifyError(ErrorCode err, const std::string & reason)
 {
+	error_queue.push_back(std::make_pair(err,reason));
+}
 
+WhatsappConnection::ErrorCode WhatsappConnection::getErrors(std::string & reason) {
+	if (error_queue.size() > 0) {
+		ErrorCode r = error_queue[0].first;
+		reason = error_queue[0].second;
+		error_queue.erase(error_queue.begin());
+		return r;
+	}
+	return errorNoError;
 }
 
 Message* WhatsappConnection::getReceivedMessage()

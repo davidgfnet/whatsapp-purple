@@ -69,6 +69,7 @@ typedef struct {
 	int waAPI_fileuploadcomplete(void *waAPI, int rid);
 	void waAPI_queryprivacy(void *waAPI, char *, char *, char*);
 	void waAPI_setprivacy(void *waAPI, const char *, const char *, const char*);
+	int waAPI_geterror(void *waAPI, char **);
 
 // SSL connection
 	int waAPI_sslsendcb(void *waAPI, void *buffer, int maxbytes);

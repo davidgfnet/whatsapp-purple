@@ -208,5 +208,8 @@ void WhatsappConnectionAPI::queryPrivacy(std::string & a, std::string & b, std::
 	connection->queryPrivacy(a,b,c);
 }
 
+int WhatsappConnectionAPI::getErrors(std::string & reason) {
+	return (int)connection->getErrors(reason);
+}
 
 

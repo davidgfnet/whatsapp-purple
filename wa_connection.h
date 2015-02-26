@@ -30,10 +30,13 @@ class WhatsappConnection {
 	friend class ChatMessage;
 	friend class ImageMessage;
 	friend class Message;
+
+public:
+	enum ErrorCode { errorNoError = 0, errorAuth, errorUnknown };
+
 private:
 
 	enum SessionStatus { SessionNone = 0, SessionConnecting = 1, SessionWaitingChallenge = 2, SessionWaitingAuthOK = 3, SessionConnected = 4 };
-	enum ErrorCode { errorAuth, errorUnknown };
 
 	/* Current dissection classes */
 	RC4Decoder * in, *out;
@@ -51,6 +54,7 @@ private:
 	std::string whatsappserver, whatsappservergroup;
 	std::string mypresence, mymessage;
 	bool sendRead;
+	std::vector < std::pair<ErrorCode,std::string> > error_queue;
 
 	/* Various account info */
 	std::string account_type, account_status, account_expiration, account_creation;
@@ -105,7 +109,7 @@ private:
 	void notifyMyMessage();
 	void notifyMyPresence();
 	void sendInitial();
-	void notifyError(ErrorCode err);
+	void notifyError(ErrorCode err, const std::string & reason);
 	DataBuffer generateResponse(std::string from, std::string type, std::string id);
 	std::string generateUploadPOST(t_fileupload * fu);
 	void processUploadQueue();
@@ -124,6 +128,8 @@ public:
 	int sendCallback(char *data, int len);
 	void sentCallback(int len);
 	bool hasDataToSend();
+
+	ErrorCode getErrors(std::string & reason);
 
 	Message * getReceivedMessage();
 	bool queryReceivedMessage(char *msgid, int * type);

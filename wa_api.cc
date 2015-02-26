@@ -273,6 +273,15 @@ int waAPI_getuserstatus(void *waAPI, const char *who)
 	return ((WhatsappConnectionAPI *) waAPI)->getuserstatus(std::string(who));
 }
 
+int waAPI_geterror(void *waAPI, char ** reason)
+{
+	std::string sreason;
+	int r = (int)((WhatsappConnectionAPI *) waAPI)->getErrors(sreason);
+	if (r != 0)
+		*reason = g_strdup(sreason.c_str());
+	return r;
+}
+
 char *waAPI_getuserstatusstring(void *waAPI, const char *who)
 {
 	if (!waAPI)

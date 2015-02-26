@@ -474,6 +474,19 @@ static void waprpl_process_incoming_events(PurpleConnection * gc)
 	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
 	PurpleAccount *acc = purple_connection_get_account(gc);
 
+	int err;
+	do {
+		char * reason;
+		err = waAPI_geterror(wconn->waAPI, &reason);
+		if (err != 0) {
+			PurpleConnectionError errcode = PURPLE_CONNECTION_ERROR_OTHER_ERROR;
+			if (err == 1)
+				errcode = PURPLE_CONNECTION_ERROR_AUTHENTICATION_FAILED;
+			purple_connection_error_reason(gc, errcode, reason);
+			g_free(reason);
+		}
+	} while (err != 0);
+
 	switch (waAPI_loginstatus(wconn->waAPI)) {
 	case 0:
 		purple_connection_update_progress(gc, "Connecting", 0, 4);

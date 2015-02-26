@@ -10,6 +10,7 @@
  */
 
 #include <iostream>
+#include <algorithm>
 #include <map>
 #include <vector>
 #include <map>
@@ -71,9 +72,9 @@ int WhatsappConnection::sendImage(std::string to, int w, int h, unsigned int siz
 	return iqid;
 }
 
-WhatsappConnection::WhatsappConnection(std::string phone, std::string password, std::string nickname)
+WhatsappConnection::WhatsappConnection(std::string phonenum, std::string password, std::string nickname)
 {
-	this->phone = phone;
+	this->phone = phonenum;
 	this->password = password;
 	this->in = NULL;
 	this->out = NULL;
@@ -98,6 +99,9 @@ WhatsappConnection::WhatsappConnection(std::string phone, std::string password, 
 		password = password.substr(1);
 	while (password.size() > 0 and password[password.size() - 1] == ' ')
 		password = password.substr(0, password.size() - 1);
+
+	/* Remove non-numbers from phone */
+	phone.erase(std::remove_if(phone.begin(), phone.end(), [](char ch){return !isdigit(ch);}), phone.end());
 }
 
 WhatsappConnection::~WhatsappConnection()

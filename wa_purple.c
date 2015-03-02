@@ -381,6 +381,7 @@ PurpleConversation *get_open_combo(const char *who, PurpleConnection * gc)
 				convo = serv_got_joined_chat(gc, convo_id, groupname);
 				purple_debug_info(WHATSAPP_ID, "group info ID(%s) SUBJECT(%s) OWNER(%s)\n", who, subject, owner);
 				conv_add_participants(convo, part, owner);
+				g_free(owner); g_free(subject); g_free(part);
 			}
 		}
 		
@@ -436,6 +437,7 @@ static void query_status(PurpleConnection *gc)
 		} else {
 			purple_prpl_got_user_status(acc, who, "unavailable", "message", "", NULL);
 		}
+		g_free(who);
 	}
 }
 
@@ -454,6 +456,7 @@ static void query_typing(PurpleConnection *gc)
 			serv_got_typing(gc, who, 0, PURPLE_NOT_TYPING);
 			serv_got_typing_stopped(gc, who);
 		}
+		g_free(who);
 	}
 }
 
@@ -465,7 +468,8 @@ static void query_icon(PurpleConnection *gc)
 	int len;
 
 	while (waAPI_queryicon(wconn->waAPI, &who, &icon, &len, &hash)) {
-		purple_buddy_icons_set_for_user(acc, who, g_memdup(icon, len), len, hash);
+		purple_buddy_icons_set_for_user(acc, who, icon, len, hash);
+		g_free(who); g_free(hash);
 	}
 }
 
@@ -538,9 +542,9 @@ static void waprpl_process_incoming_events(PurpleConnection * gc)
 				/* The group is in the system, update the fields */
 				char *sub, *own;
 				waAPI_getgroupinfo(wconn->waAPI, grid, &sub, &own, 0);
-				g_hash_table_replace(hasht, g_strdup("subject"), g_strdup(sub));
-				g_hash_table_replace(hasht, g_strdup("owner"), g_strdup(own));
-				purple_blist_alias_chat(ch, g_strdup(sub));
+				g_hash_table_replace(hasht, g_strdup("subject"), sub);
+				g_hash_table_replace(hasht, g_strdup("owner"), own);
+				purple_blist_alias_chat(ch, sub);
 			} else {
 				/* The group was deleted */
 				PurpleChat *del = (PurpleChat *) node;
@@ -549,6 +553,7 @@ static void waprpl_process_incoming_events(PurpleConnection * gc)
 			}
 
 			g_strfreev(gplist);
+			g_free(glist);
 		}
 
 		/* Add new groups */
@@ -565,9 +570,9 @@ static void waprpl_process_incoming_events(PurpleConnection * gc)
 				purple_debug_info(WHATSAPP_ID, "New group found %s %s\n", gpid, sub);
 
 				GHashTable *htable = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
-				g_hash_table_insert(htable, g_strdup("subject"), g_strdup(sub));
-				g_hash_table_insert(htable, g_strdup("id"), g_strdup(gpid));
-				g_hash_table_insert(htable, g_strdup("owner"), g_strdup(own));
+				g_hash_table_insert(htable, g_strdup("subject"), sub);
+				g_hash_table_insert(htable, g_strdup("id"), gpid);
+				g_hash_table_insert(htable, g_strdup("owner"), own);
 
 				ch = purple_chat_new(acc, sub, htable);
 				purple_blist_add_chat(ch, NULL, NULL);
@@ -577,11 +582,13 @@ static void waprpl_process_incoming_events(PurpleConnection * gc)
 			int prplid = chatid_to_convo(id);
 			PurpleConversation *conv = purple_find_chat(gc, prplid);
 			char *subject, *owner, *part;
-			if (conv && waAPI_getgroupinfo(wconn->waAPI, id, &subject, &owner, &part))
+			if (conv && waAPI_getgroupinfo(wconn->waAPI, id, &subject, &owner, &part)) {
 				conv_add_participants(conv, part, owner);
+			}
 		}
 
 		g_strfreev(gplist);
+		g_free(glist);
 	}
 
 	t_message m;
@@ -626,6 +633,7 @@ static void waprpl_process_incoming_events(PurpleConnection * gc)
 			purple_debug_info(WHATSAPP_ID, "Got an unrecognized message!\n");
 			break;
 		};
+		g_free(m.who); g_free(m.author); g_free(m.message);
 	}
 
 	while (1) {
@@ -1089,6 +1097,7 @@ static void waprpl_chat_join(PurpleConnection * gc, GHashTable * data)
 		/* Add people in the chat */
 		purple_debug_info(WHATSAPP_ID, "group info ID(%s) SUBJECT(%s) OWNER(%s)\n", id, subject, owner);
 		conv_add_participants(conv, part, owner);
+		g_free(subject); g_free(part);
 	}
 }
 

@@ -571,7 +571,7 @@ static void waprpl_process_incoming_events(PurpleConnection * gc)
 
 				GHashTable *htable = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
 				g_hash_table_insert(htable, g_strdup("subject"), sub);
-				g_hash_table_insert(htable, g_strdup("id"), gpid);
+				g_hash_table_insert(htable, g_strdup("id"), g_strdup(gpid));
 				g_hash_table_insert(htable, g_strdup("owner"), own);
 
 				ch = purple_chat_new(acc, sub, htable);

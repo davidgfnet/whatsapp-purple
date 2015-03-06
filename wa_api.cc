@@ -40,7 +40,7 @@ int waAPI_getgroupsupdated(void *waAPI)
 	return 0;
 }
 
-int waAPI_getgroupinfo(void *waAPI, char *id, char **subject, char **owner, char **p)
+int waAPI_getgroupinfo(void *waAPI, const char *id, char **subject, char **owner, char **p)
 {
 	std::map < std::string, Group > ret = ((WhatsappConnectionAPI *) waAPI)->getGroups();
 

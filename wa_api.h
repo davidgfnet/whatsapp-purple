@@ -59,7 +59,7 @@ typedef struct {
 	unsigned long long waAPI_getlastseen(void *waAPI, const char *who);
 	int waAPI_querytyping(void *waAPI, char **who, int *stat);
 	char *waAPI_getgroups(void *waAPI);
-	int waAPI_getgroupinfo(void *waAPI, char *id, char **subject, char **owner, char **p);
+	int waAPI_getgroupinfo(void *waAPI, const char *id, char **subject, char **owner, char **p);
 	int waAPI_getgroupbyname(void *waAPI, const char *name);
 	int waAPI_getgroupsupdated(void *waAPI);
 	void waAPI_creategroup(void *waAPI, const char *);

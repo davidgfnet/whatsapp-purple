@@ -345,6 +345,28 @@ static PurpleChat *blist_find_chat_by_convo(PurpleConnection *gc, int convo)
 	return blist_find_chat_by_hasht_cond(gc, hasht_cmp_convo, &convo);
 }
 
+static PurpleChat * create_chat_group(const char * gpid, whatsapp_connection *wconn, PurpleAccount *acc) {
+	purple_debug_info(WHATSAPP_ID, "Creating new group: %s\n", gpid);
+
+	char *sub, *own;
+	if (waAPI_getgroupinfo(wconn->waAPI, gpid, &sub, &own, 0)) {
+		purple_debug_info(WHATSAPP_ID, "New group found %s %s\n", gpid, sub);
+	}
+	else {
+		sub = g_strdup("Unknown");
+		own = g_strdup("000000");
+	}
+
+	GHashTable *htable = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
+	g_hash_table_insert(htable, g_strdup("subject"), sub);
+	g_hash_table_insert(htable, g_strdup("id"), g_strdup(gpid));
+	g_hash_table_insert(htable, g_strdup("owner"), own);
+
+	PurpleChat * ch = purple_chat_new(acc, sub, htable);
+	purple_blist_add_chat(ch, NULL, NULL);
+
+	return ch;
+}
 
 static void conv_add_participants(PurpleConversation * conv, const char *part, const char *owner)
 {
@@ -361,9 +383,16 @@ static void conv_add_participants(PurpleConversation * conv, const char *part, c
 PurpleConversation *get_open_combo(const char *who, PurpleConnection * gc)
 {
 	PurpleAccount *acc = purple_connection_get_account(gc);
+	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
+
+	purple_debug_info(WHATSAPP_ID, "Opening conversation window for %s\n", who);
+
 	if (isgroup(who)) {
 		/* Search fot the combo */
 		PurpleChat *ch = blist_find_chat_by_id(gc, who);
+		if (!ch)
+			ch = create_chat_group(who, wconn, acc);
+
 		GHashTable *hasht = purple_chat_get_components(ch);
 		int convo_id = chatid_to_convo(who);
 		const char *groupname = g_hash_table_lookup(hasht, "subject");
@@ -376,7 +405,6 @@ PurpleConversation *get_open_combo(const char *who, PurpleConnection * gc)
 		}
 		else if (purple_conv_chat_has_left(PURPLE_CONV_CHAT(convo))) {
 			char *subject, *owner, *part;
-			whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
 			if (waAPI_getgroupinfo(wconn->waAPI, (char*)who, &subject, &owner, &part)) {
 				convo = serv_got_joined_chat(gc, convo_id, groupname);
 				purple_debug_info(WHATSAPP_ID, "group info ID(%s) SUBJECT(%s) OWNER(%s)\n", who, subject, owner);
@@ -521,6 +549,7 @@ static void waprpl_process_incoming_events(PurpleConnection * gc)
 	
 	/* Groups update */
 	if (waAPI_getgroupsupdated(wconn->waAPI)) {
+		purple_debug_info(WHATSAPP_ID, "Receiving update information from my groups\n");
 
 		/* Delete/update the chats that are in our list */
 		PurpleBlistNode *node;
@@ -564,19 +593,9 @@ static void waprpl_process_incoming_events(PurpleConnection * gc)
 		for (p = gplist; *p; p++) {
 			gchar *gpid = *p;
 			PurpleChat *ch = blist_find_chat_by_id(gc, gpid);
-			if (!ch) {
-				char *sub, *own;
-				waAPI_getgroupinfo(wconn->waAPI, gpid, &sub, &own, 0);
-				purple_debug_info(WHATSAPP_ID, "New group found %s %s\n", gpid, sub);
-
-				GHashTable *htable = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
-				g_hash_table_insert(htable, g_strdup("subject"), sub);
-				g_hash_table_insert(htable, g_strdup("id"), g_strdup(gpid));
-				g_hash_table_insert(htable, g_strdup("owner"), own);
-
-				ch = purple_chat_new(acc, sub, htable);
-				purple_blist_add_chat(ch, NULL, NULL);
-			}
+			if (!ch)
+				ch = create_chat_group(gpid, wconn, acc);
+			
 			/* Now update the open conversation that may exist */
 			char *id = g_hash_table_lookup(purple_chat_get_components(ch), "id");
 			int prplid = chatid_to_convo(id);

@@ -38,6 +38,11 @@
 #include "wa_connection.h"
 #include "thumb.h"
 
+static int isbroadcast(const std::string user)
+{
+	return (user.find("@broadcast") != std::string::npos);
+}
+
 DataBuffer WhatsappConnection::generateResponse(std::string from, std::string type, std::string id)
 {
 	if (type == "") { // Auto 
@@ -839,6 +844,9 @@ void WhatsappConnection::processIncomingData()
 				std::string id = treelist[i]["id"];
 				std::string author = treelist[i]["participant"];
 
+				if (isbroadcast(from))
+					from = author;
+
 				Tree t;
 				if (treelist[i].getChild("body", t)) {
 					this->receiveMessage(ChatMessage(this, from, time, id, t.getData(), author));
@@ -1135,8 +1143,10 @@ void WhatsappConnection::receiveMessage(const Message & m)
 	if (isgroup(m.from) and gq_stat != 8)	{/* Delay the group message deliver if we do not have the group list */
 		recv_messages_delay.push_back(mc);
 		DEBUG_PRINT("Received delayed message!");
-	}else
+	}
+	else {
 		recv_messages.push_back(mc);
+	}
 
 	DEBUG_PRINT("Received message type " << m.type() << " from " << m.from << " at " << m.t);
 

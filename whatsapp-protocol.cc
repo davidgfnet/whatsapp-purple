@@ -992,14 +992,6 @@ void WhatsappConnection::processIncomingData()
 			}
 		}
 	}
-
-	if (gq_stat == 8 and recv_messages_delay.size() != 0) {
-		DEBUG_PRINT ("Delayed messages -> Messages");
-		for (unsigned int i = 0; i < recv_messages_delay.size(); i++) {
-			recv_messages.push_back(recv_messages_delay[i]);
-		}
-		recv_messages_delay.clear();
-	}
 }
 
 DataBuffer WhatsappConnection::serialize_tree(Tree * tree, bool crypt)
@@ -1140,13 +1132,7 @@ void WhatsappConnection::receiveMessage(const Message & m)
 	/* Push message to user and generate a response */
 	Message *mc = m.copy();
 	
-	if (isgroup(m.from) and gq_stat != 8)	{/* Delay the group message deliver if we do not have the group list */
-		recv_messages_delay.push_back(mc);
-		DEBUG_PRINT("Received delayed message!");
-	}
-	else {
-		recv_messages.push_back(mc);
-	}
+	recv_messages.push_back(mc);
 
 	DEBUG_PRINT("Received message type " << m.type() << " from " << m.from << " at " << m.t);
 

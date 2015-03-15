@@ -1107,8 +1107,11 @@ static void waprpl_chat_join(PurpleConnection * gc, GHashTable * data)
 
 	if (!purple_find_chat(gc, prplid)) {
 		char *subject, *owner, *part;
-		if (!waAPI_getgroupinfo(wconn->waAPI, id, &subject, &owner, &part))
-			return;
+		if (!waAPI_getgroupinfo(wconn->waAPI, id, &subject, &owner, &part)) {
+			subject = g_strdup("Unknown");
+			owner   = g_strdup("000000");
+			part    = g_strdup("");
+		}
 
 		/* Notify chat add */
 		PurpleConversation *conv = serv_got_joined_chat(gc, prplid, groupname);

@@ -70,7 +70,7 @@ private:
 
 	/* Contacts & msg */
 	std::map < std::string, Contact > contacts;
-	std::vector < Message * >recv_messages, recv_messages_delay;
+	std::vector < Message * >recv_messages;
 	std::vector < std::string > user_changes, user_icons, user_typing;
 
 	/* Reception queue */

@@ -91,10 +91,6 @@ WhatsappConnection::WhatsappConnection(std::string phonenum, std::string passwor
 	this->whatsappservergroup = "g.us";
 	this->mypresence = "available";
 	this->groups_updated = false;
-	this->gq_stat = 0;
-	this->gw1 = -1;
-	this->gw2 = -1;
-	this->gw3 = 0;
 	this->sslstatus = 0;
 	this->frame_seq = 0;
 	this->sendRead = true;
@@ -127,17 +123,9 @@ std::map < std::string, Group > WhatsappConnection::getGroups()
 
 bool WhatsappConnection::groupsUpdated()
 {
-	if (gq_stat == 7) {
-		groups_updated = true;
-		gq_stat = 8;
-	}
-
-	if (groups_updated and gw3 <= 0) {
-		groups_updated = false;
-		return true;
-	}
-
-	return false;
+	bool r = groups_updated;
+	groups_updated = false;
+	return r;
 }
 
 void WhatsappConnection::updateGroups()
@@ -145,19 +133,15 @@ void WhatsappConnection::updateGroups()
 	/* Get the group list */
 	groups.clear();
 	{
-		gw1 = iqid;
 		Tree req("iq", makeAttr4("id", i2s(iqid++), "type", "get", "to", "g.us", "xmlns", "w:g"));
 		req.addChild(Tree("list", makeAttr1("type", "owning")));
 		outbuffer = outbuffer + serialize_tree(&req);
 	}
 	{
-		gw2 = iqid;
 		Tree req("iq", makeAttr4("id", i2s(iqid++), "type", "get", "to", "g.us", "xmlns", "w:g"));
 		req.addChild(Tree("list", makeAttr1("type", "participating")));
 		outbuffer = outbuffer + serialize_tree(&req);
 	}
-	gq_stat = 1;		/* Queried the groups */
-	gw3 = 0;
 }
 
 void WhatsappConnection::manageParticipant(std::string group, std::string participant, std::string command)
@@ -878,10 +862,6 @@ void WhatsappConnection::processIncomingData()
 			}
 		} else if (treelist[i].getTag() == "iq") {
 			/* Receives the presence of the user */
-			if (atoi(treelist[i]["id"].c_str()) == gw1)
-				gq_stat |= 2;
-			if (atoi(treelist[i]["id"].c_str()) == gw2)
-				gq_stat |= 4;
 
 			if (treelist[i].hasAttributeValue("type", "result") and treelist[i].hasAttribute("from")) {
 				Tree t;
@@ -938,7 +918,6 @@ void WhatsappConnection::processIncomingData()
 				}
 
 				std::vector < Tree > childs = treelist[i].getChildren();
-				int acc = 0;
 				for (unsigned int j = 0; j < childs.size(); j++) {
 					if (childs[j].getTag() == "group") {
 						bool rep = groups.find(getusername(childs[j]["id"])) != groups.end();
@@ -950,20 +929,18 @@ void WhatsappConnection::processIncomingData()
 							Tree req("iq", makeAttr4("id", i2s(iqid++), "type", "get", 
 									"to", childs[j]["id"] + "@g.us", "xmlns", "w:g"));
 							req.addChild(iq);
-							gw3++;
 							outbuffer = outbuffer + serialize_tree(&req);
 						}
+						groups_updated = true;
 					} else if (childs[j].getTag() == "participant") {
 						std::string gid = getusername(treelist[i]["from"]);
 						std::string pt = getusername(childs[j]["jid"]);
 						if (groups.find(gid) != groups.end()) {
 							groups.find(gid)->second.participants.push_back(pt);
 						}
-						if (!acc)
-							gw3--;
-						acc = 1;
+						groups_updated = true;
 					} else if (childs[j].getTag() == "add") {
-
+						//groups_updated = true;
 					}
 				}
 

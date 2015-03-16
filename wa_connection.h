@@ -64,8 +64,6 @@ private:
 
 	/* Groups stuff */
 	std::map < std::string, Group > groups;
-	int gq_stat;
-	int gw1, gw2, gw3;
 	bool groups_updated;
 
 	/* Contacts & msg */

@@ -190,6 +190,8 @@ void WhatsappConnection::doLogin(std::string resource)
 		Tree p("stream:features");
 		p.addChild(Tree("readreceipts"));
 		p.addChild(Tree("privacy"));
+		p.addChild(Tree("presence"));
+		p.addChild(Tree("groups_v2"));
 		first = first + serialize_tree(&p, false);
 	}
 

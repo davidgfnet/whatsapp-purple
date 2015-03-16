@@ -888,6 +888,7 @@ static void waprpl_add_buddy(PurpleConnection * gc, PurpleBuddy * buddy, PurpleG
 	const char *name = purple_buddy_get_name(buddy);
 
 	waAPI_addcontact(wconn->waAPI, name);
+	waAPI_contactsupdate(wconn->waAPI);
 
 	waprpl_check_output(gc);
 }

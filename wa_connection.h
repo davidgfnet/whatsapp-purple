@@ -137,6 +137,7 @@ public:
 
 	void getMessageId(char * msgid);
 	void addContacts(std::vector < std::string > clist);
+	void contactsUpdate();
 	void sendChat(std::string msgid, std::string to, std::string message);
 	void sendGroupChat(std::string msgid, std::string to, std::string message);
 	bool query_status(std::string & from, int &status);

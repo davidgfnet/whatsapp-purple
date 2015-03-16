@@ -439,6 +439,9 @@ void WhatsappConnection::addContacts(std::vector < std::string > clist)
 
 		user_changes.push_back(clist[i]);
 	}
+}
+
+void WhatsappConnection::contactsUpdate() {
 	/* Query the profile pictures */
 	bool qstatus = false;
 	for (std::map < std::string, Contact >::iterator iter = contacts.begin(); iter != contacts.end(); iter++) {

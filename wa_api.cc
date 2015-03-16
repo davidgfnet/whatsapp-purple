@@ -347,6 +347,11 @@ void waAPI_addcontact(void *waAPI, const char *phone)
 	((WhatsappConnectionAPI *) waAPI)->addContacts(clist);
 }
 
+void waAPI_contactsupdate(void *waAPI)
+{
+	((WhatsappConnectionAPI *) waAPI)->contactsUpdate();
+}
+
 void waAPI_delcontact(void *waAPI, const char *phone)
 {
 

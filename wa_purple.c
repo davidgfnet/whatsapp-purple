@@ -1062,6 +1062,8 @@ static void waprpl_insert_contacts(PurpleConnection * gc)
 		waAPI_addcontact(wconn->waAPI, name);
 	}
 
+	waAPI_contactsupdate(wconn->waAPI);
+
 	waprpl_check_output(gc);
 
 	g_slist_free(buddies);

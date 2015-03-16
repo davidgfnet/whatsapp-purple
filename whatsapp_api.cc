@@ -151,6 +151,11 @@ void WhatsappConnectionAPI::addContacts(std::vector < std::string > clist)
 	connection->addContacts(clist);
 }
 
+void WhatsappConnectionAPI::contactsUpdate()
+{
+	connection->contactsUpdate();
+}
+
 bool WhatsappConnectionAPI::hasDataToSend()
 {
 	return connection->hasDataToSend();

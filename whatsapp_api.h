@@ -44,6 +44,7 @@ public:
 	void queryPrivacy(std::string &, std::string &, std::string &);
 
 	void addContacts(std::vector < std::string > clist);
+	void contactsUpdate();
 	bool query_status(std::string & from, int &status);
 	bool query_icon(std::string & from, std::string & icon, std::string & hash);
 	bool query_avatar(std::string user, std::string & icon);

@@ -308,6 +308,18 @@ void DataBuffer::putRawString(std::string s)
 	}
 }
 
+bool DataBuffer::canbeNibbled(const std::string & s) {
+	for (unsigned i = 0; i < s.size(); i++) {
+		if (!(
+			(s[i] >= '0' && s[i] <= '9') ||
+			(s[i] == '-') ||
+			(s[i] == '.')
+		))
+			return false;
+	}
+	return true;
+}
+
 void DataBuffer::putString(std::string s)
 {
 	unsigned short lu = lookupDecoded(s);
@@ -324,6 +336,22 @@ void DataBuffer::putString(std::string s)
 		putInt(250, 1);
 		putString(p1);
 		putString(p2);
+	} else if (canbeNibbled(s)) {
+		// Encode it in nibbles
+		int numn = (s.size()+1)/2;
+		std::string out(numn, 0);
+		for (unsigned i = 0; i < s.size(); i++) {
+			unsigned char c;
+			if (s[i] >= '0' && s[i] <= '9') c = s[i]-'0';
+			else c = s[i]-'-'+10;
+
+			out[i/2] |= c << (4-4*(i&1));
+		}
+
+		if (s.size() % 2 != 0) numn |= 0x80;
+		putInt(255,1);
+		putInt(numn,1);
+		addData(out.c_str(), out.size());
 	} else if (s.size() < 256) {
 		putInt(252, 1);
 		putInt(s.size(), 1);
@@ -333,8 +361,6 @@ void DataBuffer::putString(std::string s)
 		putInt(s.size(), 3);
 		addData(s.c_str(), s.size());
 	}
-	// TODO: Use nibble encoding to encode numbers,
-	// phones and timestamps
 }
 
 bool DataBuffer::isList()

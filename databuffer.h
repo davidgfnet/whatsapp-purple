@@ -39,6 +39,7 @@ public:
 	void writeListSize(int size);
 	void putRawString(std::string s);
 	void putString(std::string s);
+	bool canbeNibbled(const std::string & s);
 
 	void clear();
 	void addData(const void *ptr, int size);

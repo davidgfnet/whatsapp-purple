@@ -798,6 +798,11 @@ void WhatsappConnection::processIncomingData()
 				/* If the nofitication comes from a group, assume we have to reload groups ;) */
 				updateGroups();
 			}
+
+			if (treelist[i].hasAttributeValue("type", "picture")) {
+				/* Picture update */
+				this->queryPreview(treelist[i]["from"]);
+			}
 		} else if (treelist[i].getTag() == "ack") {
 			std::string id = treelist[i]["id"];
 			received_messages.push_back( std::make_pair(id,0) );

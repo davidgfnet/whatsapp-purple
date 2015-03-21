@@ -963,13 +963,25 @@ static unsigned int waprpl_send_typing(PurpleConnection * gc, const char *who, P
 	return 1;
 }
 
+int imgResize(void * inb, size_t ins, void ** outb, unsigned long * outs, int desiredsize);
+
 static void waprpl_set_buddy_icon(PurpleConnection * gc, PurpleStoredImage * img)
 {
 	/* Send the picture the user has selected! */
 	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
 	size_t size = purple_imgstore_get_size(img);
 	const void *data = purple_imgstore_get_data(img);
-	waAPI_setavatar(wconn->waAPI, data, size);
+
+	// First of all make the picture a square
+	char * sqbuffer; unsigned long sqsize;
+	imgResize(data, size, &sqbuffer, &sqsize, 640);
+
+	char * pbuffer; unsigned long osize;
+	imgResize(data, size, &pbuffer, &osize, 96);
+
+	waAPI_setavatar(wconn->waAPI, sqbuffer, sqsize, pbuffer, osize);
+
+	free(sqbuffer); free(pbuffer);
 
 	waprpl_check_output(gc);
 }
@@ -1413,9 +1425,9 @@ static PurplePluginProtocolInfo prpl_info = {
 		"jpg",			/* format */
 		1,			/* min_width */
 		1,			/* min_height */
-		640,			/* max_width */
-		640,			/* max_height */
-		32000,			/* max_filesize */
+		4096,			/* max_width */
+		4096,			/* max_height */
+		8*1024*1024,	/* max_filesize */
 		PURPLE_ICON_SCALE_SEND,	/* scale_rules */
 	},
 	waprpl_list_icon,	/* list_icon */

@@ -144,7 +144,7 @@ public:
 	bool query_icon(std::string & from, std::string & icon, std::string & hash);
 	bool query_avatar(std::string user, std::string & icon);
 	bool query_typing(std::string & from, int &status);
-	void send_avatar(const std::string & avatar);
+	void send_avatar(const std::string & avatar, const std::string & avatarp);
 	void account_info(unsigned long long &creation, unsigned long long &freeexp, std::string & status);
 	int getuserstatus(const std::string & who);
 	std::string getuserstatusstring(const std::string & who);

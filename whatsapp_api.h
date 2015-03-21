@@ -50,7 +50,7 @@ public:
 	bool query_avatar(std::string user, std::string & icon);
 	bool query_typing(std::string & from, int &status);
 	void account_info(unsigned long long &creation, unsigned long long &freeexp, std::string & status);
-	void send_avatar(const std::string & avatar);
+	void send_avatar(const std::string & avatar, const std::string & avatarp);
 	int getuserstatus(const std::string & who);
 	std::string getuserstatusstring(const std::string & who);
 	unsigned long long getlastseen(const std::string & who);

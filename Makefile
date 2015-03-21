@@ -13,7 +13,7 @@ endif
 .PHONY: all
 all: $(LIBNAME)
 
-C_SRCS = wa_purple.c tinfl.c
+C_SRCS = wa_purple.c tinfl.c imgr.c
 CXX_SRCS = whatsapp-protocol.cc wa_api.cc rc4.cc keygen.cc tree.cc databuffer.cc message.cc whatsapp_api.cc 
 
 C_OBJS = $(C_SRCS:.c=.o)
@@ -37,7 +37,7 @@ CFLAGS += \
 
 CXXFLAGS += -std=c++11
 
-LIBS_PURPLE = $(shell pkg-config --libs purple)
+LIBS_PURPLE = $(shell pkg-config --libs purple) -ljpeg
 LDFLAGS ?= $(ARCHFLAGS)
 LDFLAGS += -shared -pipe
 

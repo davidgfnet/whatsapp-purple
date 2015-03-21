@@ -86,10 +86,11 @@ void waAPI_manageparticipant(void *waAPI, const char *id, const char *part, cons
 	((WhatsappConnectionAPI *) waAPI)->manageParticipant(std::string(id), std::string(part), std::string(command));
 }
 
-void waAPI_setavatar(void *waAPI, const void *buffer, int len)
+void waAPI_setavatar(void *waAPI, const void *buffer, int len, const void *buffers, int lens)
 {
-	std::string im((const char *)buffer, (size_t) len);
-	((WhatsappConnectionAPI *) waAPI)->send_avatar(im);
+	std::string im ((const char *)buffer,  (size_t) len);
+	std::string imp((const char *)buffers, (size_t) lens);
+	((WhatsappConnectionAPI *) waAPI)->send_avatar(im, imp);
 }
 
 int waAPI_sendcb(void *waAPI, void *buffer, int maxbytes)

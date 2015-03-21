@@ -382,10 +382,10 @@ void WhatsappConnection::queryFullSize(std::string user)
 	outbuffer = outbuffer + serialize_tree(&req);
 }
 
-void WhatsappConnection::send_avatar(const std::string & avatar)
+void WhatsappConnection::send_avatar(const std::string & avatar, const std::string & avatarp)
 {
 	Tree pic("picture"); pic.setData(avatar);
-	Tree prev("picture", makeAttr1("type", "preview")); prev.setData(avatar);
+	Tree prev("picture", makeAttr1("type", "preview")); prev.setData(avatarp);
 
 	Tree req("iq", makeAttr4("id", "set_photo_"+i2s(iqid++), "type", "set", "to", phone + "@" + whatsappserver, "xmlns", "w:profile:picture"));
 	req.addChild(pic);
@@ -774,8 +774,8 @@ void WhatsappConnection::processIncomingData()
 			if (treelist[i].hasAttribute("creation"))
 				this->account_creation = treelist[i]["creation"];
 
-			this->updatePrivacy();
 			this->notifyMyPresence();
+			this->updatePrivacy();
 			this->sendInitial();  // Seems to trigger an error IQ response
 			this->updateGroups();
 

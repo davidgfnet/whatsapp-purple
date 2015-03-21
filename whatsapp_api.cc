@@ -61,9 +61,9 @@ int WhatsappConnectionAPI::uploadComplete(int rid)
 	return connection->uploadComplete(rid);
 }
 
-void WhatsappConnectionAPI::send_avatar(const std::string & avatar)
+void WhatsappConnectionAPI::send_avatar(const std::string & avatar, const std::string & avatarp)
 {
-	connection->send_avatar(avatar);
+	connection->send_avatar(avatar, avatarp);
 }
 
 bool WhatsappConnectionAPI::query_icon(std::string & from, std::string & icon, std::string & hash)

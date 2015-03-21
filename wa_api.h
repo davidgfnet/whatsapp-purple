@@ -54,7 +54,7 @@ typedef struct {
 	int waAPI_queryicon(void *waAPI, char **who, char **icon, int *len, char **hash);
 	int waAPI_queryavatar(void *waAPI, const char *who, char **icon, int *len);
 	void waAPI_accountinfo(void *waAPI, unsigned long long *creation, unsigned long long *freeexpires, char **status);
-	void waAPI_setavatar(void *waAPI, const void *buffer, int len);
+	void waAPI_setavatar(void *waAPI, const void *buffer, int len, const void *buffers, int lens);
 	int waAPI_getuserstatus(void *waAPI, const char *who);
 	char *waAPI_getuserstatusstring(void *waAPI, const char *who);
 	unsigned long long waAPI_getlastseen(void *waAPI, const char *who);

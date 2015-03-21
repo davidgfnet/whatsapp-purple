@@ -67,7 +67,7 @@
 #define sys_close close
 #endif
 
-const char default_resource[] = "WP7-2.11.596-443";
+const char default_resource[] = "Android-2.12.5-443";
 
 #define WHATSAPP_ID "whatsapp"
 static PurplePlugin *_whatsapp_protocol = NULL;
@@ -76,7 +76,6 @@ static PurplePlugin *_whatsapp_protocol = NULL;
 #define WHATSAPP_STATUS_AWAY     "away"
 #define WHATSAPP_STATUS_OFFLINE  "offline"
 
-#define WHATSAPP_DEFAULT_SERVER "c2.whatsapp.net"
 #define WHATSAPP_DEFAULT_PORT   443
 
 typedef struct {
@@ -799,8 +798,14 @@ static void waprpl_login(PurpleAccount * acct)
 	wconn->waAPI = waAPI_create(username, password, nickname);
 	purple_connection_set_protocol_data(gc, wconn);
 
-	const char *hostname = purple_account_get_string(acct, "server", WHATSAPP_DEFAULT_SERVER);
+	const char *hostname = purple_account_get_string(acct, "server", "");
 	int port = purple_account_get_int(acct, "port", WHATSAPP_DEFAULT_PORT);
+
+	char hn[256];
+	if (strlen(hostname) == 0) {
+		sprintf(hn, "e%d.whatsapp.net", rand() % 9 + 1);
+		hostname = hn;
+	}
 
 	if (purple_proxy_connect(gc, acct, hostname, port, waprpl_connect_cb, gc) == NULL) {
 		purple_connection_error_reason(gc, PURPLE_CONNECTION_ERROR_NETWORK_ERROR, "Unable to connect");
@@ -1491,7 +1496,7 @@ static void waprpl_init(PurplePlugin * plugin)
 
 	prpl_info.user_splits = NULL;
 
-	option = purple_account_option_string_new("Server", "server", WHATSAPP_DEFAULT_SERVER);
+	option = purple_account_option_string_new("Server", "server", "");
 	prpl_info.protocol_options = g_list_append(prpl_info.protocol_options, option);
 
 	option = purple_account_option_int_new("Port", "port", WHATSAPP_DEFAULT_PORT);

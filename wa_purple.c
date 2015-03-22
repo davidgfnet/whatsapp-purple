@@ -1191,6 +1191,7 @@ void waprpl_ssl_output_cb(gpointer data, gint source, PurpleInputCondition cond)
 
 	/* Check if we need to callback again or not */
 	waprpl_check_ssl_output(gc);
+	waprpl_check_output(gc);
 }
 
 /* Try to read some data and push it to the WhatsApp API */
@@ -1224,6 +1225,7 @@ void waprpl_ssl_input_cb(gpointer data, gint source, PurpleInputCondition cond)
 	} while (ret > 0);
 
 	waprpl_check_ssl_output(gc);	/* The input data may generate responses! */
+	waprpl_check_output(gc);
 }
 
 static void waprpl_check_complete_uploads(PurpleConnection * gc) {

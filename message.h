@@ -46,18 +46,18 @@ public:
 class MediaMessage: public Message {
 public:
 	MediaMessage(const WhatsappConnection * wc, const std::string from, const unsigned long long time,
-		const std::string id, const std::string author,
-		const std::string url, const std::string hash, const std::string filetype);
+		const std::string id, const std::string author, const std::string url, const std::string ip,
+		const std::string hash, const std::string filetype);
 
-	std::string url, hash, filetype;
+	std::string url, hash, filetype, ip;
 };
 
 class ImageMessage: public MediaMessage {
 public:
 	ImageMessage(const WhatsappConnection * wc, const std::string from, const unsigned long long time,
-		const std::string id, const std::string author, const std::string url, const unsigned int width,
-		const unsigned int height, const unsigned int size, const std::string encoding, const std::string hash,
-		const std::string filetype, const std::string preview);
+		const std::string id, const std::string author, const std::string url, const std::string ip,
+		const unsigned int width, const unsigned int height, const unsigned int size, const std::string encoding,
+		const std::string hash,	const std::string filetype, const std::string preview);
 
 	int type() const { return IMAGE_MESSAGE; }
 	DataBuffer serialize() const;

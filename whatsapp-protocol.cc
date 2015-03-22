@@ -584,8 +584,12 @@ void WhatsappConnection::updateContactStatuses(std::string json)
 	}
 }
 
+std::string base64_encode_esp(unsigned char const *bytes_to_encode, unsigned int in_len);
+
 void WhatsappConnection::updateFileUpload(std::string json)
 {
+	DEBUG_PRINT("FILE UPLOAD:\n");
+	DEBUG_PRINT(json);
 	size_t offset = json.find("{");
 	if (offset == std::string::npos)
 		return;
@@ -605,16 +609,17 @@ void WhatsappConnection::updateFileUpload(std::string json)
 	std::string filehash = query_field(work, "filehash");
 	std::string mimetype = query_field(work, "mimetype");
 
-	std::string to, thumb;
+	std::string to, thumb, ip;
 	for (unsigned int j = 0; j < uploadfile_queue.size(); j++)
 		if (uploadfile_queue[j].uploading and uploadfile_queue[j].hash == filehash) {
 			to = uploadfile_queue[j].to;
 			thumb = uploadfile_queue[j].thumbnail;
+			ip = uploadfile_queue[j].ip;
 			uploadfile_queue.erase(uploadfile_queue.begin() + j);
 			break;
 		}
 	/* Send the message with the URL :) */
-	ImageMessage msg(this, to, time(NULL), i2s(msgcounter++), "author", url, a2i(width), a2i(height), a2i(size), "encoding", filehash, mimetype, thumb);
+	ImageMessage msg(this, to, time(NULL), i2s(msgcounter++), "author", url, ip, a2i(width), a2i(height), a2i(size), "encoding", filehash, mimetype, thumb);
 
 	DataBuffer buf = msg.serialize();
 
@@ -702,10 +707,11 @@ std::string WhatsappConnection::generateUploadPOST(t_fileupload * fu)
 	post += "POST " + fu->uploadurl + "\r\n";
 	post += "Content-Type: multipart/form-data; boundary=zzXXzzYYzzXXzzQQ\r\n";
 	post += "Host: " + fu->host + "\r\n";
-	post += "User-Agent: WhatsApp/2.4.7 S40Version/14.26 Device/Nokia302\r\n";
+	post += "User-Agent: WhatsApp/2.12.5 Android/4.3 Device/GalaxyS3\r\n";
 	post += "Content-Length:  " + i2s(ret.size()) + "\r\n\r\n";
 
 	std::string all = post + ret;
+	DEBUG_PRINT(post);
 
 	fu->totalsize = file_buffer.size();
 
@@ -849,7 +855,7 @@ void WhatsappConnection::processIncomingData()
 				}
 				if (treelist[i].getChild("media", t)) {
 					if (t.hasAttributeValue("type", "image")) {
-						this->receiveMessage(ImageMessage(this, from, time, id, author, t["url"], a2i(t["width"]), a2i(t["height"]), a2i(t["size"]), t["encoding"], t["filehash"], t["mimetype"], t.getData()));
+						this->receiveMessage(ImageMessage(this, from, time, id, author, t["url"], t["ip"], a2i(t["width"]), a2i(t["height"]), a2i(t["size"]), t["encoding"], t["filehash"], t["mimetype"], t.getData()));
 					} else if (t.hasAttributeValue("type", "location")) {
 						this->receiveMessage(LocationMessage(this, from, time, id, author, str2dbl(t["latitude"]), str2dbl(t["longitude"]), t.getData()));
 					} else if (t.hasAttributeValue("type", "audio")) {
@@ -893,6 +899,7 @@ void WhatsappConnection::processIncomingData()
 						if (uploadfile_queue[j].rid == a2i(treelist[i]["id"])) {
 							/* Queue to upload the file */
 							uploadfile_queue[j].uploadurl = t["url"];
+							uploadfile_queue[j].ip = t["ip"];
 							std::string host = uploadfile_queue[j].uploadurl.substr(8);	/* Remove https:// */
 							for (unsigned int i = 0; i < host.size(); i++)
 								if (host[i] == '/')

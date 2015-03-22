@@ -20,7 +20,7 @@ struct t_fileupload {
 	std::string file, hash;
 	int rid;
 	std::string type;
-	std::string uploadurl, host;
+	std::string uploadurl, host, ip;
 	std::string thumbnail;
 	bool uploading;
 	int totalsize;

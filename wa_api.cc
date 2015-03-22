@@ -452,7 +452,7 @@ std::string getpreview(const char *filename)
 
 	int len;
 	char * buffer;
-	imgThumbnail((unsigned char*)r.c_str(), r.size(), (void**)&buffer, &len, 100);
+	imgThumbnail((unsigned char*)r.c_str(), r.size(), (void**)&buffer, &len, 81);
 
 	std::string ret(buffer, len);
 	return ret;

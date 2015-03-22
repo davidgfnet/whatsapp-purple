@@ -60,7 +60,7 @@ void imgThumbnail(const unsigned char * data, unsigned int size, void ** out, in
 
 	double scalew = maxdimensions / ((double)width);
 	double scaleh = maxdimensions / ((double)height);
-	double scale  = fmax(scalew,scaleh);
+	double scale  = fmin(scalew,scaleh);
 	unsigned nwidth  = round(width  * scale);
 	unsigned nheight = round(height * scale);
 

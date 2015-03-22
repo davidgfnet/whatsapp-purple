@@ -47,5 +47,38 @@ void imgProfile(const unsigned char * data, unsigned int size, void ** out, int 
 	FreeImage_CloseMemory(outimgmem);
 }
 
+void imgThumbnail(const unsigned char * data, unsigned int size, void ** out, int * outlen, int maxdimensions) {
+	FreeImage_Initialise(0);
+
+	FIMEMORY * inimgmem = FreeImage_OpenMemory(data, size);
+	FREE_IMAGE_FORMAT fif = FreeImage_GetFileTypeFromMemory(inimgmem, size);
+	FIBITMAP * inimg = FreeImage_LoadFromMemory(fif, inimgmem, 0);
+	
+	// Create a squared version of the img
+	unsigned width = FreeImage_GetWidth(inimg);
+	unsigned height = FreeImage_GetHeight(inimg);
+
+	double scalew = maxdimensions / ((double)width);
+	double scaleh = maxdimensions / ((double)height);
+	double scale  = fmax(scalew,scaleh);
+	unsigned nwidth  = round(width  * scale);
+	unsigned nheight = round(height * scale);
+
+	FIBITMAP * outimg = FreeImage_Rescale(inimg, nwidth, nheight, FILTER_CATMULLROM);
+
+	FIMEMORY * outimgmem = FreeImage_OpenMemory(0,0);
+	FreeImage_SaveToMemory(FIF_JPEG, outimg, outimgmem, JPEG_QUALITYNORMAL);
+
+	*outlen = FreeImage_TellMemory(outimgmem);
+	*out = malloc(*outlen);
+	unsigned char *tbuf;
+	FreeImage_AcquireMemory(outimgmem, &tbuf, (unsigned*)outlen);
+	memcpy(*out, tbuf, *outlen);
+
+	FreeImage_Unload(outimg);
+	FreeImage_Unload(inimg);
+	FreeImage_CloseMemory(inimgmem);
+	FreeImage_CloseMemory(outimgmem);
+}
 
 

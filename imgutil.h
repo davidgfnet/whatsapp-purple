@@ -8,6 +8,7 @@ extern "C" {
 
 
 void imgProfile(const unsigned char * data, unsigned int size, void ** out, int * outlen, int dimensions);
+void imgThumbnail(const unsigned char * data, unsigned int size, void ** out, int * outlen, int maxdimensions);
 
 #ifdef __cplusplus
 }

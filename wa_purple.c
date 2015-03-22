@@ -971,16 +971,21 @@ static void waprpl_set_buddy_icon(PurpleConnection * gc, PurpleStoredImage * img
 	size_t size = purple_imgstore_get_size(img);
 	const void *data = purple_imgstore_get_data(img);
 
-	// First of all make the picture a square
-	char * sqbuffer; int sqsize;
-	imgProfile(data, size, (void**)&sqbuffer, &sqsize, 640);
+	if (data) {
+		// First of all make the picture a square
+		char * sqbuffer; int sqsize;
+		imgProfile(data, size, (void**)&sqbuffer, &sqsize, 640);
 
-	char * pbuffer; int osize;
-	imgProfile(data, size, (void**)&pbuffer, &osize, 96);
+		char * pbuffer; int osize;
+		imgProfile(data, size, (void**)&pbuffer, &osize, 96);
 
-	waAPI_setavatar(wconn->waAPI, sqbuffer, sqsize, pbuffer, osize);
+		waAPI_setavatar(wconn->waAPI, sqbuffer, sqsize, pbuffer, osize);
 
-	free(sqbuffer); free(pbuffer);
+		free(sqbuffer); free(pbuffer);
+	}
+	else {
+		waAPI_setavatar(wconn->waAPI, 0,0,0,0);
+	}
 
 	waprpl_check_output(gc);
 }

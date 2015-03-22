@@ -963,7 +963,7 @@ static unsigned int waprpl_send_typing(PurpleConnection * gc, const char *who, P
 	return 1;
 }
 
-int imgResize(void * inb, size_t ins, void ** outb, unsigned long * outs, int desiredsize);
+void imgProfile(const unsigned char * data, unsigned int size, void ** out, int * outlen, int dimensions);
 
 static void waprpl_set_buddy_icon(PurpleConnection * gc, PurpleStoredImage * img)
 {
@@ -973,11 +973,11 @@ static void waprpl_set_buddy_icon(PurpleConnection * gc, PurpleStoredImage * img
 	const void *data = purple_imgstore_get_data(img);
 
 	// First of all make the picture a square
-	char * sqbuffer; unsigned long sqsize;
-	imgResize(data, size, &sqbuffer, &sqsize, 640);
+	char * sqbuffer; int sqsize;
+	imgProfile(data, size, (void**)&sqbuffer, &sqsize, 640);
 
-	char * pbuffer; unsigned long osize;
-	imgResize(data, size, &pbuffer, &osize, 96);
+	char * pbuffer; int osize;
+	imgProfile(data, size, (void**)&pbuffer, &osize, 96);
 
 	waAPI_setavatar(wconn->waAPI, sqbuffer, sqsize, pbuffer, osize);
 
@@ -1422,7 +1422,7 @@ static PurplePluginProtocolInfo prpl_info = {
 	NULL,			/* user_splits, initialized in waprpl_init() */
 	NULL,			/* protocol_options, initialized in waprpl_init() */
 	{			/* icon_spec, a PurpleBuddyIconSpec */
-		"jpg",			/* format */
+		"png,gif,bmp,tiff,jpg",			/* format */
 		1,			/* min_width */
 		1,			/* min_height */
 		4096,			/* max_width */

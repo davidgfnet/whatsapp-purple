@@ -71,6 +71,7 @@ int WhatsappConnection::sendImage(std::string to, int w, int h, unsigned int siz
 	fu.type = "image";
 	fu.uploading = false;
 	fu.totalsize = 0;
+	fu.thumbnail = getpreview(fp);
 	uploadfile_queue.push_back(fu);
 	outbuffer = outbuffer + serialize_tree(&req);
 
@@ -604,15 +605,16 @@ void WhatsappConnection::updateFileUpload(std::string json)
 	std::string filehash = query_field(work, "filehash");
 	std::string mimetype = query_field(work, "mimetype");
 
-	std::string to;
+	std::string to, thumb;
 	for (unsigned int j = 0; j < uploadfile_queue.size(); j++)
 		if (uploadfile_queue[j].uploading and uploadfile_queue[j].hash == filehash) {
 			to = uploadfile_queue[j].to;
+			thumb = uploadfile_queue[j].thumbnail;
 			uploadfile_queue.erase(uploadfile_queue.begin() + j);
 			break;
 		}
 	/* Send the message with the URL :) */
-	ImageMessage msg(this, to, time(NULL), i2s(msgcounter++), "author", url, a2i(width), a2i(height), a2i(size), "encoding", filehash, mimetype, temp_thumbnail);
+	ImageMessage msg(this, to, time(NULL), i2s(msgcounter++), "author", url, a2i(width), a2i(height), a2i(size), "encoding", filehash, mimetype, thumb);
 
 	DataBuffer buf = msg.serialize();
 

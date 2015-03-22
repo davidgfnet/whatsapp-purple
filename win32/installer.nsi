@@ -90,6 +90,9 @@ Section "MainSection" SEC01
   SetOverwrite on
   File "libwhatsapp.dll"
 
+  SetOutPath "$PidginDir\"
+  File "deps/*.dll"
+
   !ifdef PIDGIN_PLUGIN
     SetOutPath "$INSTDIR"
     SetOverwrite on
@@ -103,6 +106,8 @@ Section "MainSection" SEC01
   ; move to pidgin plugin directory, check if not busy (pidgin is running)
   StrCpy $DllName "libwhatsapp.dll"
   call CopyDLL
+
+  Rename "$INSTDIR\$DllName" "$PidginDir\plugins\$DllName"
 
   ; hard part is done, do the rest now.
   SetOverwrite on

@@ -95,6 +95,7 @@ typedef struct {
 std::string md5hex(std::string target);
 std::string md5raw(std::string target);
 std::string SHA256_file_b64(const char *filename);
+std::string getpreview(const char *filename);
 #endif
 
 #ifdef DEBUG

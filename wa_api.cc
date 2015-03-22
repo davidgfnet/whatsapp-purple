@@ -20,6 +20,7 @@
 #include "contacts.h"
 #include "whatsapp_api.h"
 #include "message.h"
+#include "imgutil.h"
 
 char *waAPI_getgroups(void *waAPI)
 {
@@ -434,6 +435,27 @@ std::string base64_encode_esp(unsigned char const *bytes_to_encode, unsigned int
 
 	return ret;
 
+}
+
+std::string getpreview(const char *filename)
+{
+	FILE * fd = fopen(filename, "rb");
+	std::string r;
+	int read = 0;
+	do {
+		char buf[1024];
+		read = fread(buf, 1, 1024, fd);
+		if (read > 0)
+			r += std::string(buf,read);
+	} while (read > 0);
+	fclose(fd);
+
+	int len;
+	char * buffer;
+	imgProfile((unsigned char*)r.c_str(), r.size(), (void**)&buffer, &len, 100);
+
+	std::string ret(buffer, len);
+	return ret;
 }
 
 std::string SHA256_file_b64(const char *filename)

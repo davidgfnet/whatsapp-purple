@@ -55,6 +55,7 @@
 #include "request.h"
 
 #include "wa_api.h"
+#include "imgutil.h"
 
 #ifdef _WIN32
 #define sys_read  wpurple_read
@@ -962,8 +963,6 @@ static unsigned int waprpl_send_typing(PurpleConnection * gc, const char *who, P
 
 	return 1;
 }
-
-void imgProfile(const unsigned char * data, unsigned int size, void ** out, int * outlen, int dimensions);
 
 static void waprpl_set_buddy_icon(PurpleConnection * gc, PurpleStoredImage * img)
 {

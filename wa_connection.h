@@ -21,6 +21,7 @@ struct t_fileupload {
 	int rid;
 	std::string type;
 	std::string uploadurl, host;
+	std::string thumbnail;
 	bool uploading;
 	int totalsize;
 };

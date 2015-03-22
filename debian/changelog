@@ -1,3 +1,18 @@
+pidgin-whatsapp (0.8) trusty; urgency=low
+
+  * Ability to change profile picture
+  * Ability to set privacy options
+  * Fixed image sending by creating realistic thumbnails
+  * Fixed profile picture update for contacts in buddy list
+  * Fixing some features to look like an android phone
+  * Supports receiving broadcast messages
+  * Fixed some minor bugs with groups and some cleanup
+  * Fixed some leaks (probably some still ther)
+  * Fixing status message setting
+  * Fixed photo thumbnails display when receiving media messages
+
+ -- David Guillen Fandos <david@davidgf.net>  Sun, 22 Mar 2015 23:23:00 +0100
+
 pidgin-whatsapp (0.7) trusty; urgency=low
 
   * Minor fixes on whatsapp API interaction

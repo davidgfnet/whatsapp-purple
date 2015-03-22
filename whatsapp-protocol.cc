@@ -36,7 +36,6 @@
 #include "contacts.h"
 #include "message.h"
 #include "wa_connection.h"
-#include "thumb.h"
 
 static int isbroadcast(const std::string user)
 {

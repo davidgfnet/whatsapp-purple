@@ -3,7 +3,7 @@ LIBNAME = libwhatsapp.dll
 .PHONY: all
 all: $(LIBNAME)
 
-C_SRCS = wa_purple.c tinfl.c
+C_SRCS = wa_purple.c tinfl.c imgutil.c
 CXX_SRCS = whatsapp-protocol.cc wa_api.cc rc4.cc keygen.cc tree.cc databuffer.cc message.cc whatsapp_api.cc
 
 C_OBJS = $(C_SRCS:.c=.o)
@@ -41,7 +41,7 @@ CFLAGS = \
     $(EXTRAINCLUDES) \
     $(PIDGIN_INCLUDE_WIN32_DEV)
 
-LIBS_PURPLE = $(shell mingw32-pkg-config --libs purple) $(EXTRALIBS)
+LIBS_PURPLE = $(shell mingw32-pkg-config --libs purple) $(EXTRALIBS) -lfreeimage
 LDFLAGS = -shared 
 
 %.o: %.c

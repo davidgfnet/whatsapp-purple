@@ -603,6 +603,7 @@ static void waprpl_process_incoming_events(PurpleConnection * gc)
 			char *subject, *owner, *part;
 			if (conv && waAPI_getgroupinfo(wconn->waAPI, id, &subject, &owner, &part)) {
 				conv_add_participants(conv, part, owner);
+				g_free(subject); g_free(owner); g_free(part);
 			}
 		}
 
@@ -1143,7 +1144,7 @@ static void waprpl_chat_join(PurpleConnection * gc, GHashTable * data)
 		/* Add people in the chat */
 		purple_debug_info(WHATSAPP_ID, "group info ID(%s) SUBJECT(%s) OWNER(%s)\n", id, subject, owner);
 		conv_add_participants(conv, part, owner);
-		g_free(subject); g_free(part);
+		g_free(subject); g_free(owner); g_free(part);
 	}
 }
 

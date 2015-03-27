@@ -7,7 +7,7 @@
 void imgProfile(const unsigned char * data, unsigned int size, void ** out, int * outlen, int dimensions) {
 	FreeImage_Initialise(0);
 
-	FIMEMORY * inimgmem = FreeImage_OpenMemory(data, size);
+	FIMEMORY * inimgmem = FreeImage_OpenMemory((BYTE *) data, size);
 	FREE_IMAGE_FORMAT fif = FreeImage_GetFileTypeFromMemory(inimgmem, size);
 	FIBITMAP * inimg = FreeImage_LoadFromMemory(fif, inimgmem, 0);
 	
@@ -50,7 +50,7 @@ void imgProfile(const unsigned char * data, unsigned int size, void ** out, int 
 void imgThumbnail(const unsigned char * data, unsigned int size, void ** out, int * outlen, int maxdimensions) {
 	FreeImage_Initialise(0);
 
-	FIMEMORY * inimgmem = FreeImage_OpenMemory(data, size);
+	FIMEMORY * inimgmem = FreeImage_OpenMemory((BYTE *) data, size);
 	FREE_IMAGE_FORMAT fif = FreeImage_GetFileTypeFromMemory(inimgmem, size);
 	FIBITMAP * inimg = FreeImage_LoadFromMemory(fif, inimgmem, 0);
 	

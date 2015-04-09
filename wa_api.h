@@ -99,7 +99,7 @@ std::string getpreview(const char *filename);
 #endif
 
 #ifdef DEBUG
-#define DEBUG_PRINT(a) std::cout << a << std::endl;
+#define DEBUG_PRINT(a) std::clog << a << std::endl;
 #else
 #define DEBUG_PRINT(a)
 #endif

@@ -1531,7 +1531,7 @@ static void waprpl_init(PurplePlugin * plugin)
 	// Some signals which can be caught by plugins
 	purple_signal_register(plugin, "whatsapp-sending-message",
 			purple_marshal_VOID__POINTER_POINTER_POINTER_POINTER,
-			purple_value_new(PURPLE_TYPE_UNKNOWN), 4,
+			NULL, 4,
 			purple_value_new(PURPLE_TYPE_SUBTYPE, PURPLE_SUBTYPE_CONNECTION),
 			purple_value_new(PURPLE_TYPE_STRING), /* id */
 			purple_value_new(PURPLE_TYPE_STRING), /* who */
@@ -1539,7 +1539,7 @@ static void waprpl_init(PurplePlugin * plugin)
 	);
 	purple_signal_register(plugin, "whatsapp-message-received",
 			purple_marshal_VOID__POINTER_POINTER_UINT,
-			purple_value_new(PURPLE_TYPE_UNKNOWN), 3,
+			NULL, 3,
 			purple_value_new(PURPLE_TYPE_SUBTYPE, PURPLE_SUBTYPE_CONNECTION),
 			purple_value_new(PURPLE_TYPE_STRING),  /* id */
 			purple_value_new(PURPLE_TYPE_INT)      /* reception-types */

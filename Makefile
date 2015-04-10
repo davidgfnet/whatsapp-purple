@@ -54,8 +54,8 @@ strip: $(LIBNAME)
 	$(STRIP) --strip-unneeded $(LIBNAME)
 
 .PHONY: debug
-debug: CFLAGS += -g -DDEBUG -O0
-debug: $(LIBNAME)
+debug:
+	CFLAGS="$$CFLAGS -DDEBUG -g3 -O0" make all
 
 PLUGIN_DIR_PURPLE:=$(shell pkg-config --variable=plugindir purple)
 DATA_ROOT_DIR_PURPLE:=$(shell pkg-config --variable=datarootdir purple)

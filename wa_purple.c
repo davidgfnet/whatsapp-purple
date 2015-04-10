@@ -648,6 +648,10 @@ static void waprpl_process_incoming_events(PurpleConnection * gc)
 			conv_add_message(gc, m.who, msg, m.author, m.t);
 			g_free(msg);
 			} break;
+		case 5: {
+			purple_debug_info(WHATSAPP_ID, "Got phone call from %s\n", m.who, m.url);
+			conv_add_message(gc, m.who, "[Trying to voice-call you]", m.author, m.t);
+			} break;
 		default:
 			purple_debug_info(WHATSAPP_ID, "Got an unrecognized message!\n");
 			break;

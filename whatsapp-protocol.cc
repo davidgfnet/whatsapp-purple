@@ -872,6 +872,19 @@ void WhatsappConnection::processIncomingData()
 				DataBuffer reply = generateResponse(treelist[i]["from"], "", treelist[i]["id"]);
 				outbuffer = outbuffer + reply;
 			}
+		} else if (treelist[i].getTag() == "call") {
+			if (treelist[i].hasAttribute("notify")) {
+				unsigned long long time = 0;
+				if (treelist[i].hasAttribute("t"))
+					time = str2lng(treelist[i]["t"]);
+				std::string from = treelist[i]["from"];
+				std::string id = treelist[i]["id"];
+
+				this->receiveMessage(CallMessage(this, from, time, id));
+
+				DataBuffer reply = generateResponse(treelist[i]["from"], "", treelist[i]["id"]);
+				outbuffer = outbuffer + reply;
+			}
 		} else if (treelist[i].getTag() == "presence") {
 			/* Receives the presence of the user, for v14 type is optional */
 			if (treelist[i].hasAttribute("from")) {

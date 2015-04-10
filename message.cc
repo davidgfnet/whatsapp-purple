@@ -67,6 +67,22 @@ Message *ChatMessage::copy() const
 	return new ChatMessage(wc, from, t, id, message, author);
 }
 
+CallMessage::CallMessage(const WhatsappConnection * wc, const std::string from, const unsigned long long time,
+	const std::string id) : 
+	Message(wc, from, time, id, "")
+{
+}
+
+DataBuffer CallMessage::serialize() const
+{
+	Tree mes("call");
+	return wc->serialize_tree(&mes);
+}
+
+Message *CallMessage::copy() const
+{
+	return new CallMessage(wc, from, t, id);
+}
 
 ImageMessage::ImageMessage(const WhatsappConnection * wc, const std::string from, const unsigned long long time, 
 	const std::string id, const std::string author, const std::string url, const std::string ip, const unsigned int width,

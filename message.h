@@ -10,6 +10,7 @@
 #define LOCAT_MESSAGE 2
 #define SOUND_MESSAGE 3
 #define VIDEO_MESSAGE 4
+#define CALL_MESSAGE  5
 
 class WhatsappConnection;
 class DataBuffer;
@@ -42,6 +43,19 @@ public:
 	DataBuffer serialize() const;
 	Message *copy() const;
 };
+
+
+class CallMessage: public Message {
+public:
+	CallMessage(const WhatsappConnection * wc, const std::string from, const unsigned long long time,
+		const std::string id);
+
+	int type() const { return CALL_MESSAGE; }
+
+	DataBuffer serialize() const;
+	Message *copy() const;
+};
+
 
 class MediaMessage: public Message {
 public:

@@ -31,6 +31,7 @@ class WhatsappConnection {
 	friend class ChatMessage;
 	friend class ImageMessage;
 	friend class Message;
+	friend class CallMessage;
 
 public:
 	enum ErrorCode { errorNoError = 0, errorAuth, errorUnknown };

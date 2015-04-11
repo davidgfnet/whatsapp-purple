@@ -66,6 +66,26 @@ In order to get a proper backtrace, you can either use your package manager to
 install a debug package or rebuild the library with debug symbols using `make
 debug`.
 
+### Why are some private messages not displayed?
+
+Since the end of 2014, wahtsapp's Android clients feature end-to-end encryption
+using libaxolotl from ChatSecure (WhisperSystems). Unfortunately, this plugin
+can't (yet) handle such messages. Workaround:
+
+Register your phone number using a modified yowsup. Edit yowsup/env/env_android.py
+so it says
+  _VERSION = "2.11.414"
+and
+  _AXOLOTL = False
+. Then call
+  ./setup.py build
+  ./setup.py install
+and register using yowsup-cli.
+
+If you already have registered: tough luck. Too really have your account data
+deleted, it looks like you have to wait 30 days after you did this:
+  http://www.whatsapp.com/faq/en/wp/21335316
+Then, it MAY BE possible to re-register as described above...
 
 *Disclaimer
 -----------

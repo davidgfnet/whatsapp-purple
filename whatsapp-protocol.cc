@@ -224,6 +224,13 @@ int WhatsappConnection::sendCallback(char *data, int len)
 
 bool WhatsappConnection::hasDataToSend()
 {
+	// Check whether we need to send a keepalive
+	if (time(0) - last_keepalive > 30) {
+		last_keepalive = time(0);
+		if (conn_status == SessionConnected)
+			notifyMyPresence();
+	}
+
 	return outbuffer.size() != 0;
 }
 

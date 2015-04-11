@@ -92,6 +92,7 @@ typedef struct {
 	PurpleAccount *account;
 	int fd;			/* File descriptor of the socket */
 	guint rh, wh;		/* Read/write handlers */
+	guint timer;        /* Keep alive timer */
 	int connected;		/* Connection status */
 	void *waAPI;		/* Pointer to the C++ class which actually implements the protocol */
 	int conv_id;		/* Combo id counter */
@@ -649,7 +650,7 @@ static void waprpl_process_incoming_events(PurpleConnection * gc)
 			g_free(msg);
 			} break;
 		case 5: {
-			purple_debug_info(WHATSAPP_ID, "Got phone call from %s\n", m.who, m.url);
+			purple_debug_info(WHATSAPP_ID, "Got phone call from %s\n", m.who);
 			conv_add_message(gc, m.who, "[Trying to voice-call you]", m.author, m.t);
 			} break;
 		default:
@@ -756,6 +757,13 @@ static void waprpl_check_output(PurpleConnection * gc)
 	waprpl_check_complete_uploads(gc);
 }
 
+static gboolean wa_timer_cb(gpointer data) {
+	PurpleConnection * gc = (PurpleConnection*)data;
+	waprpl_check_output(gc);
+
+	return TRUE;
+}
+
 static void waprpl_connect_cb(gpointer data, gint source, const gchar * error_message)
 {
 	PurpleConnection *gc = data;
@@ -772,6 +780,8 @@ static void waprpl_connect_cb(gpointer data, gint source, const gchar * error_me
 		wconn->fd = source;
 		waAPI_login(wconn->waAPI, resource);
 		wconn->rh = purple_input_add(wconn->fd, PURPLE_INPUT_READ, waprpl_input_cb, gc);
+		wconn->timer = purple_timeout_add_seconds(20, wa_timer_cb, gc);
+
 		waprpl_check_output(gc);
 	}
 }
@@ -790,6 +800,7 @@ static void waprpl_login(PurpleAccount * acct)
 	wconn->account = acct;
 	wconn->rh = 0;
 	wconn->wh = 0;
+	wconn->timer = 0;
 	wconn->connected = 0;
 	wconn->conv_id = 1;
 	wconn->gsc = 0;
@@ -832,6 +843,8 @@ static void waprpl_close(PurpleConnection * gc)
 		purple_input_remove(wconn->rh);
 	if (wconn->wh)
 		purple_input_remove(wconn->wh);
+	if (wconn->timer)
+		purple_timeout_remove(wconn->timer);
 
 	if (wconn->fd >= 0)
 		sys_close(wconn->fd);

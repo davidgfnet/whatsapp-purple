@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <time.h>
 #include "wacommon.h"
 #include "databuffer.h"
 #include "contacts.h"
@@ -49,6 +50,7 @@ private:
 	std::string challenge_data, challenge_response;
 	std::string phone, password;
 	SessionStatus conn_status;
+	time_t last_keepalive;
 
 	/* State stuff */
 	unsigned int msgcounter, iqid;

@@ -1,3 +1,10 @@
+pidgin-whatsapp (0.8.1) trusty; urgency=low
+
+  * Added ability to detect incoming voice calls
+  * Fixed some bugs which cause the connection to drop (keepalive)
+
+ -- David Guillen Fandos <david@davidgf.net>  Wed, 22 Apr 2015 19:45:00 +0100
+
 pidgin-whatsapp (0.8) trusty; urgency=low
 
   * Ability to change profile picture

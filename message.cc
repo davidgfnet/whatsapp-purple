@@ -104,11 +104,11 @@ DataBuffer ImageMessage::serialize() const
 	mattrs["encoding"] = "raw";
 	mattrs["filehash"] = this->hash;
 	mattrs["mimetype"] = this->filetype;
-	mattrs["width"] = std::to_string(this->width);
-	mattrs["height"] = std::to_string(this->height);
+	mattrs["width"] = i2s(this->width);
+	mattrs["height"] = i2s(this->height);
 	mattrs["type"] = "image";
 	mattrs["url"] = url;
-	mattrs["size"] = std::to_string(size);
+	mattrs["size"] = i2s(size);
 	mattrs["file"] = basename(url);
 	mattrs["ip"] = this->ip;
 

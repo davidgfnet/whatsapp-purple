@@ -825,8 +825,17 @@ void WhatsappConnection::processIncomingData()
 			std::string id = treelist[i]["id"];
 			std::string type = treelist[i]["type"];
 			if (type == "") type = "delivery";
+			std::string from = treelist[i]["from"];
+			std::string to = treelist[i]["to"];
+			std::string participant = treelist[i]["participant"];
 			
 			Tree mes("ack", makeAttr3("class", "receipt", "type", type, "id", id));
+
+			// Add optional fields
+			if (from != "") mes["to"] = from;
+			if (to != "") mes["from"] = to;
+			if (participant != "") mes["participant"] = participant;
+
 			outbuffer = outbuffer + serialize_tree(&mes);
 
 			// Add reception package to queue

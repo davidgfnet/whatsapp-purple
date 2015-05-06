@@ -25,6 +25,7 @@ public:
 	std::map < std::string, std::string > &getAttributes();
 	std::string getAtr(const std::string & at) const;
 	std::string operator[](const std::string & at) const { return getAtr(at); }
+	std::string & operator[](const std::string & at) { return attributes[at]; }
 
 	void setTag(std::string tag) { this->tag = tag; }
 	void setAttributes(std::map < std::string, std::string > attributes);

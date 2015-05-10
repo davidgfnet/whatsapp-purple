@@ -2,13 +2,7 @@
 #include "keygen.h"
 #include <string.h>
 
-#ifdef ENABLE_OPENSSL
-#include <openssl/md5.h>
-#include <openssl/sha.h>
-#include <openssl/hmac.h>
-#else
-#include "wa_api.h"
-#endif
+#include "wa_util.h"
 
 static const std::string base64_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 static inline bool is_base64(unsigned char c)

@@ -20,14 +20,6 @@
 #include <assert.h>
 #include <time.h>
 
-#ifdef ENABLE_OPENSSL
-#include <openssl/md5.h>
-#include <openssl/sha.h>
-#include <openssl/hmac.h>
-#else
-#include "wa_api.h"
-#endif
-
 #include "wadict.h"
 #include "rc4.h"
 #include "keygen.h"
@@ -36,6 +28,8 @@
 #include "contacts.h"
 #include "message.h"
 #include "wa_connection.h"
+#include "wa_util.h"
+
 
 static int isbroadcast(const std::string user)
 {

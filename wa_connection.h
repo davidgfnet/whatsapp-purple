@@ -125,6 +125,8 @@ public:
 	WhatsappConnection(std::string phone, std::string password, std::string nick);
 	~WhatsappConnection();
 
+	std::string getPhone() const { return phone; }
+
 	void doLogin(std::string);
 	void receiveCallback(const char *data, int len);
 	int sendCallback(char *data, int len);

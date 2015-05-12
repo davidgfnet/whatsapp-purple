@@ -9,6 +9,7 @@
  */
 
 #include <string>
+#include <string.h>
 #include <stdio.h>
 
 #include "wa_util.h"
@@ -126,6 +127,30 @@ std::string getpreview(const char *filename)
 	return ret;
 }
 
+#ifdef ENABLE_OPENSSL
+
+std::string SHA256_file_b64(const char *filename)
+{
+	unsigned char hash[SHA256_DIGEST_LENGTH];
+	SHA256_CTX sha256;
+	SHA256_Init(&sha256);
+
+	FILE *fd = fopen(filename, "rb");
+	int read = 0;
+	do {
+		char buf[1024];
+		read = fread(buf, 1, 1024, fd);
+		SHA256_Update(&sha256, buf, read);
+	} while (read > 0);
+	fclose(fd);
+
+	SHA256_Final(hash, &sha256);
+
+	return base64_encode_esp(hash, 32);
+}
+
+#else
+
 std::string SHA256_file_b64(const char *filename)
 {
 	unsigned char md[32];
@@ -150,6 +175,8 @@ std::string SHA256_file_b64(const char *filename)
 
 	return base64_encode_esp(md, 32);
 }
+
+#endif
 
 std::string md5hex(std::string target)
 {

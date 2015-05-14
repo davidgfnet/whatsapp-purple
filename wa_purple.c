@@ -479,11 +479,14 @@ static void query_typing(PurpleConnection *gc)
 	while (waAPI_querytyping(wconn->waAPI, &who, &status)) {
 		if (status == 1) {
 			purple_debug_info(WHATSAPP_ID, "%s is typing\n", who);
-			serv_got_typing(gc, who, 0, PURPLE_TYPING);
+			if (!isgroup(who))
+				serv_got_typing(gc, who, 0, PURPLE_TYPING);
 		} else {
 			purple_debug_info(WHATSAPP_ID, "%s is not typing\n", who);
-			serv_got_typing(gc, who, 0, PURPLE_NOT_TYPING);
-			serv_got_typing_stopped(gc, who);
+			if (!isgroup(who)) {
+				serv_got_typing(gc, who, 0, PURPLE_NOT_TYPING);
+				serv_got_typing_stopped(gc, who);
+			}
 		}
 		g_free(who);
 	}

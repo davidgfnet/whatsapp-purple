@@ -48,7 +48,7 @@ DataBuffer WhatsappConnection::generateResponse(std::string from, std::string ty
 }
 
 /* Send image transaction */
-int WhatsappConnection::sendImage(std::string to, int w, int h, unsigned int size, const char *fp)
+int WhatsappConnection::sendImage(std::string mid, std::string to, int w, int h, unsigned int size, const char *fp)
 {
 	/* Type can be: audio/image/video */
 	std::string sha256b64hash = SHA256_file_b64(fp);
@@ -65,6 +65,7 @@ int WhatsappConnection::sendImage(std::string to, int w, int h, unsigned int siz
 	fu.uploading = false;
 	fu.totalsize = 0;
 	fu.thumbnail = getpreview(fp);
+	fu.msgid = mid;
 	uploadfile_queue.push_back(fu);
 	outbuffer = outbuffer + serialize_tree(&req);
 
@@ -406,12 +407,12 @@ bool WhatsappConnection::queryReceivedMessage(char *msgid, int * type)
 	return true;
 }
 
-void WhatsappConnection::getMessageId(char * msgid)
+std::string WhatsappConnection::getMessageId()
 {
 	unsigned int t = time(NULL);
 	unsigned int mid = msgcounter++;
 
-	sprintf(msgid, "%u-%u", t, mid);
+	return std::to_string(t) + "-" + std::to_string(mid);
 }
 
 void WhatsappConnection::sendChat(std::string msgid, std::string to, std::string message)
@@ -609,17 +610,18 @@ void WhatsappConnection::updateFileUpload(std::string json)
 	std::string filehash = query_field(work, "filehash");
 	std::string mimetype = query_field(work, "mimetype");
 
-	std::string to, thumb, ip;
+	std::string to, thumb, ip, mid;
 	for (unsigned int j = 0; j < uploadfile_queue.size(); j++)
 		if (uploadfile_queue[j].uploading and uploadfile_queue[j].hash == filehash) {
 			to = uploadfile_queue[j].to;
 			thumb = uploadfile_queue[j].thumbnail;
 			ip = uploadfile_queue[j].ip;
+			mid = uploadfile_queue[j].msgid;
 			uploadfile_queue.erase(uploadfile_queue.begin() + j);
 			break;
 		}
 	/* Send the message with the URL :) */
-	ImageMessage msg(this, to, time(NULL), i2s(msgcounter++), "author", url, ip, a2i(width), a2i(height), a2i(size), "encoding", filehash, mimetype, thumb);
+	ImageMessage msg(this, to, time(NULL), mid, "author", url, ip, a2i(width), a2i(height), a2i(size), "encoding", filehash, mimetype, thumb);
 
 	DataBuffer buf = msg.serialize();
 

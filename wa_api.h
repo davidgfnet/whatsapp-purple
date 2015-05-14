@@ -43,7 +43,7 @@ typedef struct {
 	void waAPI_getmsgid(void *waAPI, char * msgid);
 	void waAPI_sendim(void *waAPI, const char *id, const char *who, const char *message);
 	void waAPI_sendchat(void *waAPI, const char *id, const char *who, const char *message);
-	int waAPI_sendimage(void *waAPI, const char *who, int w, int h, unsigned int size, const char *fp);
+	int waAPI_sendimage(void *waAPI, const char *id, const char *who, int w, int h, unsigned int size, const char *fp);
 	int waAPI_loginstatus(void *waAPI);
 	void waAPI_addcontact(void *waAPI, const char *phone);
 	void waAPI_contactsupdate(void *waAPI);

@@ -34,10 +34,10 @@ public:
 	Message * getReceivedMessage();
 
 	// Sending stuff
-	void getMessageId(char * msgid);
+	std::string getMessageId();
 	void sendChat(std::string msgid, std::string to, std::string message);
 	void sendGroupChat(std::string msgid, std::string to, std::string message);
-	int sendImage(std::string to, int w, int h, unsigned int size, const char *fp);
+	int sendImage(std::string id, std::string to, int w, int h, unsigned int size, const char *fp);
 
 	// Privacy
 	void updatePrivacy(const std::string &, const std::string &, const std::string &);

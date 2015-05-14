@@ -23,6 +23,7 @@ struct t_fileupload {
 	std::string type;
 	std::string uploadurl, host, ip;
 	std::string thumbnail;
+	std::string msgid;
 	bool uploading;
 	int totalsize;
 };
@@ -141,7 +142,7 @@ public:
 	void updatePrivacy(const std::string &, const std::string &, const std::string &);
 	void queryPrivacy(std::string &, std::string &, std::string &);
 
-	void getMessageId(char * msgid);
+	std::string getMessageId();
 	void addContacts(std::vector < std::string > clist);
 	void contactsUpdate();
 	void sendChat(std::string msgid, std::string to, std::string message);
@@ -169,7 +170,7 @@ public:
 	{
 		return ((int)conn_status) - 1;
 	}
-	int sendImage(std::string to, int w, int h, unsigned int size, const char *fp);
+	int sendImage(std::string mid, std::string to, int w, int h, unsigned int size, const char *fp);
 
 	int sendSSLCallback(char *buffer, int maxbytes);
 	int sentSSLCallback(int bytessent);

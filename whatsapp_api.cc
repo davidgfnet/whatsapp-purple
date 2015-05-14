@@ -47,9 +47,9 @@ unsigned long long WhatsappConnectionAPI::getlastseen(const std::string & who)
 	return connection->getlastseen(who);
 }
 
-int WhatsappConnectionAPI::sendImage(std::string to, int w, int h, unsigned int size, const char *fp)
+int WhatsappConnectionAPI::sendImage(std::string mid, std::string to, int w, int h, unsigned int size, const char *fp)
 {
-	return connection->sendImage(to, w, h, size, fp);
+	return connection->sendImage(mid, to, w, h, size, fp);
 }
 
 int WhatsappConnectionAPI::uploadProgress(int &rid, int &bs)
@@ -101,9 +101,9 @@ bool WhatsappConnectionAPI::query_status(std::string & from, int &status)
 	return connection->query_status(from, status);
 }
 
-void WhatsappConnectionAPI::getMessageId(char * msgid)
+std::string WhatsappConnectionAPI::getMessageId()
 {
-	connection->getMessageId(msgid);
+	return connection->getMessageId();
 }
 
 bool WhatsappConnectionAPI::queryReceivedMessage(std::string & msgid, int & type)

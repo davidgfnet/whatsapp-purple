@@ -181,9 +181,9 @@ void waAPI_sendchat(void *waAPI, const char *id, const char *who, const char *me
 	((WhatsappConnectionAPI *) waAPI)->sendGroupChat(id, who, message);
 }
 
-int waAPI_sendimage(void *waAPI, const char *who, int w, int h, unsigned int size, const char *fp)
+int waAPI_sendimage(void *waAPI, const char * id, const char *who, int w, int h, unsigned int size, const char *fp)
 {
-	return ((WhatsappConnectionAPI *) waAPI)->sendImage(std::string(who), w, h, size, fp);
+	return ((WhatsappConnectionAPI *) waAPI)->sendImage(std::string(id), std::string(who), w, h, size, fp);
 }
 
 int waAPI_fileuploadprogress(void *waAPI, int *rid, int *bs)
@@ -340,7 +340,8 @@ int waAPI_loginstatus(void *waAPI)
 }
 
 void waAPI_getmsgid(void *waAPI, char * msgid) {
-	((WhatsappConnectionAPI *) waAPI)->getMessageId(msgid);
+	std::string id = ((WhatsappConnectionAPI *) waAPI)->getMessageId();
+	strcpy(msgid, id.c_str());
 }
 
 void waAPI_addcontact(void *waAPI, const char *phone)

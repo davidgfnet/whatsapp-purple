@@ -30,7 +30,7 @@ public:
 	bool hasDataToSend();
 
 	// Receiving stuff
-	bool queryReceivedMessage(char *msgid, int * type);
+	bool queryReceivedMessage(std::string &msgid, int & type);
 	Message * getReceivedMessage();
 
 	// Sending stuff

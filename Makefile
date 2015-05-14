@@ -32,6 +32,7 @@ CFLAGS ?= \
 CFLAGS += \
     -fPIC \
     -DPURPLE_PLUGINS \
+    -DENABLE_OPENSSL \
     -DPIC \
     $(CFLAGS_PURPLE)
 

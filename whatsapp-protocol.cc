@@ -395,12 +395,12 @@ void WhatsappConnection::send_avatar(const std::string & avatar, const std::stri
 	outbuffer = outbuffer + serialize_tree(&req);
 }
 
-bool WhatsappConnection::queryReceivedMessage(char *msgid, int * type)
+bool WhatsappConnection::queryReceivedMessage(std::string & msgid, int & type)
 {
 	if (received_messages.size() == 0) return false;
 
-	strcpy(msgid, received_messages[0].first.c_str());
-	*type = received_messages[0].second;
+	msgid = received_messages[0].first;
+	type = received_messages[0].second;
 	received_messages.erase(received_messages.begin());
 
 	return true;

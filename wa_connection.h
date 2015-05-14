@@ -136,7 +136,7 @@ public:
 	ErrorCode getErrors(std::string & reason);
 
 	Message * getReceivedMessage();
-	bool queryReceivedMessage(char *msgid, int * type);
+	bool queryReceivedMessage(std::string & msgid, int & type);
 
 	void updatePrivacy(const std::string &, const std::string &, const std::string &);
 	void queryPrivacy(std::string &, std::string &, std::string &);

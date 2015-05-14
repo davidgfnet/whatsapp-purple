@@ -106,7 +106,7 @@ void WhatsappConnectionAPI::getMessageId(char * msgid)
 	connection->getMessageId(msgid);
 }
 
-bool WhatsappConnectionAPI::queryReceivedMessage(char * msgid, int * type)
+bool WhatsappConnectionAPI::queryReceivedMessage(std::string & msgid, int & type)
 {
 	return connection->queryReceivedMessage(msgid, type);
 }

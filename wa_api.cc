@@ -65,8 +65,11 @@ int waAPI_getgroupinfo(void *waAPI, const char *id, char **subject, char **owner
 }
 
 int waAPI_queryreceivedmsg(void *waAPI, char * id, int * type) {
-	if (((WhatsappConnectionAPI *) waAPI)->queryReceivedMessage(id, type))
+	std::string msgid;
+	if (((WhatsappConnectionAPI *) waAPI)->queryReceivedMessage(msgid, *type)) {
+		strcpy(id, msgid.c_str());
 		return 1;
+	}
 	return 0;
 }
 

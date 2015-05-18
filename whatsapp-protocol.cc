@@ -415,6 +415,14 @@ std::string WhatsappConnection::getMessageId()
 	return std::to_string(t) + "-" + std::to_string(mid);
 }
 
+void WhatsappConnection::sendVCard(const std::string msgid, const std::string to, const std::string name, const std::string vcard)
+{
+	VCardMessage msg(this, to, time(NULL), msgid, name, nickname, vcard);
+	DataBuffer buf = msg.serialize();
+
+	outbuffer = outbuffer + buf;
+}
+
 void WhatsappConnection::sendChat(std::string msgid, std::string to, std::string message)
 {
 	ChatMessage msg(this, to, time(NULL), msgid, message, nickname);

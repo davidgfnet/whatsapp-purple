@@ -172,6 +172,7 @@ public:
 		return ((int)conn_status) - 1;
 	}
 	int sendImage(std::string mid, std::string to, int w, int h, unsigned int size, const char *fp);
+	void sendVCard(const std::string msgid, const std::string to, const std::string name, const std::string vcard);
 
 	int sendSSLCallback(char *buffer, int maxbytes);
 	int sentSSLCallback(int bytessent);

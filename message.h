@@ -11,6 +11,7 @@
 #define SOUND_MESSAGE 3
 #define VIDEO_MESSAGE 4
 #define CALL_MESSAGE  5
+#define VCARD_MESSAGE 6
 
 class WhatsappConnection;
 class DataBuffer;
@@ -39,6 +40,18 @@ public:
 
 	int type() const { return CHAT_MESSAGE; }
 	std::string message;	/* Message */
+
+	DataBuffer serialize() const;
+	Message *copy() const;
+};
+
+class VCardMessage: public Message {
+public:
+	VCardMessage(const WhatsappConnection * wc, const std::string from, const unsigned long long time,
+		const std::string id, const std::string name, const std::string author, const std::string vcard);
+
+	int type() const { return VCARD_MESSAGE; }
+	std::string name, vcard;
 
 	DataBuffer serialize() const;
 	Message *copy() const;

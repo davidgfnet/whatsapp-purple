@@ -178,5 +178,35 @@ Message * LocationMessage::copy() const
 	return new LocationMessage(wc, from, t, id, author, latitude, longitude, preview);
 }
 
+VCardMessage::VCardMessage(const WhatsappConnection * wc, const std::string from, const unsigned long long time,
+		const std::string id, const std::string name, const std::string author, const std::string vcard) 
+	: Message(wc, from, time, id, author), name(name), vcard(vcard) 
+{}
 
+Message *VCardMessage::copy() const
+{
+	return new VCardMessage(wc, from, t, id, name, author, vcard);
+}
+
+DataBuffer VCardMessage::serialize() const
+{
+	Tree vcardt("vcard", makeAttr1("name", this->name));
+	Tree tmedia("media", makeAttr2("encoding", "text", "type", "vcard"));
+	tmedia.addChild(vcardt);
+
+	std::string stime = i2s(t);
+	std::map < std::string, std::string > attrs;
+	if (server.size())
+		attrs["to"] = from + "@" + server;
+	else
+		attrs["to"] = from + "@" + wc->whatsappserver;
+	attrs["type"] = "media";
+	attrs["id"] = id;
+	attrs["t"] = stime;
+
+	Tree mes("message", attrs);
+	mes.addChild(tmedia);
+
+	return wc->serialize_tree(&mes);
+}
 

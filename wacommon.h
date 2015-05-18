@@ -27,12 +27,12 @@ static std::string getusername(std::string user)
 		return user;
 }
 
-#define makeAttr1(k1,v1) std::map<std::string, std::string> ({ {k1,v1} })
-#define makeAttr2(k1,v1,k2,v2) std::map<std::string, std::string> ({ {k1,v1},{k2,v2} })
-#define makeAttr3(k1,v1,k2,v2,k3,v3) std::map<std::string, std::string> ({ {k1,v1},{k2,v2},{k3,v3} })
-#define makeAttr4(k1,v1,k2,v2,k3,v3,k4,v4) std::map<std::string, std::string> ({ {k1,v1},{k2,v2},{k3,v3},{k4,v4} })
-#define makeAttr5(k1,v1,k2,v2,k3,v3,k4,v4,k5,v5) std::map<std::string, std::string> ({ {k1,v1},{k2,v2},{k3,v3},{k4,v4},{k5,v5} })
-
+static std::map<std::string, std::string> makeat(std::vector <std::string> v) {
+	std::map<std::string, std::string> ret;
+	for (unsigned i = 0; i < v.size(); i+= 2)
+		ret[v[i]] = v[i+1];
+	return ret;
+}
 
 #endif
 

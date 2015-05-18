@@ -188,8 +188,8 @@ Message *VCardMessage::copy() const
 
 DataBuffer VCardMessage::serialize() const
 {
-	Tree vcardt("vcard", makeAttr1("name", this->name));
-	Tree tmedia("media", makeAttr2("encoding", "text", "type", "vcard"));
+	Tree vcardt("vcard", makeat({"name", this->name}));
+	Tree tmedia("media", makeat({"encoding", "text", "type", "vcard"}));
 	tmedia.addChild(vcardt);
 
 	std::string stime = std::to_string(t);

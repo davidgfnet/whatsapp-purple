@@ -634,9 +634,10 @@ static void waprpl_process_incoming_events(PurpleConnection * gc)
 				m.who, (float)m.lat, (float)m.lng);
 			char * lat = dbl2str(m.lat);
 			char * lng = dbl2str(m.lng);
-			char *msg = g_strdup_printf("<a href=\"http://openstreetmap.org/?lat=%s&lon=%s&zoom=20\">"
+			int imgid = purple_imgstore_add_with_id(g_memdup(m.image, m.imagelen), m.imagelen, NULL);
+			char *msg = g_strdup_printf("<img id=\"%u\"><br />[%s]<br /><a href=\"http://openstreetmap.org/?mlat=%s&mlon=%s&zoom=20\">"
 				"http://openstreetmap.org/?lat=%s&lon=%s&zoom=20</a>", 
-				lat, lng, lat, lng);
+				imgid, m.message, lat, lng, lat, lng);
 			conv_add_message(gc, m.who, msg, m.author, m.t);
 			g_free(msg); g_free(lng); g_free(lat);
 			} break;

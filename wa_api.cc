@@ -252,6 +252,10 @@ int waAPI_querymsg(void *waAPI, t_message * msg) {
 	if (msg->type == LOCAT_MESSAGE) {
 		msg->lat = ((LocationMessage*)m)->latitude;
 		msg->lng = ((LocationMessage*)m)->longitude;
+		msg->message = g_strdup(((LocationMessage*)m)->name.c_str());
+		std::string r = (((LocationMessage*)m)->preview);
+		msg->image = (char*)g_memdup(r.c_str(), r.size());
+		msg->imagelen = r.size();
 	}
 
 	delete m;

@@ -189,6 +189,7 @@ Message *VCardMessage::copy() const
 DataBuffer VCardMessage::serialize() const
 {
 	Tree vcardt("vcard", makeat({"name", this->name}));
+	vcardt.setData(this->vcard);
 	Tree tmedia("media", makeat({"encoding", "text", "type", "vcard"}));
 	tmedia.addChild(vcardt);
 

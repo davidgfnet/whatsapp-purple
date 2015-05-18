@@ -9,31 +9,6 @@
 #include <sstream>
 #include <locale>
 
-static unsigned long long str2lng(std::string s)
-{
-	unsigned long long r;
-	#ifdef _WIN32
-	sscanf(s.c_str(), "%I64u", &r);
-	#else
-	sscanf(s.c_str(), "%llu", &r);
-	#endif
-	return r;
-}
-
-static std::string i2s(unsigned int num)
-{
-	char temp[512];
-	sprintf(temp, "%d", num);
-	return std::string(temp);
-}
-
-static int a2i(const std::string & s)
-{
-	int d;
-	sscanf(s.c_str(), "%d", &d);
-	return d;
-}
-
 static double str2dbl(std::string s)
 {
 	float longitude = 0.0f;

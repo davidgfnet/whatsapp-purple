@@ -46,7 +46,7 @@ DataBuffer ChatMessage::serialize() const
 	Tree tbody("body");
 	tbody.setData(this->message);
 
-	std::string stime = i2s(t);
+	std::string stime = std::to_string(t);
 	std::map < std::string, std::string > attrs;
 	if (server.size())
 		attrs["to"] = from + "@" + server;
@@ -115,7 +115,7 @@ DataBuffer ImageMessage::serialize() const
 	Tree tmedia("media", mattrs);
 	tmedia.setData(preview);	/* ICON DATA! */
 
-	std::string stime = i2s(t);
+	std::string stime = std::to_string(t);
 	std::map < std::string, std::string > attrs;
 	if (server.size())
 		attrs["to"] = from + "@" + server;
@@ -165,17 +165,15 @@ Message * VideoMessage::copy() const
 
 LocationMessage::LocationMessage(const WhatsappConnection * wc, const std::string from,
 	const unsigned long long time, const std::string id, const std::string author,
-	double lat, double lng, std::string preview)
-	:Message(wc, from, time, id, author)
+	double lat, double lng, const std::string name, std::string preview)
+	:Message(wc, from, time, id, author), latitude(lat), longitude(lng),
+	name(name), preview(preview)
 {
-	this->latitude = lat;
-	this->longitude = lng;
-	this->preview = preview;
 }
 
 Message * LocationMessage::copy() const
 {
-	return new LocationMessage(wc, from, t, id, author, latitude, longitude, preview);
+	return new LocationMessage(wc, from, t, id, author, latitude, longitude, name, preview);
 }
 
 VCardMessage::VCardMessage(const WhatsappConnection * wc, const std::string from, const unsigned long long time,
@@ -194,7 +192,7 @@ DataBuffer VCardMessage::serialize() const
 	Tree tmedia("media", makeAttr2("encoding", "text", "type", "vcard"));
 	tmedia.addChild(vcardt);
 
-	std::string stime = i2s(t);
+	std::string stime = std::to_string(t);
 	std::map < std::string, std::string > attrs;
 	if (server.size())
 		attrs["to"] = from + "@" + server;

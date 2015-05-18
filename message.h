@@ -118,13 +118,14 @@ public:
 class LocationMessage: public Message {
 public:
 	LocationMessage(const WhatsappConnection * wc, const std::string from, const unsigned long long time,
-		const std::string id, const std::string author, double lat, double lng, std::string preview);
+		const std::string id, const std::string author, double lat, double lng, const std::string name,
+		std::string preview);
 
 	int type() const { return LOCAT_MESSAGE; }
 	Message *copy() const;
 
 	double latitude, longitude;	/* Location */
-	std::string preview;
+	std::string name, preview;
 };
 
 #endif

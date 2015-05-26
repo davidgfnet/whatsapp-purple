@@ -177,13 +177,13 @@ Message * LocationMessage::copy() const
 }
 
 VCardMessage::VCardMessage(const WhatsappConnection * wc, const std::string from, const unsigned long long time,
-		const std::string id, const std::string name, const std::string author, const std::string vcard) 
+		const std::string id, const std::string author, const std::string name, const std::string vcard) 
 	: Message(wc, from, time, id, author), name(name), vcard(vcard) 
 {}
 
 Message *VCardMessage::copy() const
 {
-	return new VCardMessage(wc, from, t, id, name, author, vcard);
+	return new VCardMessage(wc, from, t, id, author, name, vcard);
 }
 
 DataBuffer VCardMessage::serialize() const

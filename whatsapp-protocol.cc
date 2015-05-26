@@ -417,7 +417,7 @@ std::string WhatsappConnection::getMessageId()
 
 void WhatsappConnection::sendVCard(const std::string msgid, const std::string to, const std::string name, const std::string vcard)
 {
-	VCardMessage msg(this, to, time(NULL), msgid, name, nickname, vcard);
+	VCardMessage msg(this, to, time(NULL), msgid, nickname, name, vcard);
 	DataBuffer buf = msg.serialize();
 
 	outbuffer = outbuffer + buf;
@@ -886,6 +886,10 @@ void WhatsappConnection::processIncomingData()
 						this->receiveMessage(SoundMessage(this, from, time, id, author, t["url"], t["filehash"], t["mimetype"]));
 					} else if (t.hasAttributeValue("type", "video")) {
 						this->receiveMessage(VideoMessage(this, from, time, id, author, t["url"], t["filehash"], t["mimetype"]));
+					} else if (t.hasAttributeValue("type", "vcard")) {
+						Tree vc;
+						if (t.getChild("vcard", vc))
+							this->receiveMessage(VCardMessage(this, from, time, id, author, t["name"], vc.getData()));
 					}
 				}
 			} else if (treelist[i].hasAttributeValue("type", "notification") and treelist[i].hasAttribute("from")) {

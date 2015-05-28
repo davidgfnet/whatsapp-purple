@@ -28,6 +28,12 @@ struct t_fileupload {
 	int totalsize;
 };
 
+enum ReceptionType { rSent, rDelivered, rRead };
+struct t_message_reception {
+	std::string id;
+	ReceptionType type;
+	unsigned long long t;
+};
 
 class WhatsappConnection {
 	friend class ChatMessage;
@@ -78,7 +84,7 @@ private:
 	std::vector < std::string > user_changes, user_icons, user_typing;
 
 	/* Reception queue */
-	std::vector < std::pair<std::string, int> > received_messages;
+	std::vector < t_message_reception > received_messages;
 
 	void processIncomingData();
 	void processSSLIncomingData();
@@ -138,7 +144,7 @@ public:
 	ErrorCode getErrors(std::string & reason);
 
 	Message * getReceivedMessage();
-	bool queryReceivedMessage(std::string & msgid, int & type);
+	bool queryReceivedMessage(std::string & msgid, int & type, unsigned long long & t);
 
 	void updatePrivacy(const std::string &, const std::string &, const std::string &);
 	void queryPrivacy(std::string &, std::string &, std::string &);

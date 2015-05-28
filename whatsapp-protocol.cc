@@ -396,12 +396,13 @@ void WhatsappConnection::send_avatar(const std::string & avatar, const std::stri
 	outbuffer = outbuffer + serialize_tree(&req);
 }
 
-bool WhatsappConnection::queryReceivedMessage(std::string & msgid, int & type)
+bool WhatsappConnection::queryReceivedMessage(std::string & msgid, int & type, unsigned long long & t)
 {
 	if (received_messages.size() == 0) return false;
 
-	msgid = received_messages[0].first;
-	type = received_messages[0].second;
+	msgid = received_messages[0].id;
+	type = received_messages[0].type;
+	t = received_messages[0].t;
 	received_messages.erase(received_messages.begin());
 
 	return true;
@@ -825,7 +826,8 @@ void WhatsappConnection::processIncomingData()
 			}
 		} else if (treelist[i].getTag() == "ack") {
 			std::string id = treelist[i]["id"];
-			received_messages.push_back( std::make_pair(id,0) );
+			unsigned long long t = std::stoll(treelist[i]["t"]);
+			received_messages.push_back( {id, rSent, t} );
 
 		} else if (treelist[i].getTag() == "receipt") {
 			std::string id = treelist[i]["id"];
@@ -834,6 +836,7 @@ void WhatsappConnection::processIncomingData()
 			std::string from = treelist[i]["from"];
 			std::string to = treelist[i]["to"];
 			std::string participant = treelist[i]["participant"];
+			unsigned long long t = std::stoll(treelist[i]["t"]);
 			
 			Tree mes("ack", makeat({"class", "receipt", "type", type, "id", id}));
 
@@ -845,9 +848,9 @@ void WhatsappConnection::processIncomingData()
 			outbuffer = outbuffer + serialize_tree(&mes);
 
 			// Add reception package to queue
-			int rtype = 1;
-			if (type == "read") rtype = 2;
-			received_messages.push_back( std::make_pair(id,rtype) );
+			ReceptionType rtype = rDelivered;
+			if (type == "read") rtype = rRead;
+			received_messages.push_back( {id,rtype,t} );
 			
 		} else if (treelist[i].getTag() == "chatstate") {
 			if (treelist[i].hasChild("composing"))

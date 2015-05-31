@@ -826,7 +826,9 @@ void WhatsappConnection::processIncomingData()
 			}
 		} else if (treelist[i].getTag() == "ack") {
 			std::string id = treelist[i]["id"];
-			unsigned long long t = std::stoll(treelist[i]["t"]);
+			unsigned long long t = 0;
+			if (treelist[i].hasAttribute("t"))
+				t = std::stoull(treelist[i]["t"]);
 			received_messages.push_back( {id, rSent, t} );
 
 		} else if (treelist[i].getTag() == "receipt") {
@@ -836,7 +838,9 @@ void WhatsappConnection::processIncomingData()
 			std::string from = treelist[i]["from"];
 			std::string to = treelist[i]["to"];
 			std::string participant = treelist[i]["participant"];
-			unsigned long long t = std::stoll(treelist[i]["t"]);
+			unsigned long long t = 0;
+			if (treelist[i].hasAttribute("t"))
+				t = std::stoull(treelist[i]["t"]);
 			
 			Tree mes("ack", makeat({"class", "receipt", "type", type, "id", id}));
 

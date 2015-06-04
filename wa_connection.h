@@ -33,6 +33,7 @@ struct t_message_reception {
 	std::string id;
 	ReceptionType type;
 	unsigned long long t;
+	std::string from;
 };
 
 class WhatsappConnection {
@@ -78,6 +79,10 @@ private:
 	std::map < std::string, Group > groups;
 	bool groups_updated;
 
+	/* Blist stuff */
+	std::map < std::string, BList > blists;
+	bool blists_updated;
+
 	/* Contacts & msg */
 	std::map < std::string, Contact > contacts;
 	std::vector < Message * >recv_messages;
@@ -114,6 +119,7 @@ private:
 	void queryFullSize(std::string user);
 	void gotTyping(std::string who, std::string tstat);
 	void updateGroups();
+	void updateBlists();
 	void queryStatuses();
 
 	void notifyMyMessage();
@@ -144,7 +150,7 @@ public:
 	ErrorCode getErrors(std::string & reason);
 
 	Message * getReceivedMessage();
-	bool queryReceivedMessage(std::string & msgid, int & type, unsigned long long & t);
+	bool queryReceivedMessage(std::string & msgid, int & type, unsigned long long & t, std::string & sender);
 
 	void updatePrivacy(const std::string &, const std::string &, const std::string &);
 	void queryPrivacy(std::string &, std::string &, std::string &);
@@ -166,11 +172,13 @@ public:
 
 	void manageParticipant(std::string group, std::string participant, std::string command);
 	void leaveGroup(std::string group);
+	void deleteBlist(std::string id);
 
 	void notifyTyping(std::string who, int status);
 	void setMyPresence(std::string s, std::string msg);
 	std::map < std::string, Group > getGroups();
 	bool groupsUpdated();
+	bool blistsUpdated();
 	void addGroup(std::string subject);
 
 	int loginStatus() const

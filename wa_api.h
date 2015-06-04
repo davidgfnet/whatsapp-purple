@@ -30,7 +30,7 @@ typedef struct {
 	double lat, lng;
 } t_message;
 
-	int waAPI_queryreceivedmsg(void *waAPI, char * id, int * type);
+	int waAPI_queryreceivedmsg(void *waAPI, char * id, int * type, char * from);
 	int waAPI_querymsg(void *waAPI, t_message * msg);
 
 	int waAPI_sendcb(void *waAPI, void *buffer, int maxbytes);

@@ -8,15 +8,17 @@
 class Group {
 public:
 	Group(std::string id, std::string subject, std::string owner)
-	{
-		this->id = id;
-		this->subject = subject;
-		this->owner = owner;
-	}
-	~Group() {
-	}
+	: id(id), subject(subject), owner(owner) {}
 	std::string id, subject, owner;
 	std::vector < std::string > participants;
+};
+
+class BList {
+public:
+	BList(std::string id, std::string name)
+	: id(id), name(name) {}
+	std::string id, name;
+	std::vector < std::string > dests;
 };
 
 class Contact {

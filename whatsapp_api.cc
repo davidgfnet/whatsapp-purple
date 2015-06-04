@@ -106,10 +106,10 @@ std::string WhatsappConnectionAPI::getMessageId()
 	return connection->getMessageId();
 }
 
-bool WhatsappConnectionAPI::queryReceivedMessage(std::string & msgid, int & type)
+bool WhatsappConnectionAPI::queryReceivedMessage(std::string & msgid, int & type, std::string & who)
 {
 	unsigned long long t;
-	return connection->queryReceivedMessage(msgid, type, t);
+	return connection->queryReceivedMessage(msgid, type, t, who);
 }
 
 void WhatsappConnectionAPI::sendChat(std::string msgid, std::string to, std::string message)

@@ -86,6 +86,7 @@ WhatsappConnection::WhatsappConnection(std::string phonenum, std::string passwor
 	this->whatsappservergroup = "g.us";
 	this->mypresence = "available";
 	this->groups_updated = false;
+	this->blists_updated = false;
 	this->sslstatus = 0;
 	this->frame_seq = 0;
 	this->sendRead = true;
@@ -164,6 +165,43 @@ void WhatsappConnection::addGroup(std::string subject)
 	Tree gr("group", makeat({"action", "create", "subject", subject}));
 	Tree req("iq", makeat({"id", std::to_string(iqid++), "type", "set", "to", "g.us", "xmlns", "w:g"}));
 	req.addChild(gr);
+
+	outbuffer = outbuffer + serialize_tree(&req);
+}
+
+void WhatsappConnection::updateBlists()
+{
+	blists.clear();
+	Tree req("iq", makeat({
+		"id", std::to_string(iqid++),
+		"from", phone + "@" + whatsappserver,
+		"type", "get",
+		"to", "s.whatsapp.net",
+		"xmlns", "w:b"}
+	));
+	req.addChild(Tree("lists"));
+
+	outbuffer = outbuffer + serialize_tree(&req);
+}
+
+bool WhatsappConnection::blistsUpdated()
+{
+	bool r = blists_updated;
+	blists_updated = false;
+	return r;
+}
+
+void WhatsappConnection::deleteBlist(std::string id)
+{
+	Tree req("iq", makeat({
+		"id", std::to_string(iqid++),
+		"type", "set",
+		"to", "s.whatsapp.net",
+		"xmlns", "w:b"}
+	));
+	Tree del;
+	del.addChild(Tree("list", makeat({"id", id + "@broadcast"})));
+	req.addChild(del);
 
 	outbuffer = outbuffer + serialize_tree(&req);
 }
@@ -396,13 +434,14 @@ void WhatsappConnection::send_avatar(const std::string & avatar, const std::stri
 	outbuffer = outbuffer + serialize_tree(&req);
 }
 
-bool WhatsappConnection::queryReceivedMessage(std::string & msgid, int & type, unsigned long long & t)
+bool WhatsappConnection::queryReceivedMessage(std::string & msgid, int & type, unsigned long long & t, std::string & sender)
 {
 	if (received_messages.size() == 0) return false;
 
 	msgid = received_messages[0].id;
 	type = received_messages[0].type;
 	t = received_messages[0].t;
+	sender = received_messages[0].from;
 	received_messages.erase(received_messages.begin());
 
 	return true;
@@ -799,6 +838,7 @@ void WhatsappConnection::processIncomingData()
 			this->updatePrivacy();
 			this->sendInitial();  // Seems to trigger an error IQ response
 			this->updateGroups();
+			this->updateBlists();
 
 			DEBUG_PRINT("Logged in!!!");
 		} else if (treelist[i].getTag() == "failure") {
@@ -829,7 +869,7 @@ void WhatsappConnection::processIncomingData()
 			unsigned long long t = 0;
 			if (treelist[i].hasAttribute("t"))
 				t = std::stoull(treelist[i]["t"]);
-			received_messages.push_back( {id, rSent, t} );
+			received_messages.push_back( {id, rSent, t, ""} );
 
 		} else if (treelist[i].getTag() == "receipt") {
 			std::string id = treelist[i]["id"];
@@ -852,9 +892,10 @@ void WhatsappConnection::processIncomingData()
 			outbuffer = outbuffer + serialize_tree(&mes);
 
 			// Add reception package to queue
+			std::string who = getusername(participant.size() ? participant : from);
 			ReceptionType rtype = rDelivered;
 			if (type == "read") rtype = rRead;
-			received_messages.push_back( {id,rtype,t} );
+			received_messages.push_back( {id,rtype,t, } );
 			
 		} else if (treelist[i].getTag() == "chatstate") {
 			if (treelist[i].hasChild("composing"))
@@ -1007,6 +1048,20 @@ void WhatsappConnection::processIncomingData()
 						groups_updated = true;
 					} else if (childs[j].getTag() == "add") {
 						//groups_updated = true;
+					} else if (childs[j].getTag() == "lists") {
+						// For every blist, add it to the blist vector
+						std::vector < Tree > clists = childs[j].getChildren();
+						for (unsigned int k = 0; k < clists.size(); k++) {
+							if (clists[k].hasAttribute("id")) {
+								BList bl(clists[k]["id"], clists[k]["name"]);
+								std::vector < Tree > parts = clists[k].getChildren();
+								for (unsigned int l = 0; l < parts.size(); l++) {
+									if (parts[l].getTag() == "recipient" && parts[l]["jid"] != "")
+										bl.dests.push_back(parts[l]["jid"]);
+								}
+							}
+						}
+						blists_updated = true;
 					}
 				}
 

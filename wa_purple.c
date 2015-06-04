@@ -666,11 +666,11 @@ static void waprpl_process_incoming_events(PurpleConnection * gc)
 
 	while (1) {
 		int typer;
-		char msgid[128];
-		if (!waAPI_queryreceivedmsg(wconn->waAPI, msgid, &typer))
+		char msgid[128], from[128];
+		if (!waAPI_queryreceivedmsg(wconn->waAPI, msgid, &typer, from))
 			break;
 
-		purple_debug_info(WHATSAPP_ID, "Received message %s type: %d\n", msgid, typer);
+		purple_debug_info(WHATSAPP_ID, "Received message %s type: %d (from %s)\n", msgid, typer, from);
 		purple_signal_emit(purple_connection_get_prpl(gc), "whatsapp-message-received", gc, msgid, typer);
 	}
 

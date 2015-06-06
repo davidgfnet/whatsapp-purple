@@ -900,6 +900,12 @@ static int waprpl_send_chat(PurpleConnection * gc, int id, const char *message, 
 	char *chat_id = g_hash_table_lookup(hasht, "id");
 	char *plain;
 
+	if (!chat_id) {
+		purple_notify_error(gc, "Group not found", "Group not found",
+			"Could not send a message to this group. It probably means that you don't belong to this group");
+		return 0;
+	}
+
 	purple_markup_html_to_xhtml(message, NULL, &plain);
 
 	char msgid[128];

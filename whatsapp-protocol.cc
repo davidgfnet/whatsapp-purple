@@ -129,13 +129,8 @@ void WhatsappConnection::updateGroups()
 	/* Get the group list */
 	groups.clear();
 	{
-		Tree req("iq", makeat({"id", std::to_string(iqid++), "type", "get", "to", "g.us", "xmlns", "w:g"}));
-		req.addChild(Tree("list", makeat({"type", "owning"})));
-		outbuffer = outbuffer + serialize_tree(&req);
-	}
-	{
-		Tree req("iq", makeat({"id", std::to_string(iqid++), "type", "get", "to", "g.us", "xmlns", "w:g"}));
-		req.addChild(Tree("list", makeat({"type", "participating"})));
+		Tree req("iq", makeat({"id", std::to_string(iqid++), "type", "get", "to", "g.us", "xmlns", "w:g2"}));
+		req.addChild(Tree("participating"));
 		outbuffer = outbuffer + serialize_tree(&req);
 	}
 }
@@ -144,7 +139,7 @@ void WhatsappConnection::manageParticipant(std::string group, std::string partic
 {
 	Tree iq(command);
 	iq.addChild(Tree("participant", makeat({"jid", participant})));
-	Tree req("iq", makeat({"id", std::to_string(iqid++), "type", "set", "to", group + "@g.us", "xmlns", "w:g"}));
+	Tree req("iq", makeat({"id", std::to_string(iqid++), "type", "set", "to", group + "@g.us", "xmlns", "w:g2"}));
 	req.addChild(iq);
 
 	outbuffer = outbuffer + serialize_tree(&req);
@@ -154,7 +149,7 @@ void WhatsappConnection::leaveGroup(std::string group)
 {
 	Tree iq("leave");
 	iq.addChild(Tree("group", makeat({"id", group + "@g.us"})));
-	Tree req("iq", makeat({"id", std::to_string(iqid++), "type", "set", "to", "g.us", "xmlns", "w:g"}));
+	Tree req("iq", makeat({"id", std::to_string(iqid++), "type", "set", "to", "g.us", "xmlns", "w:g2"}));
 	req.addChild(iq);
 
 	outbuffer = outbuffer + serialize_tree(&req);
@@ -162,9 +157,9 @@ void WhatsappConnection::leaveGroup(std::string group)
 
 void WhatsappConnection::addGroup(std::string subject)
 {
-	Tree gr("group", makeat({"action", "create", "subject", subject}));
-	Tree req("iq", makeat({"id", std::to_string(iqid++), "type", "set", "to", "g.us", "xmlns", "w:g"}));
-	req.addChild(gr);
+	Tree req("iq", makeat({"id", std::to_string(iqid++), "type", "set", "to", "g.us", "xmlns", "w:g2"}));
+	Tree create("create", makeat({"subject", subject}));
+	req.addChild(create);
 
 	outbuffer = outbuffer + serialize_tree(&req);
 }
@@ -855,7 +850,8 @@ void WhatsappConnection::processIncomingData()
 			outbuffer = outbuffer + reply;
 			
 			if (treelist[i].hasAttributeValue("type", "participant") || 
-				treelist[i].hasAttributeValue("type", "owner") ) {
+				treelist[i].hasAttributeValue("type", "owner") ||
+				treelist[i].hasAttributeValue("type", "w:gp2") ) {
 				/* If the nofitication comes from a group, assume we have to reload groups ;) */
 				updateGroups();
 			}
@@ -1026,24 +1022,37 @@ void WhatsappConnection::processIncomingData()
 
 				std::vector < Tree > childs = treelist[i].getChildren();
 				for (unsigned int j = 0; j < childs.size(); j++) {
-					if (childs[j].getTag() == "group") {
-						bool rep = groups.find(getusername(childs[j]["id"])) != groups.end();
-						if (not rep) {
-							groups.insert(std::pair < std::string, Group > (getusername(childs[j]["id"]), Group(getusername(childs[j]["id"]), childs[j]["subject"], getusername(childs[j]["owner"]))));
+					if (childs[j].getTag() == "groups") {
+						std::vector < Tree > cgroups = childs[j].getChildren();
+						for (auto & g : cgroups) {
+							if (g.getTag() != "group") continue;
+							bool rep = groups.find(getusername(g["id"])) != groups.end();
+							if (not rep) {
+								unsigned long long subjt = 0, creat = 0;
+								if (g.hasAttribute("s_t"))
+									subjt = std::stoull(g["s_t"]);
+								if (g.hasAttribute("creation"))
+									creat = std::stoull(g["creation"]);
 
-							/* Query group participants */
-							Tree iq("list");
-							Tree req("iq", makeat({"id", std::to_string(iqid++), "type", "get", 
-									"to", childs[j]["id"] + "@g.us", "xmlns", "w:g"}));
-							req.addChild(iq);
-							outbuffer = outbuffer + serialize_tree(&req);
-						}
-						groups_updated = true;
-					} else if (childs[j].getTag() == "participant") {
-						std::string gid = getusername(treelist[i]["from"]);
-						std::string pt = getusername(childs[j]["jid"]);
-						if (groups.find(gid) != groups.end()) {
-							groups.find(gid)->second.participants.push_back(pt);
+								Group ng(
+									getusername(g["id"]), g["subject"], subjt, 
+									getusername(g["s_o"]),
+									getusername(g["creator"]), creat
+								);
+								for (auto & pa: g.getChildren()) {
+									if (pa.getTag() != "participant") continue;
+									ng.participants.push_back(
+										Group::Participant(getusername(pa["jid"]), pa["type"])
+									);
+								}
+
+								groups.insert(	
+									std::pair < std::string, Group > (
+										getusername(g["id"]),
+										ng
+									)
+								);
+							}
 						}
 						groups_updated = true;
 					} else if (childs[j].getTag() == "add") {

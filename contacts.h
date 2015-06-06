@@ -7,10 +7,22 @@
 
 class Group {
 public:
-	Group(std::string id, std::string subject, std::string owner)
-	: id(id), subject(subject), owner(owner) {}
-	std::string id, subject, owner;
-	std::vector < std::string > participants;
+	class Participant {
+	public:
+		Participant(std::string p, std::string t)
+		: jid(p), type(t) {}
+		std::string jid, type;
+	};
+	Group(std::string id, 
+		std::string subject, unsigned long long subject_time,
+		std::string owner, std::string creator,
+		unsigned long long creation_time)
+	: id(id), subject(subject), owner(owner), creator(creator),
+	creation_time(creation_time), subject_time(subject_time) {}
+
+	std::string id, subject, owner, creator;
+	std::vector < Participant > participants;
+	unsigned long long creation_time, subject_time;
 };
 
 class BList {

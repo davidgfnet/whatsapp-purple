@@ -39,7 +39,7 @@ int waAPI_getgroupsupdated(void *waAPI)
 	return 0;
 }
 
-int waAPI_getgroupinfo(void *waAPI, const char *id, char **subject, char **owner, char **p)
+int waAPI_getgroupinfo(void *waAPI, const char *id, char **subject, char **owner, char **p, char **admins)
 {
 	std::map < std::string, Group > ret = ((WhatsappConnectionAPI *) waAPI)->getGroups();
 
@@ -47,11 +47,13 @@ int waAPI_getgroupinfo(void *waAPI, const char *id, char **subject, char **owner
 	if (ret.find(sid) == ret.end())
 		return 0;
 
-	std::string part;
+	std::string part, adm;
 	for (unsigned int i = 0; i < ret.at(sid).participants.size(); i++) {
 		if (i != 0)
 			part += ",";
-		part += ret.at(sid).participants[i];
+		part += ret.at(sid).participants[i].jid;
+		if (ret.at(sid).participants[i].type == "admin")
+			adm += (adm.size() ? "," : "") + ret.at(sid).participants[i].jid;
 	}
 
 	if (subject)
@@ -60,6 +62,8 @@ int waAPI_getgroupinfo(void *waAPI, const char *id, char **subject, char **owner
 		*owner = g_strdup(ret.at(sid).owner.c_str());
 	if (p)
 		*p = g_strdup(part.c_str());
+	if (admins)
+		*admins = g_strdup(adm.c_str());
 
 	return 1;
 }

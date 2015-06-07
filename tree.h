@@ -18,10 +18,10 @@ public:
 	Tree(std::string tag, std::map < std::string, std::string > attributes);
 	~Tree();
 
-	std::string getData() { return data; }
-	std::string getTag() { return tag; }
-	std::vector < Tree > getChildren();
-	bool getChild(std::string tag, Tree & t);
+	std::string getData() const { return data; }
+	std::string getTag() const { return tag; }
+	std::vector < Tree > getChildren() const;
+	bool getChild(std::string tag, Tree & t) const;
 	std::map < std::string, std::string > &getAttributes();
 	std::string getAtr(const std::string & at) const;
 	std::string operator[](const std::string & at) const { return getAtr(at); }
@@ -36,9 +36,9 @@ public:
 	void readAttributes(DataBuffer * data, int size);
 	void writeAttributes(DataBuffer * data);
 
-	bool hasAttributeValue(std::string at, std::string val);
+	bool hasAttributeValue(std::string at, std::string val) const;
 	bool hasAttribute(const std::string & at) const;
-	bool hasChild(std::string tag);
+	bool hasChild(std::string tag) const;
 
 	std::string toString(int sp = 0);
 };

@@ -381,6 +381,33 @@ void WhatsappConnection::queryStatuses()
 	outbuffer = outbuffer + serialize_tree(&req);
 }
 
+std::string WhatsappConnection::syncContacts(std::vector < std::string > clist)
+{
+	std::string uid = getNextIqId();
+	Tree req("iq", makeat({"id", uid, "type", "get", "xmlns", "urn:xmpp:whatsapp:sync"}));
+	Tree sync("sync", makeat({"sid", std::to_string(time(0)), "index", "0", "mode", "full", "context", "registration", "last", "true"}));
+	for (auto & u: clist) {
+		Tree t("user");
+		t.setData(u);
+		sync.addChild(t);
+	}
+	req.addChild(sync);
+
+	sync_result[uid] = std::vector <std::string> ();
+
+	outbuffer = outbuffer + serialize_tree(&req);
+	return uid;
+}
+
+bool WhatsappConnection::getSyncResult(std::string uid, std::vector<std::string> & out)
+{
+	if (sync_result.find(uid) == sync_result.end())
+		return false;
+	out = sync_result[uid];
+	sync_result.erase(uid);
+	return true;
+}
+
 void WhatsappConnection::getLast(std::string user)
 {
 	Tree req("iq", makeat({"id", getNextIqId(), "type", "get", "to", user, "xmlns", "jabber:iq:last"}));
@@ -1107,6 +1134,22 @@ void WhatsappConnection::processIncomingData()
 						if (childs[j].hasAttributeValue("name","profile"))
 							this->show_profile_pic = childs[j]["value"];
 					}
+				}
+
+				if (treelist[i].getChild("sync", t)) {
+					std::vector <std::string> ct_in, ct_out, ct_invalid;
+					for (auto & tt: t.getChildren()) {
+						for (auto & user: tt.getChildren()) {
+							if (user.getTag() != "user") continue;
+							if (tt.getTag() == "in")
+								ct_in.push_back(user.getData());
+							if (tt.getTag() == "out")
+								ct_out.push_back(user.getData());
+							if (tt.getTag() == "invalid")
+								ct_invalid.push_back(user.getData());
+						}
+					}
+					sync_result[treelist[i]["id"]] = ct_in;
 				}
 			}
 			if (treelist[i].hasAttribute("from") and treelist[i].hasAttribute("id") and 

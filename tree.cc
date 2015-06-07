@@ -55,7 +55,7 @@ void Tree::setChildren(std::vector < Tree > c)
 	children = c;
 }
 
-std::vector < Tree > Tree::getChildren()
+std::vector < Tree > Tree::getChildren() const
 {
 	return children;
 }
@@ -65,10 +65,10 @@ std::map < std::string, std::string > &Tree::getAttributes()
 	return attributes;
 }
 
-bool Tree::hasAttributeValue(std::string at, std::string val)
+bool Tree::hasAttributeValue(std::string at, std::string val) const
 {
 	if (hasAttribute(at)) {
-		return (attributes[at] == val);
+		return (attributes.at(at) == val);
 	}
 	return false;
 }
@@ -85,7 +85,7 @@ std::string Tree::getAtr(const std::string & at) const
 	return "";
 }
 
-bool Tree::getChild(std::string tag, Tree & t)
+bool Tree::getChild(std::string tag, Tree & t) const
 {
 	for (unsigned int i = 0; i < children.size(); i++) {
 		if (children[i].getTag() == tag) {
@@ -98,7 +98,7 @@ bool Tree::getChild(std::string tag, Tree & t)
 	return false;
 }
 
-bool Tree::hasChild(std::string tag)
+bool Tree::hasChild(std::string tag) const
 {
 	for (unsigned int i = 0; i < children.size(); i++) {
 		if (children[i].getTag() == tag)

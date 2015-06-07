@@ -83,6 +83,9 @@ private:
 	std::map < std::string, BList > blists;
 	bool blists_updated;
 
+	/* Contact sync stuff */
+	std::map <std::string, std::vector<std::string> > sync_result;
+
 	/* Contacts & msg */
 	std::map < std::string, Contact > contacts;
 	std::vector < Message * >recv_messages;
@@ -161,6 +164,9 @@ public:
 	std::string getMessageId();
 	void addContacts(std::vector < std::string > clist);
 	void contactsUpdate();
+	std::string syncContacts(std::vector < std::string > clist);
+	bool getSyncResult(std::string, std::vector<std::string>&);
+
 	void sendChat(std::string msgid, std::string to, std::string message);
 	void sendGroupChat(std::string msgid, std::string to, std::string message);
 	bool query_status(std::string & from, int &status);

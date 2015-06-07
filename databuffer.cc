@@ -348,7 +348,10 @@ void DataBuffer::putString(std::string s)
 			out[i/2] |= c << (4-4*(i&1));
 		}
 
-		if (s.size() % 2 != 0) numn |= 0x80;
+		if (s.size() % 2 != 0) {
+			numn |= 0x80;
+			out[out.size()-1] |= 0xf;
+		}
 		putInt(255,1);
 		putInt(numn,1);
 		addData(out.c_str(), out.size());

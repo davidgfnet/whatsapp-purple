@@ -393,8 +393,6 @@ std::string WhatsappConnection::syncContacts(std::vector < std::string > clist)
 	}
 	req.addChild(sync);
 
-	sync_result[uid] = std::vector <std::string> ();
-
 	outbuffer = outbuffer + serialize_tree(&req);
 	return uid;
 }
@@ -1142,11 +1140,11 @@ void WhatsappConnection::processIncomingData()
 						for (auto & user: tt.getChildren()) {
 							if (user.getTag() != "user") continue;
 							if (tt.getTag() == "in")
-								ct_in.push_back(user.getData());
+								ct_in.push_back(getusername(user["jid"]));
 							if (tt.getTag() == "out")
-								ct_out.push_back(user.getData());
+								ct_out.push_back(getusername(user["jid"]));
 							if (tt.getTag() == "invalid")
-								ct_invalid.push_back(user.getData());
+								ct_invalid.push_back(getusername(user["jid"]));
 						}
 					}
 					sync_result[tl["id"]] = ct_in;

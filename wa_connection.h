@@ -133,6 +133,9 @@ private:
 	void updateContactStatuses(std::string json);
 	void updateFileUpload(std::string);
 
+	std::string getNextIqId();
+	std::string tohex(int);
+
 public:
 	bool read_tree(DataBuffer * data, Tree & tt);
 

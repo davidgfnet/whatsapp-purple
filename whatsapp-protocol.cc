@@ -47,13 +47,29 @@ DataBuffer WhatsappConnection::generateResponse(std::string from, std::string ty
 	return serialize_tree(&mes);
 }
 
+std::string WhatsappConnection::tohex(int n) {
+	std::string ret;
+	const char *hext = "0123456789abcdef";
+	int cnum = n;
+	while (cnum > 0) {
+		ret += hext[cnum&15];
+		cnum >>= 4;
+	}
+	return ret;
+}
+
+std::string WhatsappConnection::getNextIqId() {
+	return tohex(++iqid);
+}
+
 /* Send image transaction */
 int WhatsappConnection::sendImage(std::string mid, std::string to, int w, int h, unsigned int size, const char *fp)
 {
 	/* Type can be: audio/image/video */
+	std::string siqid = getNextIqId();
 	std::string sha256b64hash = SHA256_file_b64(fp);
 	Tree iq("media", makeat({"type", "image", "hash", sha256b64hash, "size", std::to_string(size)}));
-	Tree req("iq", makeat({"id", std::to_string(++iqid), "type", "set", "to", whatsappserver, "xmlns", "w:m"}));
+	Tree req("iq", makeat({"id", siqid, "type", "set", "to", whatsappserver, "xmlns", "w:m"}));
 	req.addChild(iq);
 
 	t_fileupload fu;
@@ -80,7 +96,7 @@ WhatsappConnection::WhatsappConnection(std::string phonenum, std::string passwor
 	this->out = NULL;
 	this->conn_status = SessionNone;
 	this->msgcounter = 1;
-	this->iqid = 1;
+	this->iqid = 0;
 	this->nickname = nickname;
 	this->whatsappserver = "s.whatsapp.net";
 	this->whatsappservergroup = "g.us";
@@ -129,7 +145,7 @@ void WhatsappConnection::updateGroups()
 	/* Get the group list */
 	groups.clear();
 	{
-		Tree req("iq", makeat({"id", std::to_string(iqid++), "type", "get", "to", "g.us", "xmlns", "w:g2"}));
+		Tree req("iq", makeat({"id", getNextIqId(), "type", "get", "to", "g.us", "xmlns", "w:g2"}));
 		req.addChild(Tree("participating"));
 		outbuffer = outbuffer + serialize_tree(&req);
 	}
@@ -139,7 +155,7 @@ void WhatsappConnection::manageParticipant(std::string group, std::string partic
 {
 	Tree iq(command);
 	iq.addChild(Tree("participant", makeat({"jid", participant})));
-	Tree req("iq", makeat({"id", std::to_string(iqid++), "type", "set", "to", group + "@g.us", "xmlns", "w:g2"}));
+	Tree req("iq", makeat({"id", getNextIqId(), "type", "set", "to", group + "@g.us", "xmlns", "w:g2"}));
 	req.addChild(iq);
 
 	outbuffer = outbuffer + serialize_tree(&req);
@@ -149,7 +165,7 @@ void WhatsappConnection::leaveGroup(std::string group)
 {
 	Tree iq("leave");
 	iq.addChild(Tree("group", makeat({"id", group + "@g.us"})));
-	Tree req("iq", makeat({"id", std::to_string(iqid++), "type", "set", "to", "g.us", "xmlns", "w:g2"}));
+	Tree req("iq", makeat({"id", getNextIqId(), "type", "set", "to", "g.us", "xmlns", "w:g2"}));
 	req.addChild(iq);
 
 	outbuffer = outbuffer + serialize_tree(&req);
@@ -157,7 +173,7 @@ void WhatsappConnection::leaveGroup(std::string group)
 
 void WhatsappConnection::addGroup(std::string subject)
 {
-	Tree req("iq", makeat({"id", std::to_string(iqid++), "type", "set", "to", "g.us", "xmlns", "w:g2"}));
+	Tree req("iq", makeat({"id", getNextIqId(), "type", "set", "to", "g.us", "xmlns", "w:g2"}));
 	Tree create("create", makeat({"subject", subject}));
 	req.addChild(create);
 
@@ -168,7 +184,7 @@ void WhatsappConnection::updateBlists()
 {
 	blists.clear();
 	Tree req("iq", makeat({
-		"id", std::to_string(iqid++),
+		"id", getNextIqId(),
 		"from", phone + "@" + whatsappserver,
 		"type", "get",
 		"to", "s.whatsapp.net",
@@ -189,7 +205,7 @@ bool WhatsappConnection::blistsUpdated()
 void WhatsappConnection::deleteBlist(std::string id)
 {
 	Tree req("iq", makeat({
-		"id", std::to_string(iqid++),
+		"id", getNextIqId(),
 		"type", "set",
 		"to", "s.whatsapp.net",
 		"xmlns", "w:b"}
@@ -353,7 +369,7 @@ void WhatsappConnection::subscribePresence(std::string user)
 
 void WhatsappConnection::queryStatuses()
 {
-	Tree req("iq", makeat({"to", "s.whatsapp.net", "type", "get", "id", std::to_string(iqid++), "xmlns", "status"}));
+	Tree req("iq", makeat({"to", "s.whatsapp.net", "type", "get", "id", getNextIqId(), "xmlns", "status"}));
 	Tree stat("status");
 
 	for (std::map < std::string, Contact >::iterator iter = contacts.begin(); iter != contacts.end(); iter++)
@@ -367,7 +383,7 @@ void WhatsappConnection::queryStatuses()
 
 void WhatsappConnection::getLast(std::string user)
 {
-	Tree req("iq", makeat({"id", std::to_string(iqid++), "type", "get", "to", user, "xmlns", "jabber:iq:last"}));
+	Tree req("iq", makeat({"id", getNextIqId(), "type", "get", "to", user, "xmlns", "jabber:iq:last"}));
 	req.addChild(Tree("query"));
 
 	outbuffer = outbuffer + serialize_tree(&req);
@@ -403,7 +419,7 @@ void WhatsappConnection::account_info(unsigned long long &creation, unsigned lon
 
 void WhatsappConnection::queryPreview(std::string user)
 {
-	Tree req("iq", makeat({"id", std::to_string(iqid++), "type", "get", "to", user, "xmlns", "w:profile:picture"}));
+	Tree req("iq", makeat({"id", getNextIqId(), "type", "get", "to", user, "xmlns", "w:profile:picture"}));
 	req.addChild(Tree("picture", makeat({"type", "preview"})));
 
 	outbuffer = outbuffer + serialize_tree(&req);
@@ -411,7 +427,7 @@ void WhatsappConnection::queryPreview(std::string user)
 
 void WhatsappConnection::queryFullSize(std::string user)
 {
-	Tree req("iq", makeat({"id", std::to_string(iqid++), "type", "get", "to", user, "xmlns", "w:profile:picture"}));
+	Tree req("iq", makeat({"id", getNextIqId(), "type", "get", "to", user, "xmlns", "w:profile:picture"}));
 	req.addChild(Tree("picture"));
 
 	outbuffer = outbuffer + serialize_tree(&req);
@@ -422,7 +438,7 @@ void WhatsappConnection::send_avatar(const std::string & avatar, const std::stri
 	Tree pic("picture"); pic.setData(avatar);
 	Tree prev("picture", makeat({"type", "preview"})); prev.setData(avatarp);
 
-	Tree req("iq", makeat({"id", "set_photo_"+std::to_string(iqid++), "type", "set", "to", phone + "@" + whatsappserver, "xmlns", "w:profile:picture"}));
+	Tree req("iq", makeat({"id", "set_photo_"+getNextIqId(), "type", "set", "to", phone + "@" + whatsappserver, "xmlns", "w:profile:picture"}));
 	req.addChild(pic);
 	req.addChild(prev);
 
@@ -980,7 +996,7 @@ void WhatsappConnection::processIncomingData()
 				}
 				if (treelist[i].getChild("media", t)) {
 					for (unsigned int j = 0; j < uploadfile_queue.size(); j++) {
-						if (uploadfile_queue[j].rid == std::stoi(treelist[i]["id"])) {
+						if (tohex(uploadfile_queue[j].rid) == treelist[i]["id"]) {
 							/* Queue to upload the file */
 							uploadfile_queue[j].uploadurl = t["url"];
 							uploadfile_queue[j].ip = t["ip"];
@@ -998,7 +1014,7 @@ void WhatsappConnection::processIncomingData()
 
 				if (treelist[i].getChild("duplicate", t)) {
 					for (unsigned int j = 0; j < uploadfile_queue.size(); j++) {
-						if (uploadfile_queue[j].rid == std::stoi(treelist[i]["id"])) {
+						if (tohex(uploadfile_queue[j].rid) == treelist[i]["id"]) {
 							/* Generate a fake JSON and process directly */
 							std::string json = "{\"name\":\"" + uploadfile_queue[j].file + "\"," "\"url\":\"" + t["url"] + "\"," "\"size\":\"" + t["size"] + "\"," "\"mimetype\":\"" + t["mimetype"] + "\"," "\"filehash\":\"" + t["filehash"] + "\"," "\"type\":\"" + t["type"] + "\"," "\"width\":\"" + t["width"] + "\"," "\"height\":\"" + t["height"] + "\"}";
 
@@ -1313,7 +1329,7 @@ void WhatsappConnection::notifyMyPresence()
 void WhatsappConnection::sendInitial()
 {
 	Tree conf("config");
-	Tree iq("iq", makeat({"id", std::to_string(iqid++), "type", "get", "to", whatsappserver, "xmlns", "urn:xmpp:whatsapp:push"}));
+	Tree iq("iq", makeat({"id", getNextIqId(), "type", "get", "to", whatsappserver, "xmlns", "urn:xmpp:whatsapp:push"}));
 	iq.addChild(conf);	
 
 	outbuffer = outbuffer + serialize_tree(&iq);
@@ -1325,7 +1341,7 @@ void WhatsappConnection::notifyMyMessage()
 	Tree status("status");
 	status.setData(this->mymessage);
 
-	Tree mes("iq", makeat({"to", whatsappserver, "type", "set", "id", std::to_string(time(NULL)) + "-" + std::to_string(iqid++), "xmlns", "status"}));
+	Tree mes("iq", makeat({"to", whatsappserver, "type", "set", "id", getNextIqId(), "xmlns", "status"}));
 	mes.addChild(status);
 
 	outbuffer = outbuffer + serialize_tree(&mes);
@@ -1342,7 +1358,7 @@ void WhatsappConnection::updatePrivacy(
 	Tree profile("category", makeat({"name", "profile", "value", show_profile_pic}));
 	Tree status ("category", makeat({"name", "status",  "value", show_status_msg}));
 
-	Tree mes("iq", makeat({"to", whatsappserver, "type", "set", "id", std::to_string(iqid++), "xmlns", "privacy"}));
+	Tree mes("iq", makeat({"to", whatsappserver, "type", "set", "id", getNextIqId(), "xmlns", "privacy"}));
 	Tree priv("privacy");
 	priv.addChild(last); priv.addChild(profile); priv.addChild(status);
 	mes.addChild(priv);
@@ -1363,7 +1379,7 @@ void WhatsappConnection::queryPrivacy(
 }
 
 void WhatsappConnection::updatePrivacy() {
-	Tree mes("iq", makeat({"to", whatsappserver, "type", "get", "id", std::to_string(iqid++), "xmlns", "privacy"}));
+	Tree mes("iq", makeat({"to", whatsappserver, "type", "get", "id", getNextIqId(), "xmlns", "privacy"}));
 	mes.addChild(Tree("privacy"));
 
 	outbuffer = outbuffer + serialize_tree(&mes);
@@ -1492,7 +1508,7 @@ bool WhatsappConnection::query_avatar(std::string user, std::string & icon)
 
 void WhatsappConnection::doPong(std::string id, std::string from)
 {
-	Tree t("iq", makeat({"to",from, "id",id, "type","result"}));
+	Tree t("iq", makeat({"to",from, "id", id, "type","result"}));
 	outbuffer = outbuffer + serialize_tree(&t);
 }
 

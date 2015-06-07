@@ -845,32 +845,33 @@ void WhatsappConnection::processIncomingData()
 	}
 
 	/* Now process the tree list! */
-	for (unsigned int i = 0; i < treelist.size(); i++) {
-		DEBUG_PRINT( treelist[i].toString() );
-		if (treelist[i].getTag() == "challenge") {
+	//for (unsigned int i = 0; i < treelist.size(); i++) {
+	for (auto & tl : treelist) {
+		DEBUG_PRINT( tl.toString() );
+		if (tl.getTag() == "challenge") {
 			/* Generate a session key using the challege & the password */
 			assert(conn_status == SessionWaitingChallenge);
 
-			KeyGenerator::generateKeysV14(password, treelist[i].getData().c_str(), treelist[i].getData().size(), (char *)this->session_key);
+			KeyGenerator::generateKeysV14(password, tl.getData().c_str(), tl.getData().size(), (char *)this->session_key);
 
 			in  = new RC4Decoder(&session_key[20*2], 20, 768);
 			out = new RC4Decoder(&session_key[20*0], 20, 768);
 
 			conn_status = SessionWaitingAuthOK;
-			challenge_data = treelist[i].getData();
+			challenge_data = tl.getData();
 
 			this->sendResponse();
-		} else if (treelist[i].getTag() == "success") {
+		} else if (tl.getTag() == "success") {
 			/* Notifies the success of the auth */
 			conn_status = SessionConnected;
-			if (treelist[i].hasAttribute("status"))
-				this->account_status = treelist[i]["status"];
-			if (treelist[i].hasAttribute("kind"))
-				this->account_type = treelist[i]["kind"];
-			if (treelist[i].hasAttribute("expiration"))
-				this->account_expiration = treelist[i]["expiration"];
-			if (treelist[i].hasAttribute("creation"))
-				this->account_creation = treelist[i]["creation"];
+			if (tl.hasAttribute("status"))
+				this->account_status = tl["status"];
+			if (tl.hasAttribute("kind"))
+				this->account_type = tl["kind"];
+			if (tl.hasAttribute("expiration"))
+				this->account_expiration = tl["expiration"];
+			if (tl.hasAttribute("creation"))
+				this->account_creation = tl["creation"];
 
 			this->notifyMyPresence();
 			this->updatePrivacy();
@@ -879,47 +880,47 @@ void WhatsappConnection::processIncomingData()
 			this->updateBlists();
 
 			DEBUG_PRINT("Logged in!!!");
-		} else if (treelist[i].getTag() == "failure") {
+		} else if (tl.getTag() == "failure") {
 			std::string reason = "unknown";
-			if (treelist[i].hasChild("not-authorized"))
+			if (tl.hasChild("not-authorized"))
 				reason = "not-authorized";
 
 			if (conn_status == SessionWaitingAuthOK)
 				this->notifyError(errorAuth, reason);
 			else
 				this->notifyError(errorUnknown, reason);
-		} else if (treelist[i].getTag() == "notification") {
-			DataBuffer reply = generateResponse( treelist[i]["from"], treelist[i]["type"], treelist[i]["id"] );
+		} else if (tl.getTag() == "notification") {
+			DataBuffer reply = generateResponse( tl["from"], tl["type"], tl["id"] );
 			outbuffer = outbuffer + reply;
 			
-			if (treelist[i].hasAttributeValue("type", "participant") || 
-				treelist[i].hasAttributeValue("type", "owner") ||
-				treelist[i].hasAttributeValue("type", "w:gp2") ) {
+			if (tl.hasAttributeValue("type", "participant") || 
+				tl.hasAttributeValue("type", "owner") ||
+				tl.hasAttributeValue("type", "w:gp2") ) {
 				/* If the nofitication comes from a group, assume we have to reload groups ;) */
 				updateGroups();
 			}
 
-			if (treelist[i].hasAttributeValue("type", "picture")) {
+			if (tl.hasAttributeValue("type", "picture")) {
 				/* Picture update */
-				this->queryPreview(treelist[i]["from"]);
+				this->queryPreview(tl["from"]);
 			}
-		} else if (treelist[i].getTag() == "ack") {
-			std::string id = treelist[i]["id"];
+		} else if (tl.getTag() == "ack") {
+			std::string id = tl["id"];
 			unsigned long long t = 0;
-			if (treelist[i].hasAttribute("t"))
-				t = std::stoull(treelist[i]["t"]);
+			if (tl.hasAttribute("t"))
+				t = std::stoull(tl["t"]);
 			received_messages.push_back( {id, rSent, t, ""} );
 
-		} else if (treelist[i].getTag() == "receipt") {
-			std::string id = treelist[i]["id"];
-			std::string type = treelist[i]["type"];
+		} else if (tl.getTag() == "receipt") {
+			std::string id = tl["id"];
+			std::string type = tl["type"];
 			if (type == "") type = "delivery";
-			std::string from = treelist[i]["from"];
-			std::string to = treelist[i]["to"];
-			std::string participant = treelist[i]["participant"];
+			std::string from = tl["from"];
+			std::string to = tl["to"];
+			std::string participant = tl["participant"];
 			unsigned long long t = 0;
-			if (treelist[i].hasAttribute("t"))
-				t = std::stoull(treelist[i]["t"]);
+			if (tl.hasAttribute("t"))
+				t = std::stoull(tl["t"]);
 			
 			Tree mes("ack", makeat({"class", "receipt", "type", type, "id", id}));
 
@@ -936,32 +937,32 @@ void WhatsappConnection::processIncomingData()
 			if (type == "read") rtype = rRead;
 			received_messages.push_back( {id,rtype,t, } );
 			
-		} else if (treelist[i].getTag() == "chatstate") {
-			if (treelist[i].hasChild("composing"))
-				this->gotTyping(treelist[i]["from"], "composing");
-			if (treelist[i].hasChild("paused"))
-				this->gotTyping(treelist[i]["from"], "paused");
+		} else if (tl.getTag() == "chatstate") {
+			if (tl.hasChild("composing"))
+				this->gotTyping(tl["from"], "composing");
+			if (tl.hasChild("paused"))
+				this->gotTyping(tl["from"], "paused");
 			
-		} else if (treelist[i].getTag() == "message") {
+		} else if (tl.getTag() == "message") {
 			/* Receives a message! */
 			DEBUG_PRINT("Received message stanza...");
-			if (treelist[i].hasAttribute("from") and
-				(treelist[i].hasAttributeValue("type", "text") or treelist[i].hasAttributeValue("type", "media"))) {
+			if (tl.hasAttribute("from") and
+				(tl.hasAttributeValue("type", "text") or tl.hasAttributeValue("type", "media"))) {
 				unsigned long long time = 0;
-				if (treelist[i].hasAttribute("t"))
-					time = std::stoull(treelist[i]["t"]);
-				std::string from = treelist[i]["from"];
-				std::string id = treelist[i]["id"];
-				std::string author = treelist[i]["participant"];
+				if (tl.hasAttribute("t"))
+					time = std::stoull(tl["t"]);
+				std::string from = tl["from"];
+				std::string id = tl["id"];
+				std::string author = tl["participant"];
 
 				if (isbroadcast(from))
 					from = author;
 
 				Tree t;
-				if (treelist[i].getChild("body", t)) {
+				if (tl.getChild("body", t)) {
 					this->receiveMessage(ChatMessage(this, from, time, id, t.getData(), author));
 				}
-				if (treelist[i].getChild("media", t)) {
+				if (tl.getChild("media", t)) {
 					if (t.hasAttributeValue("type", "image")) {
 						this->receiveMessage(ImageMessage(this, from, time, id, author, 
 							t["url"], t["ip"], std::stoi(t["width"]), std::stoi(t["height"]),
@@ -979,51 +980,51 @@ void WhatsappConnection::processIncomingData()
 							this->receiveMessage(VCardMessage(this, from, time, id, author, t["name"], vc.getData()));
 					}
 				}
-			} else if (treelist[i].hasAttributeValue("type", "notification") and treelist[i].hasAttribute("from")) {
+			} else if (tl.hasAttributeValue("type", "notification") and tl.hasAttribute("from")) {
 				/* If the nofitication comes from a group, assume we have to reload groups ;) */
 				updateGroups();
 			}
 			/* Generate response for the messages */
-			if (treelist[i].hasAttribute("type") and treelist[i].hasAttribute("from")) { //FIXME
-				DataBuffer reply = generateResponse(treelist[i]["from"], "", treelist[i]["id"]);
+			if (tl.hasAttribute("type") and tl.hasAttribute("from")) { //FIXME
+				DataBuffer reply = generateResponse(tl["from"], "", tl["id"]);
 				outbuffer = outbuffer + reply;
 			}
-		} else if (treelist[i].getTag() == "call") {
-			if (treelist[i].hasAttribute("notify")) {
+		} else if (tl.getTag() == "call") {
+			if (tl.hasAttribute("notify")) {
 				unsigned long long time = 0;
-				if (treelist[i].hasAttribute("t"))
-					time = std::stoull(treelist[i]["t"]);
-				std::string from = treelist[i]["from"];
-				std::string id = treelist[i]["id"];
+				if (tl.hasAttribute("t"))
+					time = std::stoull(tl["t"]);
+				std::string from = tl["from"];
+				std::string id = tl["id"];
 
 				this->receiveMessage(CallMessage(this, from, time, id));
 			}
-			DataBuffer reply = generateResponse(treelist[i]["from"], "", treelist[i]["id"]);
+			DataBuffer reply = generateResponse(tl["from"], "", tl["id"]);
 			outbuffer = outbuffer + reply;
-		} else if (treelist[i].getTag() == "presence") {
+		} else if (tl.getTag() == "presence") {
 			/* Receives the presence of the user, for v14 type is optional */
-			if (treelist[i].hasAttribute("from")) {
-				this->notifyPresence(treelist[i]["from"], treelist[i]["type"]);
+			if (tl.hasAttribute("from")) {
+				this->notifyPresence(tl["from"], tl["type"]);
 			}
-		} else if (treelist[i].getTag() == "iq") {
+		} else if (tl.getTag() == "iq") {
 			/* Receives the presence of the user */
 
-			if (treelist[i].hasAttributeValue("type", "result") and treelist[i].hasAttribute("from")) {
+			if (tl.hasAttributeValue("type", "result") and tl.hasAttribute("from")) {
 				Tree t;
-				if (treelist[i].getChild("query", t)) {
+				if (tl.getChild("query", t)) {
 					if (t.hasAttribute("seconds")) {
-						this->notifyLastSeen(treelist[i]["from"], t["seconds"]);
+						this->notifyLastSeen(tl["from"], t["seconds"]);
 					}
 				}
-				if (treelist[i].getChild("picture", t)) {
+				if (tl.getChild("picture", t)) {
 					if (t.hasAttributeValue("type", "preview"))
-						this->addPreviewPicture(treelist[i]["from"], t.getData());
+						this->addPreviewPicture(tl["from"], t.getData());
 					if (t.hasAttributeValue("type", "image"))
-						this->addFullsizePicture(treelist[i]["from"], t.getData());
+						this->addFullsizePicture(tl["from"], t.getData());
 				}
-				if (treelist[i].getChild("media", t)) {
+				if (tl.getChild("media", t)) {
 					for (unsigned int j = 0; j < uploadfile_queue.size(); j++) {
-						if (tohex(uploadfile_queue[j].rid) == treelist[i]["id"]) {
+						if (tohex(uploadfile_queue[j].rid) == tl["id"]) {
 							/* Queue to upload the file */
 							uploadfile_queue[j].uploadurl = t["url"];
 							uploadfile_queue[j].ip = t["ip"];
@@ -1039,9 +1040,9 @@ void WhatsappConnection::processIncomingData()
 					}
 				}
 
-				if (treelist[i].getChild("duplicate", t)) {
+				if (tl.getChild("duplicate", t)) {
 					for (unsigned int j = 0; j < uploadfile_queue.size(); j++) {
-						if (tohex(uploadfile_queue[j].rid) == treelist[i]["id"]) {
+						if (tohex(uploadfile_queue[j].rid) == tl["id"]) {
 							/* Generate a fake JSON and process directly */
 							std::string json = "{\"name\":\"" + uploadfile_queue[j].file + "\"," "\"url\":\"" + t["url"] + "\"," "\"size\":\"" + t["size"] + "\"," "\"mimetype\":\"" + t["mimetype"] + "\"," "\"filehash\":\"" + t["filehash"] + "\"," "\"type\":\"" + t["type"] + "\"," "\"width\":\"" + t["width"] + "\"," "\"height\":\"" + t["height"] + "\"}";
 
@@ -1053,7 +1054,7 @@ void WhatsappConnection::processIncomingData()
 				}
 
 				// Status result
-				if (treelist[i].getChild("status", t)) {
+				if (tl.getChild("status", t)) {
 					std::vector < Tree > childs = t.getChildren();
 					for (unsigned int j = 0; j < childs.size(); j++) {
 						if (childs[j].getTag() == "user") {
@@ -1063,7 +1064,7 @@ void WhatsappConnection::processIncomingData()
 					}
 				}
 
-				std::vector < Tree > childs = treelist[i].getChildren();
+				std::vector < Tree > childs = tl.getChildren();
 				for (unsigned int j = 0; j < childs.size(); j++) {
 					if (childs[j].getTag() == "groups") {
 						std::vector < Tree > cgroups = childs[j].getChildren();
@@ -1117,26 +1118,25 @@ void WhatsappConnection::processIncomingData()
 					}
 				}
 
-				if (treelist[i].getChild("group", t)) {
+				if (tl.getChild("group", t)) {
 					if (t.hasAttributeValue("type", "preview"))
-						this->addPreviewPicture(treelist[i]["from"], t.getData());
+						this->addPreviewPicture(tl["from"], t.getData());
 					if (t.hasAttributeValue("type", "image"))
-						this->addFullsizePicture(treelist[i]["from"], t.getData());
+						this->addFullsizePicture(tl["from"], t.getData());
 				}
 
-				if (treelist[i].getChild("privacy", t)) {
-					std::vector < Tree > childs = t.getChildren();
-					for (unsigned int j = 0; j < childs.size(); j++) {
-						if (childs[j].hasAttributeValue("name","last"))
-							this->show_last_seen = childs[j]["value"];
-						if (childs[j].hasAttributeValue("name","status"))
-							this->show_status_msg = childs[j]["value"];
-						if (childs[j].hasAttributeValue("name","profile"))
-							this->show_profile_pic = childs[j]["value"];
+				if (tl.getChild("privacy", t)) {
+					for (auto & ct : t.getChildren()) {
+						if (ct.hasAttributeValue("name","last"))
+							this->show_last_seen = ct["value"];
+						if (ct.hasAttributeValue("name","status"))
+							this->show_status_msg = ct["value"];
+						if (ct.hasAttributeValue("name","profile"))
+							this->show_profile_pic = ct["value"];
 					}
 				}
 
-				if (treelist[i].getChild("sync", t)) {
+				if (tl.getChild("sync", t)) {
 					std::vector <std::string> ct_in, ct_out, ct_invalid;
 					for (auto & tt: t.getChildren()) {
 						for (auto & user: tt.getChildren()) {
@@ -1149,12 +1149,12 @@ void WhatsappConnection::processIncomingData()
 								ct_invalid.push_back(user.getData());
 						}
 					}
-					sync_result[treelist[i]["id"]] = ct_in;
+					sync_result[tl["id"]] = ct_in;
 				}
 			}
-			if (treelist[i].hasAttribute("from") and treelist[i].hasAttribute("id") and 
-				treelist[i].hasAttributeValue("xmlns","urn:xmpp:ping")) {
-				this->doPong(treelist[i]["id"], treelist[i]["from"]);
+			if (tl.hasAttribute("from") and tl.hasAttribute("id") and 
+				tl.hasAttributeValue("xmlns","urn:xmpp:ping")) {
+				this->doPong(tl["id"], tl["from"]);
 			}
 		}
 	}

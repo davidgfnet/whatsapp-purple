@@ -71,7 +71,9 @@
 const char default_resource[] = "Android-2.12.5-443";
 
 #define WHATSAPP_ID "whatsapp"
-static PurplePlugin *_whatsapp_protocol = NULL;
+extern "C" {
+	static PurplePlugin *_whatsapp_protocol = NULL;
+}
 
 #define WHATSAPP_STATUS_ONLINE   "online"
 #define WHATSAPP_STATUS_AWAY     "away"
@@ -125,7 +127,7 @@ unsigned int chatid_to_convo(const char *id)
 static void waprpl_tooltip_text(PurpleBuddy * buddy, PurpleNotifyUserInfo * info, gboolean full)
 {
 	const char *status;
-	whatsapp_connection *wconn = purple_connection_get_protocol_data(purple_account_get_connection(purple_buddy_get_account(buddy)));
+	whatsapp_connection *wconn = (whatsapp_connection*)purple_connection_get_protocol_data(purple_account_get_connection(purple_buddy_get_account(buddy)));
 	int st = waAPI_getuserstatus(wconn->waAPI, purple_buddy_get_name(buddy));
 	if (st < 0)
 		status = "Unknown";
@@ -143,7 +145,7 @@ static void waprpl_tooltip_text(PurpleBuddy * buddy, PurpleNotifyUserInfo * info
 static char *waprpl_status_text(PurpleBuddy * buddy)
 {
 	char *statusmsg;
-	whatsapp_connection *wconn = purple_connection_get_protocol_data(purple_account_get_connection(purple_buddy_get_account(buddy)));
+	whatsapp_connection *wconn = (whatsapp_connection *)purple_connection_get_protocol_data(purple_account_get_connection(purple_buddy_get_account(buddy)));
 	if (!wconn)
 		return 0;
 
@@ -163,7 +165,7 @@ static const char *waprpl_list_icon(PurpleAccount * acct, PurpleBuddy * buddy)
 static void waprpl_show_accountinfo(PurplePluginAction * action)
 {
 	PurpleConnection *gc = (PurpleConnection *) action->context;
-	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
+	whatsapp_connection *wconn = (whatsapp_connection *)purple_connection_get_protocol_data(gc);
 	if (!wconn)
 		return;
 
@@ -191,7 +193,7 @@ const char * priv_type[3]      = {"last", "profile", "status" };
 const char * priv_type_nice[3] = {"Last seen", "Profile picture", "Status message" };
 
 static void waprpl_update_privacy(PurpleConnection *gc, PurpleRequestFields *fields) {
-	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
+	whatsapp_connection *wconn = (whatsapp_connection *)purple_connection_get_protocol_data(gc);
 
 	int i,j;
 	char priv[3][30];
@@ -199,7 +201,7 @@ static void waprpl_update_privacy(PurpleConnection *gc, PurpleRequestFields *fie
 		PurpleRequestField * field = purple_request_fields_get_field(fields, priv_type[i]);
 		GList *sel = purple_request_field_list_get_selected (field);
 		for (j = 0; j < 3; j++)
-			if (strcmp(sel->data, priv_opt_nice[j]) == 0)
+			if (strcmp((char*)sel->data, priv_opt_nice[j]) == 0)
 				strcpy(priv[i], priv_opt[j]);
 	}
 
@@ -211,7 +213,7 @@ static void waprpl_update_privacy(PurpleConnection *gc, PurpleRequestFields *fie
 static void waprpl_show_privacy(PurplePluginAction * action)
 {
 	PurpleConnection *gc = (PurpleConnection *) action->context;
-	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
+	whatsapp_connection *wconn = (whatsapp_connection *)purple_connection_get_protocol_data(gc);
 	if (!wconn)
 		return;
 
@@ -272,10 +274,10 @@ static void waprpl_blist_node_removed(PurpleBlistNode * node)
 	if (purple_connection_get_prpl(gc) != _whatsapp_protocol)
 		return;
 
-	char *gid = g_hash_table_lookup(purple_chat_get_components(ch), "id");
+	char *gid = (char*)g_hash_table_lookup(purple_chat_get_components(ch), "id");
 	if (gid == 0)
 		return;		/* Group is not created yet... */
-	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
+	whatsapp_connection *wconn = (whatsapp_connection *)purple_connection_get_protocol_data(gc);
 	waAPI_deletegroup(wconn->waAPI, gid);
 	waprpl_check_output(purple_account_get_connection(purple_chat_get_account(ch)));
 }
@@ -290,10 +292,10 @@ static void waprpl_blist_node_added(PurpleBlistNode * node)
 	if (purple_connection_get_prpl(gc) != _whatsapp_protocol)
 		return;
 
-	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
+	whatsapp_connection *wconn = (whatsapp_connection *)purple_connection_get_protocol_data(gc);
 	GHashTable *hasht = purple_chat_get_components(ch);
-	const char *groupname = g_hash_table_lookup(hasht, "subject");
-	const char *gid = g_hash_table_lookup(hasht, "id");
+	const char *groupname = (char*)g_hash_table_lookup(hasht, "subject");
+	const char *gid = (char*)g_hash_table_lookup(hasht, "id");
 	if (gid != 0)
 		return;		/* Already created */
 	purple_debug_info(WHATSAPP_ID, "Creating group %s\n", groupname);
@@ -328,12 +330,12 @@ static PurpleChat *blist_find_chat_by_hasht_cond(PurpleConnection *gc, int (*fn)
 
 static int hasht_cmp_id(GHashTable *hasht, void *data)
 {
-	return !strcmp(g_hash_table_lookup(hasht, "id"), *((char **)data));
+	return !strcmp((char*)g_hash_table_lookup(hasht, "id"), *((char **)data));
 }
 
 static int hasht_cmp_convo(GHashTable *hasht, void *data)
 {
-	return (chatid_to_convo(g_hash_table_lookup(hasht, "id")) == *((int *)data));
+	return (chatid_to_convo((char*)g_hash_table_lookup(hasht, "id")) == *((int *)data));
 }
 
 static PurpleChat *blist_find_chat_by_id(PurpleConnection *gc, const char *id)
@@ -378,11 +380,11 @@ static void conv_add_participants(PurpleConversation * conv, const char *part, c
 
 	purple_conv_chat_clear_users(purple_conversation_get_chat_data(conv));
 	for (p = plist; *p; p++) {
-		int flags = PURPLE_CBFLAGS_NONE | (!strcmp(owner, *p) ? PURPLE_CBFLAGS_FOUNDER : 0);
+		PurpleConvChatBuddyFlags flags = (!strcmp(owner, *p) ? PURPLE_CBFLAGS_FOUNDER : PURPLE_CBFLAGS_NONE);
 		gchar **p2;
 		for (p2 = alist; *p2; p2++)
-			if (!strcmp(*p2, *p))
-				flags |= PURPLE_CBFLAGS_OP;
+			if (!strcmp(*p2, *p) && flags == PURPLE_CBFLAGS_NONE)
+				flags = PURPLE_CBFLAGS_OP;
 		purple_conv_chat_add_user(purple_conversation_get_chat_data(conv), *p, "", flags, FALSE);
 	}
 
@@ -393,7 +395,7 @@ static void conv_add_participants(PurpleConversation * conv, const char *part, c
 PurpleConversation *get_open_combo(const char *who, PurpleConnection * gc)
 {
 	PurpleAccount *acc = purple_connection_get_account(gc);
-	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
+	whatsapp_connection *wconn = (whatsapp_connection*)purple_connection_get_protocol_data(gc);
 
 	purple_debug_info(WHATSAPP_ID, "Opening conversation window for %s\n", who);
 
@@ -405,7 +407,7 @@ PurpleConversation *get_open_combo(const char *who, PurpleConnection * gc)
 
 		GHashTable *hasht = purple_chat_get_components(ch);
 		int convo_id = chatid_to_convo(who);
-		const char *groupname = g_hash_table_lookup(hasht, "subject");
+		const char *groupname = (char*)g_hash_table_lookup(hasht, "subject");
 		PurpleConversation *convo = purple_find_chat(gc, convo_id);
 		
 		/* Create a window if it's not open yet */
@@ -440,7 +442,7 @@ static void conv_add_message(PurpleConnection * gc, const char *who, const char 
 		if (convo)
 			serv_got_chat_in(gc, purple_conv_chat_get_id(PURPLE_CONV_CHAT(convo)), author, PURPLE_MESSAGE_RECV, msg, timestamp);
 	} else {
-		serv_got_im(gc, who, msg, PURPLE_MESSAGE_RECV | PURPLE_MESSAGE_IMAGES, timestamp);
+		serv_got_im(gc, who, msg, (PurpleMessageFlags)(PURPLE_MESSAGE_RECV | PURPLE_MESSAGE_IMAGES), timestamp);
 	}
 }
 
@@ -464,7 +466,7 @@ static int str_array_find(gchar **haystack, const gchar *needle)
 
 static void query_status(PurpleConnection *gc)
 {
-	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
+	whatsapp_connection *wconn = (whatsapp_connection*)purple_connection_get_protocol_data(gc);
 	PurpleAccount *acc = purple_connection_get_account(gc);
 	char *who;
 	int status;
@@ -481,7 +483,7 @@ static void query_status(PurpleConnection *gc)
 
 static void query_typing(PurpleConnection *gc)
 {
-	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
+	whatsapp_connection *wconn = (whatsapp_connection*)purple_connection_get_protocol_data(gc);
 	char *who;
 	int status;
 
@@ -503,7 +505,7 @@ static void query_typing(PurpleConnection *gc)
 
 static void query_icon(PurpleConnection *gc)
 {
-	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
+	whatsapp_connection *wconn = (whatsapp_connection*)purple_connection_get_protocol_data(gc);
 	PurpleAccount *acc = purple_connection_get_account(gc);
 	char *who, *icon, *hash;
 	int len;
@@ -516,7 +518,7 @@ static void query_icon(PurpleConnection *gc)
 
 static void waprpl_process_incoming_events(PurpleConnection * gc)
 {
-	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
+	whatsapp_connection *wconn = (whatsapp_connection*)purple_connection_get_protocol_data(gc);
 	PurpleAccount *acc = purple_connection_get_account(gc);
 
 	int err;
@@ -576,7 +578,7 @@ static void waprpl_process_incoming_events(PurpleConnection * gc)
 				continue;
 
 			GHashTable *hasht = purple_chat_get_components(ch);
-			char *grid = g_hash_table_lookup(hasht, "id");
+			char *grid = (char*)g_hash_table_lookup(hasht, "id");
 			char *glist = waAPI_getgroups(wconn->waAPI);
 			gchar **gplist = g_strsplit(glist, ",", 0);
 
@@ -610,7 +612,7 @@ static void waprpl_process_incoming_events(PurpleConnection * gc)
 				ch = create_chat_group(gpid, wconn, acc);
 			
 			/* Now update the open conversation that may exist */
-			char *id = g_hash_table_lookup(purple_chat_get_components(ch), "id");
+			char *id = (char*)g_hash_table_lookup(purple_chat_get_components(ch), "id");
 			int prplid = chatid_to_convo(id);
 			PurpleConversation *conv = purple_find_chat(gc, prplid);
 			char *subject, *owner, *part, *admins;
@@ -691,8 +693,8 @@ static void waprpl_process_incoming_events(PurpleConnection * gc)
 
 static void waprpl_output_cb(gpointer data, gint source, PurpleInputCondition cond)
 {
-	PurpleConnection *gc = data;
-	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
+	PurpleConnection *gc = (PurpleConnection*)data;
+	whatsapp_connection *wconn = (whatsapp_connection*)purple_connection_get_protocol_data(gc);
 
 	char tempbuff[16*1024];
 	int ret;
@@ -722,8 +724,8 @@ static void waprpl_output_cb(gpointer data, gint source, PurpleInputCondition co
 /* Try to read some data and push it to the WhatsApp API */
 static void waprpl_input_cb(gpointer data, gint source, PurpleInputCondition cond)
 {
-	PurpleConnection *gc = data;
-	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
+	PurpleConnection *gc = (PurpleConnection*)data;
+	whatsapp_connection *wconn = (whatsapp_connection*)purple_connection_get_protocol_data(gc);
 
 	char tempbuff[16*1024];
 	int ret;
@@ -750,7 +752,7 @@ static void waprpl_input_cb(gpointer data, gint source, PurpleInputCondition con
 /* Checks if the WA protocol has data to output and schedules a write handler */
 static void waprpl_check_output(PurpleConnection * gc)
 {
-	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
+	whatsapp_connection *wconn = (whatsapp_connection*)purple_connection_get_protocol_data(gc);
 	if (wconn->fd < 0)
 		return;
 
@@ -779,8 +781,8 @@ static gboolean wa_timer_cb(gpointer data) {
 
 static void waprpl_connect_cb(gpointer data, gint source, const gchar * error_message)
 {
-	PurpleConnection *gc = data;
-	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
+	PurpleConnection *gc = (PurpleConnection*)data;
+	whatsapp_connection *wconn = (whatsapp_connection*)purple_connection_get_protocol_data(gc);
 
 	PurpleAccount *acct = purple_connection_get_account(gc);
 	const char *resource = purple_account_get_string(acct, "resource", default_resource);
@@ -807,7 +809,7 @@ static void waprpl_login(PurpleAccount * acct)
 
 	purple_connection_update_progress(gc, "Connecting", 0, 4);
 
-	whatsapp_connection *wconn = g_new0(whatsapp_connection, 1);
+	whatsapp_connection *wconn = (whatsapp_connection*)g_new0(whatsapp_connection, 1);
 	wconn->fd = -1;
 	wconn->sslfd = -1;
 	wconn->account = acct;
@@ -850,7 +852,7 @@ static void waprpl_login(PurpleAccount * acct)
 
 static void waprpl_close(PurpleConnection * gc)
 {
-	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
+	whatsapp_connection *wconn = (whatsapp_connection*)purple_connection_get_protocol_data(gc);
 
 	if (wconn->rh)
 		purple_input_remove(wconn->rh);
@@ -872,7 +874,7 @@ static void waprpl_close(PurpleConnection * gc)
 
 static int waprpl_send_im(PurpleConnection * gc, const char *who, const char *message, PurpleMessageFlags flags)
 {
-	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
+	whatsapp_connection *wconn = (whatsapp_connection*)purple_connection_get_protocol_data(gc);
 	char *plain;
 
 	purple_markup_html_to_xhtml(message, NULL, &plain);
@@ -892,12 +894,12 @@ static int waprpl_send_im(PurpleConnection * gc, const char *who, const char *me
 
 static int waprpl_send_chat(PurpleConnection * gc, int id, const char *message, PurpleMessageFlags flags)
 {
-	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
+	whatsapp_connection *wconn = (whatsapp_connection*)purple_connection_get_protocol_data(gc);
 	PurpleAccount *account = purple_connection_get_account(gc);
 	PurpleConversation *convo = purple_find_chat(gc, id);
 	PurpleChat *ch = blist_find_chat_by_convo(gc, id);
 	GHashTable *hasht = purple_chat_get_components(ch);
-	char *chat_id = g_hash_table_lookup(hasht, "id");
+	char *chat_id = (char*)g_hash_table_lookup(hasht, "id");
 	char *plain;
 
 	if (!chat_id) {
@@ -926,7 +928,7 @@ static int waprpl_send_chat(PurpleConnection * gc, int id, const char *message, 
 
 static void waprpl_add_buddy(PurpleConnection * gc, PurpleBuddy * buddy, PurpleGroup * group)
 {
-	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
+	whatsapp_connection *wconn = (whatsapp_connection*)purple_connection_get_protocol_data(gc);
 	const char *name = purple_buddy_get_name(buddy);
 
 	waAPI_addcontact(wconn->waAPI, name);
@@ -949,7 +951,7 @@ static void waprpl_add_buddies(PurpleConnection * gc, GList * buddies, GList * g
 
 static void waprpl_remove_buddy(PurpleConnection * gc, PurpleBuddy * buddy, PurpleGroup * group)
 {
-	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
+	whatsapp_connection *wconn = (whatsapp_connection*)purple_connection_get_protocol_data(gc);
 	const char *name = purple_buddy_get_name(buddy);
 
 	waAPI_delcontact(wconn->waAPI, name);
@@ -986,7 +988,7 @@ static void waprpl_rem_deny(PurpleConnection * gc, const char *name)
 
 static unsigned int waprpl_send_typing(PurpleConnection * gc, const char *who, PurpleTypingState typing)
 {
-	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
+	whatsapp_connection *wconn = (whatsapp_connection*)purple_connection_get_protocol_data(gc);
 
 	int status = 0;
 	if (typing == PURPLE_TYPING)
@@ -1003,17 +1005,17 @@ static unsigned int waprpl_send_typing(PurpleConnection * gc, const char *who, P
 static void waprpl_set_buddy_icon(PurpleConnection * gc, PurpleStoredImage * img)
 {
 	/* Send the picture the user has selected! */
-	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
+	whatsapp_connection *wconn = (whatsapp_connection*)purple_connection_get_protocol_data(gc);
 	size_t size = purple_imgstore_get_size(img);
 	const void *data = purple_imgstore_get_data(img);
 
 	if (data) {
 		// First of all make the picture a square
 		char * sqbuffer; int sqsize;
-		imgProfile(data, size, (void**)&sqbuffer, &sqsize, 640);
+		imgProfile((unsigned char*)data, size, (void**)&sqbuffer, &sqsize, 640);
 
 		char * pbuffer; int osize;
-		imgProfile(data, size, (void**)&pbuffer, &osize, 96);
+		imgProfile((unsigned char*)data, size, (void**)&pbuffer, &osize, 96);
 
 		waAPI_setavatar(wconn->waAPI, sqbuffer, sqsize, pbuffer, osize);
 
@@ -1058,7 +1060,7 @@ static GList *waprpl_status_types(PurpleAccount * acct)
 
 static void waprpl_set_status(PurpleAccount * acct, PurpleStatus * status)
 {
-	whatsapp_connection *wconn = purple_connection_get_protocol_data(purple_account_get_connection(acct));
+	whatsapp_connection *wconn = (whatsapp_connection*)purple_connection_get_protocol_data(purple_account_get_connection(acct));
 	const char *sid = purple_status_get_id(status);
 	const char *mid = purple_status_get_attr_string(status, "message");
 	if (mid == 0)
@@ -1074,10 +1076,10 @@ static void waprpl_get_info(PurpleConnection * gc, const char *username)
 	purple_debug_info(WHATSAPP_ID, "Fetching %s's user info for %s\n", username, gc->account->username);
 
 	/* Get user status */
-	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
+	whatsapp_connection *wconn = (whatsapp_connection*)purple_connection_get_protocol_data(gc);
 	const char *status_string = waAPI_getuserstatusstring(wconn->waAPI, username);
 	/* Get user picture (big one) */
-	char *profile_image = "";
+	char *profile_image = g_strdup("");
 	char *icon;
 	int len;
 	int res = waAPI_queryavatar(wconn->waAPI, username, &icon, &len);
@@ -1109,12 +1111,12 @@ static void waprpl_rename_group(PurpleConnection * gc, const char *old_name, Pur
 
 static void waprpl_insert_contacts(PurpleConnection * gc)
 {
-	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
+	whatsapp_connection *wconn = (whatsapp_connection*)purple_connection_get_protocol_data(gc);
 	GSList *buddies = purple_find_buddies(purple_connection_get_account(gc), NULL);
 	GSList *l;
 
 	for (l = buddies; l; l = l->next) {
-		PurpleBuddy *b = l->data;
+		PurpleBuddy *b = (PurpleBuddy*)l->data;
 		const char *name = purple_buddy_get_name(b);
 
 		waAPI_addcontact(wconn->waAPI, name);
@@ -1151,9 +1153,9 @@ static GHashTable *waprpl_chat_info_defaults(PurpleConnection * gc, const char *
 
 static void waprpl_chat_join(PurpleConnection * gc, GHashTable * data)
 {
-	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
-	const char *groupname = g_hash_table_lookup(data, "subject");
-	char *id = g_hash_table_lookup(data, "id");
+	whatsapp_connection *wconn = (whatsapp_connection*)purple_connection_get_protocol_data(gc);
+	const char *groupname = (char*)g_hash_table_lookup(data, "subject");
+	char *id = (char*)g_hash_table_lookup(data, "id");
 
 	if (!id) {
 		gchar *tmp = g_strdup_printf("Joining %s requires an invitation.", groupname);
@@ -1185,14 +1187,13 @@ static void waprpl_chat_join(PurpleConnection * gc, GHashTable * data)
 
 static void waprpl_chat_invite(PurpleConnection * gc, int id, const char *message, const char *name)
 {
-	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
+	whatsapp_connection *wconn = (whatsapp_connection*)purple_connection_get_protocol_data(gc);
 	PurpleAccount *acct = purple_connection_get_account(gc);
 	PurpleConversation *convo = purple_find_chat(gc, id);
 	PurpleChat *ch = blist_find_chat_by_convo(gc, id);
 	GHashTable *hasht = purple_chat_get_components(ch);
-	char *chat_id = g_hash_table_lookup(hasht, "id");
-	char *admins = g_hash_table_lookup(hasht, "admins");
-	char *owner = g_hash_table_lookup(hasht, "owner");
+	char *chat_id = (char*)g_hash_table_lookup(hasht, "id");
+	char *admins = (char*)g_hash_table_lookup(hasht, "admins");
 	const char * me = purple_account_get_username(acct);
 
 	int imadmin = 0;
@@ -1221,13 +1222,13 @@ static void waprpl_chat_invite(PurpleConnection * gc, int id, const char *messag
 
 static char *waprpl_get_chat_name(GHashTable * data)
 {
-	return g_strdup(g_hash_table_lookup(data, "subject"));
+	return g_strdup((char*)g_hash_table_lookup(data, "subject"));
 }
 
 void waprpl_ssl_output_cb(gpointer data, gint source, PurpleInputCondition cond)
 {
-	PurpleConnection *gc = data;
-	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
+	PurpleConnection *gc = (PurpleConnection*)data;
+	whatsapp_connection *wconn = (whatsapp_connection*)purple_connection_get_protocol_data(gc);
 
 	char tempbuff[16*1024];
 	int ret;
@@ -1245,7 +1246,7 @@ void waprpl_ssl_output_cb(gpointer data, gint source, PurpleInputCondition cond)
 		} else if (ret == 0 || (ret < 0 && errno == EAGAIN)) {
 			/* Check later */
 		} else {
-			waprpl_ssl_cerr_cb(0, 0, gc);
+			waprpl_ssl_cerr_cb(0, PURPLE_SSL_CONNECT_FAILED, gc);
 		}
 	} while (ret > 0);
 
@@ -1257,12 +1258,12 @@ void waprpl_ssl_output_cb(gpointer data, gint source, PurpleInputCondition cond)
 /* Try to read some data and push it to the WhatsApp API */
 void waprpl_ssl_input_cb(gpointer data, gint source, PurpleInputCondition cond)
 {
-	PurpleConnection *gc = data;
-	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
+	PurpleConnection *gc = (PurpleConnection*)data;
+	whatsapp_connection *wconn = (whatsapp_connection*)purple_connection_get_protocol_data(gc);
 
 	/* End point closed the connection */
 	if (!g_list_find(purple_connections_get_all(), gc)) {
-		waprpl_ssl_cerr_cb(0, 0, gc);
+		waprpl_ssl_cerr_cb(0, PURPLE_SSL_CONNECT_FAILED, gc);
 		return;
 	}
 
@@ -1277,10 +1278,10 @@ void waprpl_ssl_input_cb(gpointer data, gint source, PurpleInputCondition cond)
 		} else if (ret < 0 && errno == EAGAIN)
 			break;
 		else if (ret < 0) {
-			waprpl_ssl_cerr_cb(0, 0, gc);
+			waprpl_ssl_cerr_cb(0, PURPLE_SSL_CONNECT_FAILED, gc);
 			break;
 		} else {
-			waprpl_ssl_cerr_cb(0, 0, gc);
+			waprpl_ssl_cerr_cb(0, PURPLE_SSL_CONNECT_FAILED, gc);
 		}
 	} while (ret > 0);
 
@@ -1289,11 +1290,11 @@ void waprpl_ssl_input_cb(gpointer data, gint source, PurpleInputCondition cond)
 }
 
 static void waprpl_check_complete_uploads(PurpleConnection * gc) {
-	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
+	whatsapp_connection *wconn = (whatsapp_connection*)purple_connection_get_protocol_data(gc);
 	
 	GList *xfers = purple_xfers_get_all();
 	while (xfers) {
-		PurpleXfer *xfer = xfers->data;
+		PurpleXfer *xfer = (PurpleXfer*)xfers->data;
 		wa_file_upload *xinfo = (wa_file_upload *) xfer->data;
 		if (!xinfo->done && xinfo->started && waAPI_fileuploadcomplete(wconn->waAPI, xinfo->ref_id)) {
 			purple_debug_info(WHATSAPP_ID, "Upload complete\n");
@@ -1307,7 +1308,7 @@ static void waprpl_check_complete_uploads(PurpleConnection * gc) {
 /* Checks if the WA protocol has data to output and schedules a write handler */
 void waprpl_check_ssl_output(PurpleConnection * gc)
 {
-	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
+	whatsapp_connection *wconn = (whatsapp_connection*)purple_connection_get_protocol_data(gc);
 	if (wconn->sslfd >= 0) {
 
 		int r = waAPI_sslhasoutdata(wconn->waAPI);
@@ -1316,7 +1317,7 @@ void waprpl_check_ssl_output(PurpleConnection * gc)
 			if (wconn->sslwh == 0)
 				wconn->sslwh = purple_input_add(wconn->sslfd, PURPLE_INPUT_WRITE, waprpl_ssl_output_cb, gc);
 		} else if (r < 0) {
-			waprpl_ssl_cerr_cb(0, 0, gc);	/* Finished the connection! */
+			waprpl_ssl_cerr_cb(0, PURPLE_SSL_CONNECT_FAILED, gc);	/* Finished the connection! */
 		} else {
 			if (wconn->sslwh != 0)
 				purple_input_remove(wconn->sslwh);
@@ -1331,7 +1332,7 @@ void waprpl_check_ssl_output(PurpleConnection * gc)
 		if (waAPI_fileuploadprogress(wconn->waAPI, &rid, &bytes_sent)) {
 			GList *xfers = purple_xfers_get_all();
 			while (xfers) {
-				PurpleXfer *xfer = xfers->data;
+				PurpleXfer *xfer = (PurpleXfer*)xfers->data;
 				wa_file_upload *xinfo = (wa_file_upload *) xfer->data;
 				if (xinfo->ref_id == rid) {
 					purple_debug_info(WHATSAPP_ID, "Upload progress %d bytes done\n", bytes_sent);
@@ -1351,8 +1352,8 @@ void waprpl_check_ssl_output(PurpleConnection * gc)
 
 static void waprpl_ssl_connected_cb(gpointer data, PurpleSslConnection * gsc, PurpleInputCondition cond)
 {
-	PurpleConnection *gc = data;
-	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
+	PurpleConnection *gc = (PurpleConnection*)data;
+	whatsapp_connection *wconn = (whatsapp_connection*)purple_connection_get_protocol_data(gc);
 	if (!wconn) return; // The account has disconnected 
 
 	purple_debug_info(WHATSAPP_ID, "SSL connection stablished\n");
@@ -1365,8 +1366,8 @@ static void waprpl_ssl_connected_cb(gpointer data, PurpleSslConnection * gsc, Pu
 void waprpl_ssl_cerr_cb(PurpleSslConnection * gsc, PurpleSslErrorType error, gpointer data)
 {
 	/* Do not use gsc, may be null */
-	PurpleConnection *gc = data;
-	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
+	PurpleConnection *gc = (PurpleConnection*)data;
+	whatsapp_connection *wconn = (whatsapp_connection*)purple_connection_get_protocol_data(gc);
 	if (!wconn)
 		return;
 
@@ -1388,7 +1389,7 @@ void waprpl_ssl_cerr_cb(PurpleSslConnection * gsc, PurpleSslErrorType error, gpo
 void check_ssl_requests(PurpleAccount * acct)
 {
 	PurpleConnection *gc = purple_account_get_connection(acct);
-	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
+	whatsapp_connection *wconn = (whatsapp_connection*)purple_connection_get_protocol_data(gc);
 
 	char *host;
 	int port;
@@ -1397,7 +1398,7 @@ void check_ssl_requests(PurpleAccount * acct)
 
 		PurpleSslConnection *sslc = purple_ssl_connect(acct, host, port, waprpl_ssl_connected_cb, waprpl_ssl_cerr_cb, gc);
 		if (sslc == 0) {
-			waprpl_ssl_cerr_cb(0, 0, gc);
+			waprpl_ssl_cerr_cb(0, PURPLE_SSL_CONNECT_FAILED, gc);
 		} else {
 			/* The Fd are not available yet, wait for connected callback */
 			wconn->gsc = sslc;
@@ -1409,7 +1410,7 @@ void waprpl_xfer_init(PurpleXfer * xfer)
 {
 	purple_debug_info(WHATSAPP_ID, "File xfer init...\n");
 	wa_file_upload *xinfo = (wa_file_upload *) xfer->data;
-	whatsapp_connection *wconn = xinfo->wconn;
+	whatsapp_connection *wconn = (whatsapp_connection*)xinfo->wconn;
 
 	size_t fs = purple_xfer_get_size(xfer);
 	const char *fn = purple_xfer_get_filename(xfer);
@@ -1450,7 +1451,7 @@ static PurpleXfer *waprpl_new_xfer(PurpleConnection * gc, const char *who)
 	purple_debug_info(WHATSAPP_ID, "New file xfer\n");
 	PurpleXfer *xfer = purple_xfer_new(gc->account, PURPLE_XFER_SEND, who);
 	g_return_val_if_fail(xfer != NULL, NULL);
-	whatsapp_connection *wconn = purple_connection_get_protocol_data(gc);
+	whatsapp_connection *wconn = (whatsapp_connection*)purple_connection_get_protocol_data(gc);
 
 	wa_file_upload *xfer_info = g_new0(wa_file_upload, 1);
 	memset(xfer_info, 0, sizeof(wa_file_upload));
@@ -1481,8 +1482,10 @@ static void waprpl_send_file(PurpleConnection * gc, const char *who, const char 
 		purple_xfer_request(xfer);
 }
 
+extern "C" {
+
 static PurplePluginProtocolInfo prpl_info = {
-	0,			/* options */
+	(PurpleProtocolOptions)0,			/* options */
 	NULL,			/* user_splits, initialized in waprpl_init() */
 	NULL,			/* protocol_options, initialized in waprpl_init() */
 	{			/* icon_spec, a PurpleBuddyIconSpec */
@@ -1635,3 +1638,5 @@ static PurplePluginInfo info = {
 };
 
 PURPLE_INIT_PLUGIN(whatsapp, waprpl_init, info);
+
+}

@@ -1,6 +1,6 @@
 1 VERSIONINFO
-FILEVERSION     0,8,2,0
-PRODUCTVERSION  0,8,2,0
+FILEVERSION     0,8,3,0
+PRODUCTVERSION  0,8,3,0
 BEGIN
   BLOCK "StringFileInfo"
   BEGIN
@@ -8,12 +8,12 @@ BEGIN
     BEGIN
       VALUE "CompanyName", "davidgf.net"
       VALUE "FileDescription", "Whatsapp plugin for libpurple (pidgin)"
-      VALUE "FileVersion", "0.8.2"
+      VALUE "FileVersion", "0.8.3"
       VALUE "InternalName", "whatsapp4pidgin"
       VALUE "LegalCopyright", "Copyright 2015 David Guillen Fandos"
       VALUE "OriginalFilename", "libwhatsapp.dll"
       VALUE "ProductName", "Whatsapp for Purple"
-      VALUE "ProductVersion", "0.8.2"
+      VALUE "ProductVersion", "0.8.3"
     END
   END
   BLOCK "VarFileInfo"

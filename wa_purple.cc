@@ -1619,7 +1619,7 @@ static PurplePluginInfo info = {
 	PURPLE_PRIORITY_DEFAULT,	/* priority */
 	"prpl-whatsapp",		/* id */
 	"WhatsApp",		/* name */
-	"0.8.2",			/* version */
+	"0.8.3",			/* version */
 	"WhatsApp protocol for libpurple",	/* summary */
 	"WhatsApp protocol for libpurple",	/* description */
 	"David Guillen Fandos (david@davidgf.net)",	/* author */

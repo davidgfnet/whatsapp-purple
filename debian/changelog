@@ -1,3 +1,12 @@
+pidgin-whatsapp (0.8.3) trusty; urgency=low
+
+  * Changed some protocol stuff to behave like Android.
+  * Fixed some minor issues with groups.
+  * Implemented new groups (v2). Should fix group compatibility problems.
+  * Some fixes on VCard reception
+
+ -- David Guillen Fandos <david@davidgf.net>  Thu, 25 Jun 2015 22:47:00 +0200
+
 pidgin-whatsapp (0.8.2) trusty; urgency=low
 
   * Fixed a bug which prevented messages from being received in a random fashion

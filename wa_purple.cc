@@ -61,6 +61,11 @@
 #define sys_read  wpurple_read
 #define sys_write wpurple_write
 #define sys_close wpurple_close
+extern "C" {
+  int wpurple_close(int fd);
+  int wpurple_write(int fd, const void *buf, unsigned int size);
+  int wpurple_read(int fd, void *buf, unsigned int size);
+}
 #else
 #include <unistd.h>
 #define sys_read  read

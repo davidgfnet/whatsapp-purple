@@ -1177,6 +1177,7 @@ static void waprpl_chat_join(PurpleConnection * gc, GHashTable * data)
 		if (!waAPI_getgroupinfo(wconn->waAPI, id, &subject, &owner, &part, &admins)) {
 			subject = g_strdup("Unknown");
 			owner   = g_strdup("000000");
+			admins  = g_strdup("000000");
 			part    = g_strdup("");
 		}
 

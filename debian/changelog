@@ -1,3 +1,9 @@
+pidgin-whatsapp (0.8.4) trusty; urgency=low
+
+  * Fixed a bug (segfault) introduced in 0.8.3
+
+ -- David Guillen Fandos <david@davidgf.net>  Thu, 1 Jul 2015 18:25:00 +0100
+
 pidgin-whatsapp (0.8.3) trusty; urgency=low
 
   * Changed some protocol stuff to behave like Android.

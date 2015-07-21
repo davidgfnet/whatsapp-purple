@@ -795,7 +795,7 @@ std::string WhatsappConnection::generateUploadPOST(t_fileupload * fu)
 	post += "POST " + fu->uploadurl + "\r\n";
 	post += "Content-Type: multipart/form-data; boundary=zzXXzzYYzzXXzzQQ\r\n";
 	post += "Host: " + fu->host + "\r\n";
-	post += "User-Agent: WhatsApp/2.12.5 Android/4.3 Device/GalaxyS3\r\n";
+	post += "User-Agent: WhatsApp/2.12.176 Android/4.3 Device/GalaxyS3\r\n";
 	post += "Content-Length:  " + std::to_string(ret.size()) + "\r\n\r\n";
 
 	std::string all = post + ret;

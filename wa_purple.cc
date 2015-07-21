@@ -73,7 +73,7 @@ extern "C" {
 #define sys_close close
 #endif
 
-const char default_resource[] = "Android-2.12.5-443";
+const char default_resource[] = "Android-2.12.176-443";
 
 #define WHATSAPP_ID "whatsapp"
 extern "C" {

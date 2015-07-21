@@ -3,7 +3,7 @@
 ; todo: SetBrandingImage
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "whatsapp4pidgin"
-!define PRODUCT_VERSION "0.8.4"
+!define PRODUCT_VERSION "0.8.5"
 !define PRODUCT_PUBLISHER "David Guillen Fandos"
 !define PRODUCT_WEB_SITE "https://davidgf.net/"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"

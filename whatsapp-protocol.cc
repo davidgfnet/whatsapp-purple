@@ -1171,7 +1171,7 @@ DataBuffer WhatsappConnection::serialize_tree(Tree * tree, bool crypt)
 	DEBUG_PRINT( tree->toString() );
 
 	DataBuffer data = write_tree(tree);
-	if (data.size() > 65535) {
+	if (data.size() >= 1024*1024) {
 		std::cerr << "Skipping huge tree! " << data.size() << std::endl;
 		return DataBuffer();
 	}
@@ -1182,7 +1182,7 @@ DataBuffer WhatsappConnection::serialize_tree(Tree * tree, bool crypt)
 	}
 
 	DataBuffer ret;
-	ret.putInt(flag, 1);
+	ret.putInt(flag | (data.size() >> 16), 1);
 	ret.putInt(data.size(), 2);
 	ret = ret + data;
 	return ret;
@@ -1222,8 +1222,9 @@ DataBuffer WhatsappConnection::write_tree(Tree * tree)
 
 bool WhatsappConnection::parse_tree(DataBuffer * data, Tree & t)
 {
-	int bflag = (data->getInt(1) & 0xF0) >> 4;
-	int bsize = data->getInt(2, 1);
+	int flag = data->getInt(1);
+	int bflag = (flag & 0xF0) >> 4;
+	int bsize = data->getInt(2, 1) | ((flag & 0xF) << 16);
 	if (bsize > data->size() - 3)
 		return false; /* Next message incomplete, return consumed data */
 

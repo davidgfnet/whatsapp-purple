@@ -944,6 +944,7 @@ void WhatsappConnection::processIncomingData()
 		} else if (tl.getTag() == "message") {
 			/* Receives a message! */
 			DEBUG_PRINT("Received message stanza...");
+			bool donotreply = false;
 			if (tl.hasAttribute("from") and
 				(tl.hasAttributeValue("type", "text") or tl.hasAttributeValue("type", "media"))) {
 				unsigned long long time = 0;
@@ -959,6 +960,13 @@ void WhatsappConnection::processIncomingData()
 				Tree t;
 				if (tl.getChild("body", t)) {
 					this->receiveMessage(ChatMessage(this, from, time, id, t.getData(), author));
+				}
+				if (tl.getChild("enc", t)) {
+					this->receiveMessage(ChatMessage(this, from, time, id, "[Ciphered message received]", author));
+
+					DataBuffer reply = generateResponse(tl["from"], "retry", tl["id"]);
+					donotreply = true;
+					outbuffer = outbuffer + reply;
 				}
 				if (tl.getChild("media", t)) {
 					if (t.hasAttributeValue("type", "image")) {
@@ -983,7 +991,7 @@ void WhatsappConnection::processIncomingData()
 				updateGroups();
 			}
 			/* Generate response for the messages */
-			if (tl.hasAttribute("type") and tl.hasAttribute("from")) { //FIXME
+			if (tl.hasAttribute("type") and tl.hasAttribute("from") and not donotreply) { //FIXME
 				DataBuffer reply = generateResponse(tl["from"], "", tl["id"]);
 				outbuffer = outbuffer + reply;
 			}

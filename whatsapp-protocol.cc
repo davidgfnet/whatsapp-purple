@@ -29,6 +29,7 @@
 #include "message.h"
 #include "wa_connection.h"
 #include "wa_util.h"
+#include "wa_constants.h"
 
 
 static int isbroadcast(const std::string user)
@@ -98,7 +99,7 @@ WhatsappConnection::WhatsappConnection(std::string phonenum, std::string passwor
 	this->msgcounter = 1;
 	this->iqid = 0;
 	this->nickname = nickname;
-	this->whatsappserver = "s.whatsapp.net";
+	this->whatsappserver = WHATSAPP_SERVER;
 	this->whatsappservergroup = "g.us";
 	this->mypresence = "available";
 	this->groups_updated = false;
@@ -187,7 +188,7 @@ void WhatsappConnection::updateBlists()
 		"id", getNextIqId(),
 		"from", phone + "@" + whatsappserver,
 		"type", "get",
-		"to", "s.whatsapp.net",
+		"to", WHATSAPP_SERVER,
 		"xmlns", "w:b"}
 	));
 	req.addChild(Tree("lists"));
@@ -207,7 +208,7 @@ void WhatsappConnection::deleteBlist(std::string id)
 	Tree req("iq", makeat({
 		"id", getNextIqId(),
 		"type", "set",
-		"to", "s.whatsapp.net",
+		"to", WHATSAPP_SERVER,
 		"xmlns", "w:b"}
 	));
 	Tree del;
@@ -369,7 +370,7 @@ void WhatsappConnection::subscribePresence(std::string user)
 
 void WhatsappConnection::queryStatuses()
 {
-	Tree req("iq", makeat({"to", "s.whatsapp.net", "type", "get", "id", getNextIqId(), "xmlns", "status"}));
+	Tree req("iq", makeat({"to", WHATSAPP_SERVER, "type", "get", "id", getNextIqId(), "xmlns", "status"}));
 	Tree stat("status");
 
 	for (std::map < std::string, Contact >::iterator iter = contacts.begin(); iter != contacts.end(); iter++)
@@ -795,7 +796,7 @@ std::string WhatsappConnection::generateUploadPOST(t_fileupload * fu)
 	post += "POST " + fu->uploadurl + "\r\n";
 	post += "Content-Type: multipart/form-data; boundary=zzXXzzYYzzXXzzQQ\r\n";
 	post += "Host: " + fu->host + "\r\n";
-	post += "User-Agent: WhatsApp/2.12.176 Android/4.3 Device/GalaxyS3\r\n";
+	post += WHATSAPP_USER_AGENT;
 	post += "Content-Length:  " + std::to_string(ret.size()) + "\r\n\r\n";
 
 	std::string all = post + ret;

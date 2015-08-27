@@ -56,6 +56,7 @@
 
 #include "wa_api.h"
 #include "imgutil.h"
+#include "wa_constants.h"
 
 #ifdef _WIN32
 #define sys_read  wpurple_read
@@ -73,18 +74,14 @@ extern "C" {
 #define sys_close close
 #endif
 
-const char default_resource[] = "Android-2.12.176-443";
+const char default_resource[] = WHATSAPP_VERSION;
 
 #define WHATSAPP_ID "whatsapp"
 extern "C" {
 	static PurplePlugin *_whatsapp_protocol = NULL;
 }
 
-#define WHATSAPP_STATUS_ONLINE   "online"
-#define WHATSAPP_STATUS_AWAY     "away"
-#define WHATSAPP_STATUS_OFFLINE  "offline"
 
-#define WHATSAPP_DEFAULT_PORT   443
 
 typedef struct {
 	unsigned int file_size;
@@ -1217,8 +1214,8 @@ static void waprpl_chat_invite(PurpleConnection * gc, int id, const char *messag
 		return;
 	}
 
-	if (strstr(name, "@s.whatsapp.net") == 0)
-		name = g_strdup_printf("%s@s.whatsapp.net", name);
+	if (strstr(name, "@" WHATSAPP_SERVER) == 0)
+		name = g_strdup_printf("%s@" WHATSAPP_SERVER, name);
 	waAPI_manageparticipant(wconn->waAPI, chat_id, name, "add");
 
 	purple_conv_chat_add_user(purple_conversation_get_chat_data(convo), name, "", PURPLE_CBFLAGS_NONE, FALSE);

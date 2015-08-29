@@ -33,12 +33,13 @@ CFLAGS += \
     -fPIC \
     -DPURPLE_PLUGINS \
     -DPIC \
+    $(RPM_OPT_FLAGS) \
     $(CFLAGS_PURPLE)
 
 CXXFLAGS += -std=c++11
 
 LIBS_PURPLE = $(shell pkg-config --libs purple) -lfreeimage
-LDFLAGS ?= $(ARCHFLAGS)
+LDFLAGS ?= $(ARCHFLAGS) $(RPM_LD_FLAGS)
 LDFLAGS += -shared -pipe
 
 %.o: %.c

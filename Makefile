@@ -19,11 +19,12 @@ CXX_SRCS = whatsapp-protocol.cc wa_api.cc wa_util.cc rc4.cc keygen.cc tree.cc da
 C_OBJS = $(C_SRCS:.c=.o)
 CXX_OBJS = $(CXX_SRCS:.cc=.o)
 
+PKG_CONFIG = pkg-config
 STRIP = strip
 CC = gcc
 CXX = g++
 LD = $(CXX)
-CFLAGS_PURPLE = $(shell pkg-config --cflags purple)
+CFLAGS_PURPLE = $(shell $(PKG_CONFIG) --cflags purple)
 CFLAGS ?= \
     $(ARCHFLAGS) \
     -O2 \
@@ -37,7 +38,7 @@ CFLAGS += \
 
 CXXFLAGS += -std=c++11
 
-LIBS_PURPLE = $(shell pkg-config --libs purple) -lfreeimage
+LIBS_PURPLE = $(shell $(PKG_CONFIG) --libs purple) -lfreeimage
 LDFLAGS ?= $(ARCHFLAGS)
 LDFLAGS += -shared -pipe
 
@@ -57,8 +58,8 @@ strip: $(LIBNAME)
 debug:
 	CFLAGS="$$CFLAGS -DDEBUG -g3 -O0" make all
 
-PLUGIN_DIR_PURPLE:=$(shell pkg-config --variable=plugindir purple)
-DATA_ROOT_DIR_PURPLE:=$(shell pkg-config --variable=datarootdir purple)
+PLUGIN_DIR_PURPLE:=$(shell $(PKG_CONFIG) --variable=plugindir purple)
+DATA_ROOT_DIR_PURPLE:=$(shell $(PKG_CONFIG) --variable=datarootdir purple)
 
 .PHONY: install
 install: $(LIBNAME)

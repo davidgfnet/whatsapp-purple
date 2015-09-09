@@ -13,6 +13,18 @@ endif
 .PHONY: all
 all: $(LIBNAME)
 
+INCLUDES = -I./libaxolotl-cpp/ecc \
+           -I./libaxolotl-cpp/exception \
+           -I./libaxolotl-cpp/util \
+           -I./libaxolotl-cpp/state \
+           -I./libaxolotl-cpp/protocol \
+           -I./libaxolotl-cpp/groups/ratchet \
+           -I./libaxolotl-cpp/groups/state \
+           -I./libaxolotl-cpp/kdf \
+           -I./libaxolotl-cpp/ratchet \
+           -I./libaxolotl-cpp/store \
+           -I./libaxolotl-cpp
+
 C_SRCS = tinfl.c imgutil.c 
 CXX_SRCS = whatsapp-protocol.cc wa_api.cc wa_util.cc rc4.cc keygen.cc tree.cc databuffer.cc message.cc whatsapp_api.cc wa_purple.cc
 
@@ -33,11 +45,12 @@ CFLAGS += \
     -fPIC \
     -DPURPLE_PLUGINS \
     -DPIC \
+    $(INCLUDES) \
     $(CFLAGS_PURPLE)
 
 CXXFLAGS += -std=c++11
 
-LIBS_PURPLE = $(shell pkg-config --libs purple) -lfreeimage
+LIBS_PURPLE = $(shell pkg-config --libs purple) -lfreeimage -L./libaxolotl-cpp -laxolotl
 LDFLAGS ?= $(ARCHFLAGS)
 LDFLAGS += -shared -pipe
 

@@ -6,9 +6,13 @@
 #include <vector>
 #include <map>
 #include <time.h>
+#include <stdint.h>
 #include "wacommon.h"
 #include "databuffer.h"
 #include "contacts.h"
+#include "liteaxolotlstore.h"
+
+class SessionCipher;
 
 class ChatMessage;
 class ImageMessage;
@@ -107,6 +111,17 @@ private:
 	int sslstatus;		/* 0 Idle, 1 sending request, 2 getting response */
 	/* 5/6 for image upload */
 
+	/* New Axolotl stuff */
+	std::shared_ptr<LiteAxolotlStore> axolotlStore;
+	std::map<uint64_t, SessionCipher*> cipherHash;
+
+	void sendEncrypt(bool);
+	bool receiveCipheredMessage(Tree, Tree);
+	bool parseWhisperMessage(Tree, Tree);
+	bool parsePreKeyWhisperMessage(Tree, Tree);
+	SessionCipher *getSessionCipher(uint64_t recepient);
+	void sendMessageRetry(const std::string &from, const std::string &msgid, const std::string &t);
+
 	void receiveMessage(const Message & m);
 	void notifyPresence(std::string from, std::string presence);
 	void updatePrivacy();
@@ -137,7 +152,7 @@ private:
 	void updateFileUpload(std::string);
 
 	std::string getNextIqId();
-	std::string tohex(int);
+	std::string tohex(uint64_t);
 
 public:
 	bool read_tree(DataBuffer * data, Tree & tt);

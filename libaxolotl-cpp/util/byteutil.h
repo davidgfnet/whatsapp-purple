@@ -20,6 +20,7 @@ public:
 	static int lowBitsToInt(uint8_t input);
 	static int intToByteArray(ByteArray &input, int offset, int value);
 	static ByteArray toHex(ByteArray in);
+	static ByteArray fromHex(ByteArray in);
 };
 
 #endif // BYTEUTIL_H

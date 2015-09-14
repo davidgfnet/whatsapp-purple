@@ -1195,7 +1195,7 @@ void WhatsappConnection::sendEncrypt(bool fresh)
 
 	IdentityKeyPair identityKeyPair = fresh ? KeyHelper::generateIdentityKeyPair() : axolotlStore->getIdentityKeyPair();
 	uint64_t registrationId = fresh ? KeyHelper::generateRegistrationId() : axolotlStore->getLocalRegistrationId();
-	std::vector<PreKeyRecord> preKeys = KeyHelper::generatePreKeys(KeyHelper::getRandomFFFFFFFF(), 200);
+	std::vector<PreKeyRecord> preKeys = KeyHelper::generatePreKeys(KeyHelper::getRandomFFFFFFFF(), 5);
 	SignedPreKeyRecord signedPreKey = KeyHelper::generateSignedPreKey(identityKeyPair, KeyHelper::getRandomFFFFFFFF());
 
 	Tree iq("iq", makeat({"id", getNextIqId(), "type", "set", "to", whatsappserver, "xmlns", "encrypt"}));

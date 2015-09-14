@@ -55,11 +55,26 @@ int ByteUtil::intToByteArray(ByteArray &input, int offset, int value)
 
 ByteArray ByteUtil::toHex(ByteArray in)
 {
-	std::string map = "01234567890abcdef";
+	std::string map = "0123456789abcdef";
 	std::string ret;
-	for (auto c: in)
-		ret += map[(c>>4)&0xF] + map[(c)&0xF];
+	for (auto c: in) {
+		ret += map[(c>>4)&0xF];
+		ret += map[(c)&0xF];
+	}
 
+	return ret;
+}
+
+ByteArray ByteUtil::fromHex(ByteArray in)
+{
+	std::string map = "0123456789abcdef";
+	std::string ret;
+	for (unsigned i = 0; i < in.size(); i += 2) {
+		int n1 = map.find(in[i]);
+		int n2 = map.find(in[i+1]);
+		int res = (n1 << 4) | n2;
+		ret += (char)res;
+	}
 	return ret;
 }
 

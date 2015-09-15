@@ -32,6 +32,7 @@ public:
 	}
 
 	bool isTrustedIdentity(uint64_t recipientId, const IdentityKey &identityKey);
+	std::string serialize() const;
 
 private:
 	std::map<uint64_t, IdentityKey> trustedKeys;

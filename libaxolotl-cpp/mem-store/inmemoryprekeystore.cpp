@@ -1,5 +1,5 @@
 #include "inmemoryprekeystore.h"
-
+#include "serializer.h"
 #include "whisperexception.h"
 
 InMemoryPreKeyStore::InMemoryPreKeyStore()
@@ -28,3 +28,17 @@ void InMemoryPreKeyStore::removePreKey(uint64_t preKeyId)
 {
     store.erase(preKeyId);
 }
+
+std::string InMemoryPreKeyStore::serialize() const
+{
+	Serializer ser;
+	ser.putInt32(store.size());
+
+	for (auto & key: store) {
+		ser.putInt64(key.first);
+		ser.putString(key.second);
+	}
+
+	return ser.getBuffer();	
+}
+

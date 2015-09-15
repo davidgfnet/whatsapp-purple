@@ -49,6 +49,8 @@ public:
     bool containsSignedPreKey(uint64_t signedPreKeyId);
     void removeSignedPreKey(uint64_t signedPreKeyId);
 
+	std::string serialize() const;
+
 private:
     InMemoryIdentityKeyStore  identityKeyStore;
     InMemoryPreKeyStore       preKeyStore;

@@ -35,12 +35,11 @@ CPP_FILES = identitykey.cpp \
 			protocol/prekeywhispermessage.cpp \
 			protocol/senderkeymessage.cpp \
 			protocol/ciphertextmessage.cpp \
-			store/liteaxolotlstore.cpp \
-			store/liteidentitykeystore.cpp \
-			store/liteprekeystore.cpp \
-			store/litesignedprekeystore.cpp \
-			store/litesessionstore.cpp \
-			store/sqliutil.cpp \
+			mem-store/inmemoryaxolotlstore.cpp \
+			mem-store/inmemoryidentitykeystore.cpp \
+			mem-store/inmemoryprekeystore.cpp \
+			mem-store/inmemorysignedprekeystore.cpp \
+			mem-store/inmemorysessionstore.cpp \
 			state/LocalStorageProtocol.pb.cc \
 			protocol/WhisperTextProtocol.pb.cc
 

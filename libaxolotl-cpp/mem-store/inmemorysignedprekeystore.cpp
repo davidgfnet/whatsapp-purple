@@ -5,8 +5,13 @@
 #include "byteutil.h"
 #include <vector>
 
-InMemorySignedPreKeyStore::InMemorySignedPreKeyStore()
+InMemorySignedPreKeyStore::InMemorySignedPreKeyStore(Unserializer uns)
 {
+	unsigned int n = uns.readInt32();
+	while (n--) {
+		uint64_t key = uns.readInt64();
+		store[key] = uns.readString();
+	}
 }
 
 SignedPreKeyRecord InMemorySignedPreKeyStore::loadSignedPreKey(uint64_t signedPreKeyId)

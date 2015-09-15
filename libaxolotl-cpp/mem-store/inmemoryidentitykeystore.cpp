@@ -6,8 +6,29 @@
 
 #include <iostream>
 
-InMemoryIdentityKeyStore::InMemoryIdentityKeyStore()
+InMemoryIdentityKeyStore::InMemoryIdentityKeyStore(Unserializer uns)
 {
+	unsigned int n = uns.readInt32();
+	while (n--) {
+		uint64_t key = uns.readInt64();
+		IdentityKey val(uns.readString());
+		trustedKeys[key] = val;
+	}
+
+	localRegistrationId = uns.readInt64();
+
+	IdentityKey publicKey;
+	DjbECPrivateKey privateKey;
+
+	std::string pubkey = uns.readString();
+	if (pubkey.size())
+		publicKey = IdentityKey(pubkey);
+
+	std::string privkey = uns.readString();
+	if (privkey.size())
+		privateKey = DjbECPrivateKey(privkey);
+
+	identityKeyPair = IdentityKeyPair(publicKey, privateKey);
 }
 
 bool InMemoryIdentityKeyStore::isTrustedIdentity(uint64_t recipientId, const IdentityKey &identityKey)

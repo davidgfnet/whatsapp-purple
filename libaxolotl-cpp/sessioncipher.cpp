@@ -123,7 +123,6 @@ ByteArray SessionCipher::decrypt(std::shared_ptr<PreKeyWhisperMessage> ciphertex
 ByteArray SessionCipher::decrypt(std::shared_ptr<WhisperMessage> ciphertext)
 {
     if (!sessionStore->containsSession(recipientId, deviceId)) {
-        //qDebug() << "No session for" << recipientId << deviceId;
         throw NoSessionException("No session for: " + std::to_string(recipientId) + "," + std::to_string(deviceId));
     }
 

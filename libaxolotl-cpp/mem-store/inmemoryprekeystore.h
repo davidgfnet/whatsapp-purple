@@ -2,6 +2,7 @@
 #define INMEMORYPREKEYSTORE_H
 
 #include "state/prekeystore.h"
+#include "serializer.h"
 
 #include <map>
 #include "byteutil.h"
@@ -9,7 +10,9 @@
 class InMemoryPreKeyStore : public PreKeyStore
 {
 public:
-    InMemoryPreKeyStore();
+    InMemoryPreKeyStore() {}
+	InMemoryPreKeyStore(Unserializer uns);
+
     PreKeyRecord loadPreKey(uint64_t preKeyId);
     void         storePreKey(uint64_t preKeyId, const PreKeyRecord &record);
     bool         containsPreKey(uint64_t preKeyId);

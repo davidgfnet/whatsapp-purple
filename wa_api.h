@@ -38,7 +38,8 @@ typedef struct {
 	void waAPI_input(void *waAPI, const void *buffer, int bytesrecv);
 	int waAPI_hasoutdata(void *waAPI);
 	void waAPI_login(void *waAPI, const char *ua);
-	void *waAPI_create(const char *username, const char *password, const char *nickname);
+	void *waAPI_create(std::string username, std::string password, std::string nickname, std::string axolotldb);
+	std::string waAPI_serializedb(void *waAPI);
 	void waAPI_delete(void *waAPI);
 	void waAPI_getmsgid(void *waAPI, char * msgid);
 	void waAPI_sendim(void *waAPI, const char *id, const char *who, const char *message);

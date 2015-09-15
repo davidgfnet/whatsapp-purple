@@ -2,9 +2,9 @@
 #include "whatsapp_api.h"
 #include "wa_connection.h"
 
-WhatsappConnectionAPI::WhatsappConnectionAPI(std::string phone, std::string password, std::string nick)
+WhatsappConnectionAPI::WhatsappConnectionAPI(std::string phone, std::string password, std::string nick, std::string axolotldb)
 {
-	connection = new WhatsappConnection(phone, password, nick);
+	connection = new WhatsappConnection(phone, password, nick, axolotldb);
 }
 
 WhatsappConnectionAPI::~WhatsappConnectionAPI()
@@ -217,5 +217,10 @@ void WhatsappConnectionAPI::queryPrivacy(std::string & a, std::string & b, std::
 int WhatsappConnectionAPI::getErrors(std::string & reason) {
 	return (int)connection->getErrors(reason);
 }
+
+std::string WhatsappConnectionAPI::saveAxolotlDatabase() {
+	return connection->saveAxolotlDatabase();
+}
+
 
 

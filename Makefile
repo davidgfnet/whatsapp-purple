@@ -22,7 +22,7 @@ INCLUDES = -I./libaxolotl-cpp/ecc \
            -I./libaxolotl-cpp/groups/state \
            -I./libaxolotl-cpp/kdf \
            -I./libaxolotl-cpp/ratchet \
-           -I./libaxolotl-cpp/mem-store \
+           -I./libaxolotl-cpp/sqli-store \
            -I./libaxolotl-cpp
 
 C_SRCS = tinfl.c imgutil.c 

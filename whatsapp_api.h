@@ -15,8 +15,10 @@ private:
 	WhatsappConnection * connection;
 
 public:
-	WhatsappConnectionAPI(std::string phone, std::string password, std::string nick);
+	WhatsappConnectionAPI(std::string phone, std::string password, std::string nick, std::string axolotldb = "");
 	~WhatsappConnectionAPI();
+
+	std::string saveAxolotlDatabase();
 
 	// Login/Auth functions
 	void doLogin(std::string);

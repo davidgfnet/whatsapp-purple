@@ -11,6 +11,7 @@
 #include <glib.h>
 #include <vector>
 #include <string.h>
+#include <string>
 #include <iostream>
 #include <map>
 #include <stdio.h>
@@ -165,10 +166,13 @@ void waAPI_login(void *waAPI, const char *ua)
 	((WhatsappConnectionAPI *) waAPI)->doLogin(std::string(ua));
 }
 
-void *waAPI_create(const char *username, const char *password, const char *nickname)
+void *waAPI_create(std::string username, std::string password, std::string nickname, std::string axolotldb)
 {
-	WhatsappConnectionAPI *api = new WhatsappConnectionAPI(std::string(username), std::string(password), std::string(nickname));
-	return api;
+	return new WhatsappConnectionAPI(username, password, nickname, axolotldb);
+}
+
+std::string waAPI_serializedb(void *waAPI) {
+	return ((WhatsappConnectionAPI *) waAPI)->saveAxolotlDatabase();
 }
 
 void waAPI_delete(void *waAPI)

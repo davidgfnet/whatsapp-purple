@@ -5,8 +5,16 @@
 #include <iostream>
 #include <vector>
 
-InMemorySessionStore::InMemorySessionStore()
+InMemorySessionStore::InMemorySessionStore(Unserializer uns)
 {
+	unsigned int n = uns.readInt32();
+	while (n--) {
+		uint64_t recipientId = uns.readInt64();
+		int deviceId = uns.readInt32();
+
+		SessionsKeyPair key(recipientId, deviceId);
+		sessions[key] = uns.readString();
+	}
 }
 
 SessionRecord *InMemorySessionStore::loadSession(uint64_t recipientId, int deviceId)

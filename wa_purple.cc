@@ -36,6 +36,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
+#include <string>
+#include <fstream>
 #include <math.h>
 
 #include "account.h"
@@ -828,7 +830,11 @@ static void waprpl_login(PurpleAccount * acct)
 	const char *password = purple_account_get_password(acct);
 	const char *nickname = purple_account_get_string(acct, "nick", "");
 
-	wconn->waAPI = waAPI_create(username, password, nickname);
+	//std::ifstream ifs("/home/david/watest.db");
+	//std::string content( (std::istreambuf_iterator<char>(ifs) ),
+    //                     (std::istreambuf_iterator<char>()    ) );
+
+	wconn->waAPI = waAPI_create(username, password, nickname, "/home/david/watest.db");
 	purple_connection_set_protocol_data(gc, wconn);
 
 	const char *hostname = purple_account_get_string(acct, "server", "");
@@ -866,8 +872,12 @@ static void waprpl_close(PurpleConnection * gc)
 	if (wconn->fd >= 0)
 		sys_close(wconn->fd);
 
-	if (wconn->waAPI)
+	if (wconn->waAPI) {
+		//std::ofstream ofs("/home/david/watest.db");
+		//ofs << waAPI_serializedb(wconn->waAPI);
+
 		waAPI_delete(wconn->waAPI);
+	}
 	wconn->waAPI = NULL;
 
 	g_free(wconn);

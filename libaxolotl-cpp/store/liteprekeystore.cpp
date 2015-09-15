@@ -16,6 +16,7 @@ void LitePreKeyStore::clear()
 PreKeyRecord LitePreKeyStore::loadPreKey(uint64_t preKeyId)
 {
 	sqlite::query q(_db, "SELECT record FROM prekeys WHERE prekey_id = " + std::to_string(preKeyId) + ";");
+	std::cerr << "Querying pre key id " << preKeyId << std::endl;
 
 	boost::shared_ptr<sqlite::result> result = q.get_result();
 
@@ -41,16 +42,14 @@ void LitePreKeyStore::storePreKey(uint64_t preKeyId, const PreKeyRecord &record)
 
 bool LitePreKeyStore::containsPreKey(uint64_t preKeyId)
 {
-	sqlite::query q(_db, "SELECT record FROM prekeys WHERE prekey_id=?;");
-	q % (int64_t)preKeyId;
-	q();
+	sqlite::query q(_db, "SELECT record FROM prekeys WHERE prekey_id= "+ std::to_string(preKeyId) +";");
 	return q.get_result()->next_row();
 }
 
 void LitePreKeyStore::removePreKey(uint64_t preKeyId)
 {
-	sqlite::query q(_db, "DELETE FROM prekeys WHERE prekey_id=?;");
-	q % (int64_t)preKeyId;
+	std::cerr << "DELETE pre key id " << preKeyId << std::endl;
+	sqlite::query q(_db, "DELETE FROM prekeys WHERE prekey_id = "+ std::to_string(preKeyId) +";");
 	q();
 }
 

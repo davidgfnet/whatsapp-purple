@@ -108,13 +108,13 @@ std::shared_ptr<CiphertextMessage> SessionCipher::encrypt(const ByteArray &padde
 ByteArray SessionCipher::decrypt(std::shared_ptr<PreKeyWhisperMessage> ciphertext)
 {
     SessionRecord    *sessionRecord    = sessionStore->loadSession(recipientId, deviceId);
-    uint64_t        unsignedPreKeyId = sessionBuilder.process(sessionRecord, ciphertext);
-    ByteArray        plaintext        = decrypt(sessionRecord, ciphertext->getWhisperMessage());
+    uint64_t         unsignedPreKeyId  = sessionBuilder.process(sessionRecord, ciphertext);
+    ByteArray        plaintext         = decrypt(sessionRecord, ciphertext->getWhisperMessage());
 
     sessionStore->storeSession(recipientId, deviceId, sessionRecord);
 
     if (unsignedPreKeyId != -1) {
-        preKeyStore->removePreKey(unsignedPreKeyId);
+        //preKeyStore->removePreKey(unsignedPreKeyId);
     }
 
     return plaintext;

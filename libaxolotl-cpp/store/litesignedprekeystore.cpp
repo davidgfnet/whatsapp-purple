@@ -16,7 +16,7 @@ void LiteSignedPreKeyStore::clear()
 SignedPreKeyRecord LiteSignedPreKeyStore::loadSignedPreKey(uint64_t signedPreKeyId)
 {
 	sqlite::query q(_db, "SELECT record FROM signed_prekeys WHERE prekey_id = " + std::to_string(signedPreKeyId) + " ;");
-	std::cerr << "Querying pre key id " << signedPreKeyId << std::endl;
+	std::cerr << "Querying signed pre key id " << signedPreKeyId << std::endl;
 
 	boost::shared_ptr<sqlite::result> result = q.get_result();
 
@@ -69,6 +69,7 @@ bool LiteSignedPreKeyStore::containsSignedPreKey(uint64_t signedPreKeyId)
 
 void LiteSignedPreKeyStore::removeSignedPreKey(uint64_t signedPreKeyId)
 {
+	std::cerr << "Deleting signed pre key id " << signedPreKeyId << std::endl;
 	sqlite::query q(_db, "DELETE FROM signed_prekeys WHERE prekey_id=?;");
 	q % (int64_t)signedPreKeyId;
 	q();

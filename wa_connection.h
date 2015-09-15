@@ -5,12 +5,13 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <memory>
 #include <time.h>
 #include <stdint.h>
 #include "wacommon.h"
 #include "databuffer.h"
 #include "contacts.h"
-#include "liteaxolotlstore.h"
+#include "inmemoryaxolotlstore.h"
 
 class SessionCipher;
 
@@ -112,7 +113,7 @@ private:
 	/* 5/6 for image upload */
 
 	/* New Axolotl stuff */
-	std::shared_ptr<LiteAxolotlStore> axolotlStore;
+	std::shared_ptr<InMemoryAxolotlStore> axolotlStore;
 	std::map<uint64_t, SessionCipher*> cipherHash;
 
 	void sendEncrypt(bool);
@@ -121,6 +122,8 @@ private:
 	bool parsePreKeyWhisperMessage(std::string, std::string, std::string, unsigned long long, Tree);
 	SessionCipher *getSessionCipher(uint64_t recepient);
 	void sendMessageRetry(const std::string &from, const std::string &msgid, unsigned long long t);
+
+	std::string saveAxolotlDatabase();
 
 	void receiveMessage(const Message & m);
 	void notifyPresence(std::string from, std::string presence, std::string last);

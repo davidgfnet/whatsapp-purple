@@ -114,7 +114,8 @@ WhatsappConnection::WhatsappConnection(std::string phonenum, std::string passwor
 	this->sendRead = true;
 	this->last_keepalive = 0;
 
-	this->axolotlStore.reset(new LiteAxolotlStore("/home/david/testwa.db"));
+	// Create in memory temp database!
+	this->axolotlStore.reset(new InMemoryAxolotlStore());
 
 	/* Trim password spaces */
 	while (password.size() > 0 and password[0] == ' ')
@@ -135,6 +136,12 @@ WhatsappConnection::~WhatsappConnection()
 	for (unsigned int i = 0; i < recv_messages.size(); i++) {
 		delete recv_messages[i];
 	}
+}
+
+std::string WhatsappConnection::saveAxolotlDatabase()
+{
+	// Serialize the SQLi database
+	
 }
 
 std::map < std::string, Group > WhatsappConnection::getGroups()
@@ -1282,7 +1289,6 @@ SessionCipher *WhatsappConnection::getSessionCipher(uint64_t recepient) {
 std::string decode7bit(std::string s) {
 	if (s.size() && s[0] == '\n') {
 		s = s.substr(1); // Remove first \n
-		int len = 0;
 		do {
 			s = s.substr(1);
 		} while (s.size() && (s[0] & 0x80));

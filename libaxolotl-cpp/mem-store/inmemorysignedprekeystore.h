@@ -2,6 +2,7 @@
 #define INMEMORYSIGNEDPREKEYSTORE_H
 
 #include "state/signedprekeystore.h"
+#include "serializer.h"
 
 #include <map>
 #include <vector>
@@ -10,7 +11,9 @@
 class InMemorySignedPreKeyStore : public SignedPreKeyStore
 {
 public:
-    InMemorySignedPreKeyStore();
+    InMemorySignedPreKeyStore() {}
+    InMemorySignedPreKeyStore(Unserializer uns);
+
     SignedPreKeyRecord loadSignedPreKey(uint64_t signedPreKeyId);
     std::vector<SignedPreKeyRecord> loadSignedPreKeys();
     void storeSignedPreKey(uint64_t signedPreKeyId, const SignedPreKeyRecord &record);

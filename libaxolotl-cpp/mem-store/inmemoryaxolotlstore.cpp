@@ -110,5 +110,13 @@ std::string InMemoryAxolotlStore::serialize() const {
 		signedPreKeyStore.serialize();
 }
 
+InMemoryAxolotlStore::InMemoryAxolotlStore(std::string data) {
+	Unserializer uns(data);
+	identityKeyStore = InMemoryIdentityKeyStore(uns);
+	preKeyStore = InMemoryPreKeyStore(uns);
+	sessionStore = InMemorySessionStore(uns);
+	signedPreKeyStore = InMemorySignedPreKeyStore(uns);
+}
+
 
 

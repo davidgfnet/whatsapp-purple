@@ -3,6 +3,7 @@
 
 #include "state/identitykeystore.h"
 #include "identitykeypair.h"
+#include "serializer.h"
 #include "util/keyhelper.h"
 
 #include <map>
@@ -10,7 +11,8 @@
 class InMemoryIdentityKeyStore : public IdentityKeyStore
 {
 public:
-	InMemoryIdentityKeyStore();
+	InMemoryIdentityKeyStore() {}
+	InMemoryIdentityKeyStore(Unserializer uns);
 
     IdentityKeyPair getIdentityKeyPair() { return identityKeyPair; }
 

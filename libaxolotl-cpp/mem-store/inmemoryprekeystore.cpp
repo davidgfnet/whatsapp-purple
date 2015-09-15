@@ -2,31 +2,36 @@
 #include "serializer.h"
 #include "whisperexception.h"
 
-InMemoryPreKeyStore::InMemoryPreKeyStore()
+InMemoryPreKeyStore::InMemoryPreKeyStore(Unserializer uns)
 {
+	unsigned int n = uns.readInt32();
+	while (n--) {
+		uint64_t key = uns.readInt64();
+		store[key] = uns.readString();
+	}
 }
 
 PreKeyRecord InMemoryPreKeyStore::loadPreKey(uint64_t preKeyId)
 {
-    if (store.find(preKeyId) == store.end()) {
-        throw WhisperException("No such prekeyRecord!");
-    }
-    return PreKeyRecord(store.at(preKeyId));
+	if (store.find(preKeyId) == store.end()) {
+		throw WhisperException("No such prekeyRecord!");
+	}
+	return PreKeyRecord(store.at(preKeyId));
 }
 
 void InMemoryPreKeyStore::storePreKey(uint64_t preKeyId, const PreKeyRecord &record)
 {
-    store[preKeyId] = record.serialize();
+	store[preKeyId] = record.serialize();
 }
 
 bool InMemoryPreKeyStore::containsPreKey(uint64_t preKeyId)
 {
-    return store.find(preKeyId) != store.end();
+	return store.find(preKeyId) != store.end();
 }
 
 void InMemoryPreKeyStore::removePreKey(uint64_t preKeyId)
 {
-    store.erase(preKeyId);
+	store.erase(preKeyId);
 }
 
 std::string InMemoryPreKeyStore::serialize() const

@@ -11,7 +11,7 @@
 #include "wacommon.h"
 #include "databuffer.h"
 #include "contacts.h"
-#include "inmemoryaxolotlstore.h"
+#include "liteaxolotlstore.h"
 
 class SessionCipher;
 
@@ -113,7 +113,7 @@ private:
 	/* 5/6 for image upload */
 
 	/* New Axolotl stuff */
-	std::shared_ptr<InMemoryAxolotlStore> axolotlStore;
+	std::shared_ptr<LiteAxolotlStore> axolotlStore;
 	std::map<uint64_t, SessionCipher*> cipherHash;
 
 	void sendEncrypt(bool);
@@ -122,8 +122,6 @@ private:
 	bool parsePreKeyWhisperMessage(std::string, std::string, std::string, unsigned long long, Tree);
 	SessionCipher *getSessionCipher(uint64_t recepient);
 	void sendMessageRetry(const std::string &from, const std::string &msgid, unsigned long long t);
-
-	std::string saveAxolotlDatabase();
 
 	void receiveMessage(const Message & m);
 	void notifyPresence(std::string from, std::string presence, std::string last);
@@ -159,8 +157,10 @@ private:
 public:
 	bool read_tree(DataBuffer * data, Tree & tt);
 
-	WhatsappConnection(std::string phone, std::string password, std::string nick);
+	WhatsappConnection(std::string phone, std::string password, std::string nick, std::string axolotldb = "");
 	~WhatsappConnection();
+
+	std::string saveAxolotlDatabase();
 
 	std::string getPhone() const { return phone; }
 

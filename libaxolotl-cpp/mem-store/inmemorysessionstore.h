@@ -3,6 +3,7 @@
 
 #include "state/sessionstore.h"
 #include "state/sessionrecord.h"
+#include "serializer.h"
 
 #include <utility>
 #include <map>
@@ -14,7 +15,9 @@ typedef std::pair<uint64_t, int> SessionsKeyPair;
 class InMemorySessionStore : public SessionStore
 {
 public:
-	InMemorySessionStore();
+	InMemorySessionStore() {}
+	InMemorySessionStore(Unserializer uns);
+
 	SessionRecord *loadSession(uint64_t recipientId, int deviceId);
 	std::vector<int> getSubDeviceSessions(uint64_t recipientId);
 	void storeSession(uint64_t recipientId, int deviceId, SessionRecord *record);

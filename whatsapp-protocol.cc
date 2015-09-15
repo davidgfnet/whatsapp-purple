@@ -94,7 +94,7 @@ int WhatsappConnection::sendImage(std::string mid, std::string to, int w, int h,
 	return iqid;
 }
 
-WhatsappConnection::WhatsappConnection(std::string phonenum, std::string password, std::string nickname)
+WhatsappConnection::WhatsappConnection(std::string phonenum, std::string password, std::string nickname, std::string axolotldb)
 {
 	this->phone = phonenum;
 	this->password = password;
@@ -115,7 +115,10 @@ WhatsappConnection::WhatsappConnection(std::string phonenum, std::string passwor
 	this->last_keepalive = 0;
 
 	// Create in memory temp database!
-	this->axolotlStore.reset(new InMemoryAxolotlStore());
+	//if (axolotldb.size())
+		this->axolotlStore.reset(new LiteAxolotlStore(axolotldb));
+	//else
+		//this->axolotlStore.reset(new InMemoryAxolotlStore());
 
 	/* Trim password spaces */
 	while (password.size() > 0 and password[0] == ' ')
@@ -140,8 +143,9 @@ WhatsappConnection::~WhatsappConnection()
 
 std::string WhatsappConnection::saveAxolotlDatabase()
 {
-	// Serialize the SQLi database
-	
+	// Serialize the database
+	//return axolotlStore->serialize();
+	return "";
 }
 
 std::map < std::string, Group > WhatsappConnection::getGroups()

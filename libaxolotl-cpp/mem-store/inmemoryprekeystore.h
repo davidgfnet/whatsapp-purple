@@ -16,6 +16,8 @@ public:
     void         removePreKey(uint64_t preKeyId);
     int          countPreKeys() { return store.size(); }
 
+	std::string serialize() const;
+
 private:
     std::map<uint64_t, ByteArray> store;
 };

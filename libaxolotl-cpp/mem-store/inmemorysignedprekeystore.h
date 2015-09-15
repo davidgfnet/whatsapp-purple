@@ -17,6 +17,8 @@ public:
     bool containsSignedPreKey(uint64_t signedPreKeyId);
     void removeSignedPreKey(uint64_t signedPreKeyId);
 
+	std::string serialize() const;
+
 private:
     std::map<uint64_t, ByteArray> store;
 };

@@ -40,6 +40,7 @@ CPP_FILES = identitykey.cpp \
 			mem-store/inmemoryprekeystore.cpp \
 			mem-store/inmemorysignedprekeystore.cpp \
 			mem-store/inmemorysessionstore.cpp \
+			mem-store/serializer.cpp \
 			state/LocalStorageProtocol.pb.cc \
 			protocol/WhisperTextProtocol.pb.cc
 

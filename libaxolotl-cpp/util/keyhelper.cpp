@@ -68,7 +68,7 @@ IdentityKeyPair KeyHelper::generateIdentityKeyPair()
 
 uint64_t KeyHelper::generateRegistrationId()
 {
-	return getRandomFFFFFFFF();
+	return getRandomFFFFFFFF() & 0x7FFFFFFF;
 }
 
 std::vector<PreKeyRecord> KeyHelper::generatePreKeys(uint64_t start, unsigned int count)

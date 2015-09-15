@@ -116,11 +116,11 @@ private:
 	std::map<uint64_t, SessionCipher*> cipherHash;
 
 	void sendEncrypt(bool);
-	bool receiveCipheredMessage(Tree, Tree);
-	bool parseWhisperMessage(Tree, Tree);
-	bool parsePreKeyWhisperMessage(Tree, Tree);
+	bool receiveCipheredMessage(std::string, std::string, std::string, unsigned long long, Tree);
+	bool parseWhisperMessage(std::string, std::string, std::string, unsigned long long, Tree);
+	bool parsePreKeyWhisperMessage(std::string, std::string, std::string, unsigned long long, Tree);
 	SessionCipher *getSessionCipher(uint64_t recepient);
-	void sendMessageRetry(const std::string &from, const std::string &msgid, const std::string &t);
+	void sendMessageRetry(const std::string &from, const std::string &msgid, unsigned long long t);
 
 	void receiveMessage(const Message & m);
 	void notifyPresence(std::string from, std::string presence);

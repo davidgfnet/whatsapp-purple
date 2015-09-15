@@ -51,7 +51,7 @@ std::vector<int> LiteSessionStore::getSubDeviceSessions(uint64_t recipientId)
 
 void LiteSessionStore::storeSession(uint64_t recipientId, int deviceId, SessionRecord *record)
 {
-	sqlite::query q(_db, "INSERT INTO sessions VALUES (NULL, ?, ?, ?, ?);");
+	sqlite::query q(_db, "INSERT OR REPLACE INTO sessions (`recipient_id`, `device_id`, `record`, `timestamp`) VALUES (?, ?, ?, ?);");
 	q % (int64_t)recipientId % deviceId
 		% string_to_barray(record->serialize()) % 0;
 	q();

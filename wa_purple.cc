@@ -109,7 +109,6 @@ typedef struct {
 static void waprpl_check_output(PurpleConnection * gc);
 static void waprpl_process_incoming_events(PurpleConnection * gc);
 static void waprpl_insert_contacts(PurpleConnection * gc);
-char *last_seen_text(unsigned long long t);
 static void waprpl_chat_join(PurpleConnection * gc, GHashTable * data);
 void check_ssl_requests(PurpleAccount * acct);
 void waprpl_ssl_cerr_cb(PurpleSslConnection * gsc, PurpleSslErrorType error, gpointer data);
@@ -140,7 +139,12 @@ static void waprpl_tooltip_text(PurpleBuddy * buddy, PurpleNotifyUserInfo * info
 	unsigned long long lseen = waAPI_getlastseen(wconn->waAPI, purple_buddy_get_name(buddy));
 	char * statusmsg = waAPI_getuserstatusstring(wconn->waAPI, purple_buddy_get_name(buddy));
 	purple_notify_user_info_add_pair_plaintext(info, "Status", status);
-	purple_notify_user_info_add_pair_plaintext(info, "Last seen on WhatsApp", purple_str_seconds_to_string(lseen));
+	if (lseen == 0)
+		purple_notify_user_info_add_pair_plaintext(info, "Last seen on WhatsApp", "Now");
+	else if (lseen == ~0)
+		purple_notify_user_info_add_pair_plaintext(info, "Last seen on WhatsApp", "N/A");
+	else
+		purple_notify_user_info_add_pair_plaintext(info, "Last seen on WhatsApp", purple_str_seconds_to_string(time(0) - lseen));
 	purple_notify_user_info_add_pair_plaintext(info, "Status message", statusmsg);
 }
 

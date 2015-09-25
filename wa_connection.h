@@ -108,10 +108,9 @@ private:
 	/* 5/6 for image upload */
 
 	void receiveMessage(const Message & m);
-	void notifyPresence(std::string from, std::string presence);
+	void notifyPresence(std::string from, std::string presence, std::string last);
 	void updatePrivacy();
 
-	void notifyLastSeen(std::string from, std::string seconds);
 	void addPreviewPicture(std::string from, std::string picture);
 	void addFullsizePicture(std::string from, std::string picture);
 	void sendResponse();

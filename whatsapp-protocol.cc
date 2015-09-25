@@ -407,14 +407,6 @@ bool WhatsappConnection::getSyncResult(std::string uid, std::vector<std::string>
 	return true;
 }
 
-void WhatsappConnection::getLast(std::string user)
-{
-	Tree req("iq", makeat({"id", getNextIqId(), "type", "get", "to", user, "xmlns", "jabber:iq:last"}));
-	req.addChild(Tree("query"));
-
-	outbuffer = outbuffer + serialize_tree(&req);
-}
-
 void WhatsappConnection::gotTyping(std::string who, std::string tstat)
 {
 	who = getusername(who);
@@ -539,7 +531,6 @@ void WhatsappConnection::contactsUpdate() {
 
 			this->subscribePresence(iter->first + "@" + whatsappserver);
 			this->queryPreview(iter->first + "@" + whatsappserver);
-			this->getLast(iter->first + "@" + whatsappserver);
 			qstatus = true;
 		}
 	}
@@ -1011,18 +1002,13 @@ void WhatsappConnection::processIncomingData()
 		} else if (tl.getTag() == "presence") {
 			/* Receives the presence of the user, for v14 type is optional */
 			if (tl.hasAttribute("from")) {
-				this->notifyPresence(tl["from"], tl["type"]);
+				this->notifyPresence(tl["from"], tl["type"], tl["last"]);
 			}
 		} else if (tl.getTag() == "iq") {
 			/* Receives the presence of the user */
 
 			if (tl.hasAttributeValue("type", "result") and tl.hasAttribute("from")) {
 				Tree t;
-				if (tl.getChild("query", t)) {
-					if (t.hasAttribute("seconds")) {
-						this->notifyLastSeen(tl["from"], t["seconds"]);
-					}
-				}
 				if (tl.getChild("picture", t)) {
 					if (t.hasAttributeValue("type", "preview"))
 						this->addPreviewPicture(tl["from"], t.getData());
@@ -1316,18 +1302,20 @@ void WhatsappConnection::receiveMessage(const Message & m)
 	this->addContacts(std::vector < std::string > ());
 }
 
-void WhatsappConnection::notifyLastSeen(std::string from, std::string seconds)
-{
-	from = getusername(from);
-	contacts[from].last_seen = std::stoull(seconds);
-}
-
-void WhatsappConnection::notifyPresence(std::string from, std::string status)
+void WhatsappConnection::notifyPresence(std::string from, std::string status, std::string last)
 {
 	if (status == "")
 		status = "available";
+
 	from = getusername(from);
 	contacts[from].presence = status;
+	if (last == "")
+		contacts[from].last_seen = 0;  // Active now
+	else if (last != "deny" and last != "none")
+		contacts[from].last_seen = std::stoull(last);
+	else
+		contacts[from].last_seen = ~0;
+
 	user_changes.push_back(from);
 }
 
@@ -1482,9 +1470,6 @@ std::string WhatsappConnection::getuserstatusstring(const std::string & who)
 
 unsigned long long WhatsappConnection::getlastseen(const std::string & who)
 {
-	/* Schedule a last seen update, just in case */
-	this->getLast(std::string(who) + "@" + whatsappserver);
-
 	if (contacts.find(who) != contacts.end()) {
 		return contacts[who].last_seen;
 	}

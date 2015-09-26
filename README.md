@@ -45,7 +45,7 @@ If you want to register a new WhatsApp account, you can use tools like yowsup
 or WART:
 
 * https://github.com/tgalal/yowsup
-* https://github.com/shirioko/WART
+* https://github.com/mgp25/WART
 
 Please, do not contact me by email for this kind of issues, I won't answer your
 questions. For developing matters you can open an issue, create a pull request

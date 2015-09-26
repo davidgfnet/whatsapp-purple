@@ -1311,7 +1311,7 @@ void WhatsappConnection::notifyPresence(std::string from, std::string status, st
 	contacts[from].presence = status;
 	if (last == "")
 		contacts[from].last_seen = 0;  // Active now
-	else if (last != "deny" and last != "none")
+	else if (last != "deny" and last != "none" and last != "error")
 		contacts[from].last_seen = std::stoull(last);
 	else
 		contacts[from].last_seen = ~0;

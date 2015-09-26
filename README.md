@@ -29,6 +29,10 @@ Windows.
 FAQ
 ---
 
+### I want to be updated on news about this plugin
+
+If you are a telegram user, just join the whatsapp_purple channel (https://telegram.me/whatsapp_purple)
+
 ### How do I get my user name and password?
 
 Your user name is your phone number (including the country code but without any

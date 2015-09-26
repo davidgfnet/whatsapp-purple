@@ -641,8 +641,8 @@ static void waprpl_process_incoming_events(PurpleConnection * gc)
 		case 1: {
 			purple_debug_info(WHATSAPP_ID, "Got image from %s: %s\n", m.who, m.message);
 			int imgid = purple_imgstore_add_with_id(g_memdup(m.image, m.imagelen), m.imagelen, NULL);
-			char *msg = g_strdup_printf("<a href=\"%s\"><img id=\"%u\"></a><br/><a href=\"%s\">%s</a>",
-				m.url, imgid, m.url, m.url);
+			char *msg = g_strdup_printf("<a href=\"%s\"><img id=\"%u\"></a><br/><a href=\"%s\">%s</a><br />%s",
+				m.url, imgid, m.url, m.url, m.caption);
 			conv_add_message(gc, m.who, msg, m.author, m.t);
 			g_free(msg);
 			} break;
@@ -666,7 +666,7 @@ static void waprpl_process_incoming_events(PurpleConnection * gc)
 			} break;
 		case 4: {
 			purple_debug_info(WHATSAPP_ID, "Got chat video from %s: %s\n", m.who, m.url);
-			char *msg = g_strdup_printf("<a href=\"%s\">%s</a>", m.url, m.url);
+			char *msg = g_strdup_printf("<a href=\"%s\">%s</a><br />%s", m.url, m.url, m.caption);
 			conv_add_message(gc, m.who, msg, m.author, m.t);
 			g_free(msg);
 			} break;

@@ -25,13 +25,11 @@ Message::Message(const WhatsappConnection * wc, const std::string from, const un
 }
 
 MediaMessage::MediaMessage(const WhatsappConnection * wc, const std::string from, const unsigned long long time,
-	const std::string id, const std::string author, const std::string url, const std::string ip,
-	const std::string hash, const std::string filetype)
-: Message(wc, from, time, id, author) {
-	this->url = url;
-	this->hash = hash;
-	this->filetype = filetype;
-	this->ip = ip;
+	const std::string id, const std::string author, const std::string url, const std::string caption, 
+	const std::string ip, const std::string hash, const std::string filetype)
+ : Message(wc, from, time, id, author),
+   url(url), caption(caption), hash(hash), filetype(filetype), ip(ip)
+{
 }
 
 ChatMessage::ChatMessage(const WhatsappConnection * wc, const std::string from, const unsigned long long time,
@@ -85,12 +83,11 @@ Message *CallMessage::copy() const
 }
 
 ImageMessage::ImageMessage(const WhatsappConnection * wc, const std::string from, const unsigned long long time, 
-	const std::string id, const std::string author, const std::string url, const std::string ip, const unsigned int width,
-	const unsigned int height, const unsigned int size, const std::string encoding, const std::string hash,
-	const std::string filetype, const std::string preview)
-	:MediaMessage(wc, from, time, id, author, url, ip, hash, filetype)
+	const std::string id, const std::string author, const std::string url, const std::string caption,
+	const std::string ip, const unsigned int width, const unsigned int height, const unsigned int size,
+	const std::string encoding, const std::string hash, const std::string filetype, const std::string preview)
+	:MediaMessage(wc, from, time, id, author, url, caption, ip, hash, filetype)
 {
-
 	this->width = width;
 	this->height = height;
 	this->size = size;
@@ -133,33 +130,33 @@ DataBuffer ImageMessage::serialize() const
 
 Message *ImageMessage::copy() const
 {
-	return new ImageMessage(wc, from, t, id, author, url, ip, width, height, size, encoding, hash, filetype, preview);
+	return new ImageMessage(wc, from, t, id, author, url, caption, ip, width, height, size, encoding, hash, filetype, preview);
 }
 
 
 SoundMessage::SoundMessage(const WhatsappConnection * wc, const std::string from, const unsigned long long time,
-	const std::string id, const std::string author, const std::string url, const std::string hash,
-	const std::string filetype)
-	:MediaMessage(wc, from, time, id, author, url, "", hash, filetype)
+	const std::string id, const std::string author, const std::string url, const std::string caption,
+	const std::string hash, const std::string filetype)
+	:MediaMessage(wc, from, time, id, author, url, caption, "", hash, filetype)
 {
 }
 
 Message * SoundMessage::copy() const
 {
-	return new SoundMessage(wc, from, t, id, author, url, hash, filetype);
+	return new SoundMessage(wc, from, t, id, author, url, caption, hash, filetype);
 }
 
 
 VideoMessage::VideoMessage(const WhatsappConnection * wc, const std::string from, const unsigned long long time,
-	const std::string id, const std::string author, const std::string url, const std::string hash,
+	const std::string id, const std::string author, const std::string url, const std::string caption, const std::string hash,
 	const std::string filetype)
-	:MediaMessage(wc, from, time, id, author, url, "", hash, filetype)
+	:MediaMessage(wc, from, time, id, author, url, caption, "", hash, filetype)
 {
 }
 
 Message * VideoMessage::copy() const
 {
-	return new VideoMessage(wc, from, t, id, author, url, hash, filetype);
+	return new VideoMessage(wc, from, t, id, author, url, caption, hash, filetype);
 }
 
 

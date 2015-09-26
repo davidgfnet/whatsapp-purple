@@ -697,7 +697,7 @@ void WhatsappConnection::updateFileUpload(std::string json)
 			break;
 		}
 	/* Send the message with the URL :) */
-	ImageMessage msg(this, to, time(NULL), mid, "author", url, ip, 
+	ImageMessage msg(this, to, time(NULL), mid, "author", url, "", ip, 
 		std::stoi(width), std::stoi(height), std::stoi(size), "encoding", 
 		filehash, mimetype, thumb);
 
@@ -963,15 +963,15 @@ void WhatsappConnection::processIncomingData()
 				if (tl.getChild("media", t)) {
 					if (t.hasAttributeValue("type", "image")) {
 						this->receiveMessage(ImageMessage(this, from, time, id, author, 
-							t["url"], t["ip"], std::stoi(t["width"]), std::stoi(t["height"]),
+							t["url"], t["caption"], t["ip"], std::stoi(t["width"]), std::stoi(t["height"]),
 							std::stoi(t["size"]), t["encoding"], t["filehash"], t["mimetype"],
 							t.getData()));
 					} else if (t.hasAttributeValue("type", "location")) {
 						this->receiveMessage(LocationMessage(this, from, time, id, author, str2dbl(t["latitude"]), str2dbl(t["longitude"]), t["name"], t.getData()));
 					} else if (t.hasAttributeValue("type", "audio")) {
-						this->receiveMessage(SoundMessage(this, from, time, id, author, t["url"], t["filehash"], t["mimetype"]));
+						this->receiveMessage(SoundMessage(this, from, time, id, author, t["url"], t["caption"], t["filehash"], t["mimetype"]));
 					} else if (t.hasAttributeValue("type", "video")) {
-						this->receiveMessage(VideoMessage(this, from, time, id, author, t["url"], t["filehash"], t["mimetype"]));
+						this->receiveMessage(VideoMessage(this, from, time, id, author, t["url"], t["caption"], t["filehash"], t["mimetype"]));
 					} else if (t.hasAttributeValue("type", "vcard")) {
 						Tree vc;
 						if (t.getChild("vcard", vc))

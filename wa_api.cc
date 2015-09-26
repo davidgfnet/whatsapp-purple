@@ -247,8 +247,10 @@ int waAPI_querymsg(void *waAPI, t_message * msg) {
 
 	if (msg->type == CHAT_MESSAGE)
 		msg->message = g_strdup(((ChatMessage*)m)->message.c_str());
-	if (msg->type == IMAGE_MESSAGE || msg->type == SOUND_MESSAGE || msg->type == VIDEO_MESSAGE)
+	if (msg->type == IMAGE_MESSAGE || msg->type == SOUND_MESSAGE || msg->type == VIDEO_MESSAGE) {
 		msg->url = g_strdup(((MediaMessage*)m)->url.c_str());
+		msg->caption = g_strdup(((MediaMessage*)m)->caption.c_str());
+	}
 	if (msg->type == IMAGE_MESSAGE) {
 		std::string r = (((ImageMessage*)m)->preview);
 		msg->image = (char*)g_memdup(r.c_str(), r.size());

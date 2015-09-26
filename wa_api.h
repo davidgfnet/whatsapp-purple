@@ -26,6 +26,7 @@ typedef struct {
 	char * image;
 	int imagelen;
 	char * url;
+	char * caption;
 
 	double lat, lng;
 } t_message;

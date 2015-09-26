@@ -73,16 +73,16 @@ public:
 class MediaMessage: public Message {
 public:
 	MediaMessage(const WhatsappConnection * wc, const std::string from, const unsigned long long time,
-		const std::string id, const std::string author, const std::string url, const std::string ip,
-		const std::string hash, const std::string filetype);
+		const std::string id, const std::string author, const std::string url, const std::string caption,
+		const std::string ip, const std::string hash, const std::string filetype);
 
-	std::string url, hash, filetype, ip;
+	std::string url, caption, hash, filetype, ip;
 };
 
 class ImageMessage: public MediaMessage {
 public:
 	ImageMessage(const WhatsappConnection * wc, const std::string from, const unsigned long long time,
-		const std::string id, const std::string author, const std::string url, const std::string ip,
+		const std::string id, const std::string author, const std::string url, const std::string caption, const std::string ip,
 		const unsigned int width, const unsigned int height, const unsigned int size, const std::string encoding,
 		const std::string hash,	const std::string filetype, const std::string preview);
 
@@ -98,8 +98,8 @@ public:
 class SoundMessage: public MediaMessage {
 public:
 	SoundMessage(const WhatsappConnection * wc, const std::string from, const unsigned long long time,
-		const std::string id, const std::string author, const std::string url, const std::string hash,
-		const std::string filetype);
+		const std::string id, const std::string author, const std::string url, const std::string caption,
+		const std::string hash, const std::string filetype);
 
 	int type() const { return SOUND_MESSAGE; }
 	Message *copy() const;
@@ -108,8 +108,8 @@ public:
 class VideoMessage:public MediaMessage {
 public:
 	VideoMessage(const WhatsappConnection * wc, const std::string from, const unsigned long long time,
-		const std::string id, const std::string author, const std::string url, const std::string hash,
-		const std::string filetype);
+		const std::string id, const std::string author, const std::string url, const std::string caption,
+		const std::string hash, const std::string filetype);
 
 	int type() const { return VIDEO_MESSAGE; }
 	Message *copy() const;

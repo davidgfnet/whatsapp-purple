@@ -107,6 +107,7 @@ WhatsappConnection::WhatsappConnection(std::string phonenum, std::string passwor
 	this->sslstatus = 0;
 	this->frame_seq = 0;
 	this->sendRead = true;
+	this->last_keepalive = 0;
 
 	/* Trim password spaces */
 	while (password.size() > 0 and password[0] == ' ')
@@ -322,10 +323,10 @@ void WhatsappConnection::SSLCloseCallback()
 	sslstatus = 0;
 }
 
-bool WhatsappConnection::hasSSLConnection(std::string & host, int *port)
+bool WhatsappConnection::hasSSLConnection(std::string & host, int & port)
 {
 	host = "";
-	*port = 443;
+	port = 443;
 
 	if (sslstatus == 1)
 		for (unsigned int j = 0; j < uploadfile_queue.size(); j++)
@@ -1450,7 +1451,7 @@ Message* WhatsappConnection::getReceivedMessage()
 	return NULL;
 }
 
-int WhatsappConnection::getuserstatus(const std::string & who)
+int WhatsappConnection::getUserStatus(const std::string & who)
 {
 	if (contacts.find(who) != contacts.end()) {
 		if (contacts[who].presence == "available")
@@ -1460,7 +1461,7 @@ int WhatsappConnection::getuserstatus(const std::string & who)
 	return -1;
 }
 
-std::string WhatsappConnection::getuserstatusstring(const std::string & who)
+std::string WhatsappConnection::getUserStatusString(const std::string & who)
 {
 	if (contacts.find(who) != contacts.end()) {
 		return contacts[who].status;
@@ -1468,7 +1469,7 @@ std::string WhatsappConnection::getuserstatusstring(const std::string & who)
 	return "";
 }
 
-unsigned long long WhatsappConnection::getlastseen(const std::string & who)
+unsigned long long WhatsappConnection::getLastSeen(const std::string & who)
 {
 	if (contacts.find(who) != contacts.end()) {
 		return contacts[who].last_seen;

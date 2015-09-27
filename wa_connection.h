@@ -174,9 +174,9 @@ public:
 	bool query_typing(std::string & from, int &status);
 	void send_avatar(const std::string & avatar, const std::string & avatarp);
 	void account_info(unsigned long long &creation, unsigned long long &freeexp, std::string & status);
-	int getuserstatus(const std::string & who);
-	std::string getuserstatusstring(const std::string & who);
-	unsigned long long getlastseen(const std::string & who);
+	int getUserStatus(const std::string & who);
+	std::string getUserStatusString(const std::string & who);
+	unsigned long long getLastSeen(const std::string & who);
 
 	void manageParticipant(std::string group, std::string participant, std::string command);
 	void leaveGroup(std::string group);
@@ -202,7 +202,7 @@ public:
 	bool hasSSLDataToSend();
 	bool closeSSLConnection();
 	void SSLCloseCallback();
-	bool hasSSLConnection(std::string & host, int *port);
+	bool hasSSLConnection(std::string & host, int & port);
 	int uploadProgress(int &rid, int &bs);
 	int uploadComplete(int);
 

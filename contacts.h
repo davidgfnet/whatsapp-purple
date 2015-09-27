@@ -23,6 +23,24 @@ public:
 	std::string id, subject, owner, creator;
 	std::vector < Participant > participants;
 	unsigned long long creation_time, subject_time;
+
+	std::string getAdminList() const {
+		std::string ret;
+		for (auto p : participants)
+			if (p.type == "admin")
+				ret = "," + p.jid;
+		if (ret.size())
+			ret = ret.substr(1);
+		return ret;
+	}
+	std::string getParticipantsList() const {
+		std::string ret;
+		for (auto p : participants)
+			ret = "," + p.jid;
+		if (ret.size())
+			ret = ret.substr(1);
+		return ret;
+	}
 };
 
 class BList {

@@ -14,7 +14,7 @@ endif
 all: $(LIBNAME)
 
 C_SRCS = tinfl.c imgutil.c 
-CXX_SRCS = whatsapp-protocol.cc wa_api.cc wa_util.cc rc4.cc keygen.cc tree.cc databuffer.cc message.cc whatsapp_api.cc wa_purple.cc
+CXX_SRCS = whatsapp-protocol.cc wa_util.cc rc4.cc keygen.cc tree.cc databuffer.cc message.cc wa_purple.cc
 
 C_OBJS = $(C_SRCS:.c=.o)
 CXX_OBJS = $(CXX_SRCS:.cc=.o)

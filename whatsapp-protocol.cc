@@ -1007,7 +1007,6 @@ void WhatsappConnection::processIncomingData()
 			}
 		} else if (tl.getTag() == "iq") {
 			/* Receives the presence of the user */
-
 			if (tl.hasAttributeValue("type", "result") and tl.hasAttribute("from")) {
 				Tree t;
 				if (tl.getChild("picture", t)) {

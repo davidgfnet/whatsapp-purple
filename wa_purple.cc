@@ -515,7 +515,8 @@ static void query_icon(PurpleConnection *gc)
 	int len;
 
 	while (wconn->waAPI->query_icon(who, icon, hash)) {
-		purple_buddy_icons_set_for_user(acc, who.c_str(), g_strdup(icon.c_str()), icon.size(), hash.c_str());
+		purple_debug_info(WHATSAPP_ID, "Updating user profile picture for %s\n", who.c_str());
+		purple_buddy_icons_set_for_user(acc, who.c_str(), g_memdup(icon.c_str(), icon.size()), icon.size(), hash.c_str());
 	}
 }
 

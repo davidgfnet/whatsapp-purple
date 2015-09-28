@@ -1165,6 +1165,7 @@ static void waprpl_chat_join(PurpleConnection * gc, GHashTable * data)
 			subject = glist.at(id).subject;
 			owner   = glist.at(id).owner;
 			admins  = glist.at(id).getAdminList();
+			part    = glist.at(id).getParticipantsList();
 		}
 
 		/* Notify chat add */

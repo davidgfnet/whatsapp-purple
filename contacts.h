@@ -28,7 +28,7 @@ public:
 		std::string ret;
 		for (auto p : participants)
 			if (p.type == "admin")
-				ret = "," + p.jid;
+				ret = ret + "," + p.jid;
 		if (ret.size())
 			ret = ret.substr(1);
 		return ret;
@@ -36,7 +36,7 @@ public:
 	std::string getParticipantsList() const {
 		std::string ret;
 		for (auto p : participants)
-			ret = "," + p.jid;
+			ret = ret + "," + p.jid;
 		if (ret.size())
 			ret = ret.substr(1);
 		return ret;

@@ -909,7 +909,7 @@ static int waprpl_send_chat(PurpleConnection * gc, int id, const char *message, 
 	std::string msgid = wconn->waAPI->getMessageId();
 	purple_signal_emit(purple_connection_get_prpl(gc), "whatsapp-sending-message", gc, msgid.c_str(), chat_id, message);
 
-	wconn->waAPI->sendChat(msgid, chat_id, plain);
+	wconn->waAPI->sendGroupChat(msgid, chat_id, plain);
 	g_free(plain);
 
 	waprpl_check_output(gc);

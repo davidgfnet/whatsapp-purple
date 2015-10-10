@@ -120,6 +120,12 @@ WhatsappConnection::WhatsappConnection(std::string phonenum, std::string passwor
 	//else
 		//this->axolotlStore.reset(new InMemoryAxolotlStore());
 
+	// Create in memory temp database!
+	//if (axolotldb.size())
+		this->axolotlStore.reset(new LiteAxolotlStore(axolotldb));
+	//else
+		//this->axolotlStore.reset(new InMemoryAxolotlStore());
+
 	/* Trim password spaces */
 	while (password.size() > 0 and password[0] == ' ')
 		password = password.substr(1);
@@ -979,9 +985,7 @@ void WhatsappConnection::processIncomingData()
 				if (tl.getChild("enc", t)) {
 					if (!this->receiveCipheredMessage(from, id, author, time, t))
 						donotreply = true;
-
 					//this->receiveMessage(ChatMessage(this, from, time, id, "[Ciphered message received]", author));
-
 					//DataBuffer reply = generateResponse(tl["from"], "retry", tl["id"]);
 					//donotreply = true;
 					//outbuffer = outbuffer + reply;

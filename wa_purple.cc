@@ -36,6 +36,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
+#include <string>
+#include <fstream>
 #include <math.h>
 
 #include "account.h"
@@ -824,6 +826,10 @@ static void waprpl_login(PurpleAccount * acct)
 	const char *password = purple_account_get_password(acct);
 	const char *nickname = purple_account_get_string(acct, "nick", "");
 
+	//std::ifstream ifs("/home/david/watest.db");
+	//std::string content( (std::istreambuf_iterator<char>(ifs) ),
+    //                     (std::istreambuf_iterator<char>()    ) );
+
 	wconn->waAPI = new WhatsappConnection(username, password, nickname);
 	purple_connection_set_protocol_data(gc, wconn);
 
@@ -861,6 +867,9 @@ static void waprpl_close(PurpleConnection * gc)
 
 	if (wconn->fd >= 0)
 		sys_close(wconn->fd);
+
+	//std::ofstream ofs("/home/david/watest.db");
+	//ofs << waAPI_serializedb(wconn->waAPI);
 
 	if (wconn->waAPI)
 		delete wconn->waAPI;

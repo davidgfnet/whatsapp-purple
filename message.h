@@ -102,6 +102,7 @@ public:
 		const std::string hash, const std::string filetype);
 
 	int type() const { return SOUND_MESSAGE; }
+	DataBuffer serialize() const;
 	Message *copy() const;
 };
 

@@ -39,6 +39,7 @@ struct t_message_reception {
 class WhatsappConnection {
 	friend class ChatMessage;
 	friend class ImageMessage;
+	friend class SoundMessage;
 	friend class Message;
 	friend class CallMessage;
 	friend class VCardMessage;

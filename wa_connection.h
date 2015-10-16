@@ -116,7 +116,7 @@ private:
 	std::shared_ptr<LiteAxolotlStore> axolotlStore;
 	std::map<uint64_t, SessionCipher*> cipherHash;
 
-	void sendEncrypt(bool);
+	void sendEncrypt();
 	bool receiveCipheredMessage(std::string, std::string, std::string, unsigned long long, Tree);
 	bool parseWhisperMessage(std::string, std::string, std::string, unsigned long long, Tree);
 	bool parsePreKeyWhisperMessage(std::string, std::string, std::string, unsigned long long, Tree);

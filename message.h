@@ -26,9 +26,11 @@ public:
 	unsigned long long t;
 	std::string id;
 	WhatsappConnection *wc;
+	int retries;
+	bool axolotl;
 
+	virtual DataBuffer serialize() const = 0;
 	virtual int type() const = 0;
-
 	virtual Message *copy() const = 0;
 };
 
@@ -40,9 +42,17 @@ public:
 
 	int type() const { return CHAT_MESSAGE; }
 	std::string message;	/* Message */
+	std::string ctype;
+	std::string msg_body;
 
 	DataBuffer serialize() const;
 	Message *copy() const;
+};
+
+class CipheredChatMessage: public ChatMessage {
+public:
+	CipheredChatMessage(const WhatsappConnection * wc, const std::string from, const unsigned long long time,
+		const std::string id, const std::string message, const std::string author, const std::string ctype);
 };
 
 class VCardMessage: public Message {
@@ -103,6 +113,7 @@ public:
 
 	int type() const { return SOUND_MESSAGE; }
 	Message *copy() const;
+	DataBuffer serialize() const;
 };
 
 class VideoMessage:public MediaMessage {
@@ -113,6 +124,7 @@ public:
 
 	int type() const { return VIDEO_MESSAGE; }
 	Message *copy() const;
+	DataBuffer serialize() const;
 };
 
 class LocationMessage: public Message {
@@ -123,6 +135,7 @@ public:
 
 	int type() const { return LOCAT_MESSAGE; }
 	Message *copy() const;
+	DataBuffer serialize() const;
 
 	double latitude, longitude;	/* Location */
 	std::string name, preview;

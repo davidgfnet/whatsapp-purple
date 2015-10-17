@@ -22,6 +22,8 @@ Message::Message(const WhatsappConnection * wc, const std::string from, const un
 	this->wc = const_cast < WhatsappConnection * >(wc);
 	this->id = id;
 	this->author = getusername(author);
+	this->retries = 0;
+	this->axolotl = true;
 }
 
 MediaMessage::MediaMessage(const WhatsappConnection * wc, const std::string from, const unsigned long long time,
@@ -37,12 +39,16 @@ ChatMessage::ChatMessage(const WhatsappConnection * wc, const std::string from, 
 	Message(wc, from, time, id, author)
 {
 	this->message = message;
+	this->msg_body = "body";
 }
 
 DataBuffer ChatMessage::serialize() const
 {
-	Tree tbody("body");
+	Tree tbody(this->msg_body);
 	tbody.setData(this->message);
+	if (this->ctype != "") {
+		tbody.setAttributes(makeat({"type", this->ctype, "v", "2"}));
+	}
 
 	std::string stime = std::to_string(t);
 	std::map < std::string, std::string > attrs;
@@ -63,6 +69,14 @@ DataBuffer ChatMessage::serialize() const
 Message *ChatMessage::copy() const
 {
 	return new ChatMessage(wc, from, t, id, message, author);
+}
+
+CipheredChatMessage::CipheredChatMessage(const WhatsappConnection * wc, const std::string from, const unsigned long long time,
+	const std::string id, const std::string message, const std::string author, const std::string ctype) : 
+	ChatMessage(wc, from, time, id, message, author)
+{
+	this->msg_body = "enc";
+	this->ctype = ctype;
 }
 
 CallMessage::CallMessage(const WhatsappConnection * wc, const std::string from, const unsigned long long time,
@@ -205,4 +219,21 @@ DataBuffer VCardMessage::serialize() const
 
 	return wc->serialize_tree(&mes);
 }
+
+DataBuffer LocationMessage::serialize() const
+{
+	return DataBuffer();
+}
+
+DataBuffer VideoMessage::serialize() const
+{
+	return DataBuffer();
+}
+
+DataBuffer SoundMessage::serialize() const
+{
+	return DataBuffer();
+}
+
+
 

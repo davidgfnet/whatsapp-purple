@@ -14,9 +14,8 @@ void LiteSessionStore::clear()
 
 SessionRecord *LiteSessionStore::loadSession(uint64_t recipientId, int deviceId)
 {
-	sqlite::query q(_db, "SELECT record FROM sessions WHERE recipient_id=? AND device_id=?;");
-	q % (int64_t)recipientId % deviceId;
-	q();
+	sqlite::query q(_db, "SELECT record FROM sessions WHERE recipient_id=" + 
+		std::to_string(recipientId) + " AND device_id=" + std::to_string(deviceId) + ";");
 
 	boost::shared_ptr<sqlite::result> result = q.get_result();
 
@@ -28,7 +27,7 @@ SessionRecord *LiteSessionStore::loadSession(uint64_t recipientId, int deviceId)
 		return new SessionRecord(serialized);
 	}
 	else {
-		std::cerr << "New session session" << recipientId << deviceId << std::endl;
+		std::cerr << "New session " << recipientId << " " << deviceId << std::endl;
 		return new SessionRecord();
 	}
 }
@@ -59,9 +58,8 @@ void LiteSessionStore::storeSession(uint64_t recipientId, int deviceId, SessionR
 
 bool LiteSessionStore::containsSession(uint64_t recipientId, int deviceId)
 {
-	sqlite::query q(_db, "SELECT record FROM sessions WHERE recipient_id=? AND device_id=?;");
-	q % (int64_t)recipientId % deviceId;
-	q();
+	sqlite::query q(_db, "SELECT record FROM sessions WHERE recipient_id=" + 
+		std::to_string(recipientId) + " AND device_id=" + std::to_string(deviceId) + ";");
 
 	return q.get_result()->next_row();
 }

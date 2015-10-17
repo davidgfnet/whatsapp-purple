@@ -94,6 +94,7 @@ private:
 	/* Contacts & msg */
 	std::map < std::string, Contact > contacts;
 	std::vector < Message * >recv_messages;
+	std::vector < Message * >queue_messages;
 	std::vector < std::string > user_changes, user_icons, user_typing;
 
 	/* Reception queue */
@@ -122,6 +123,7 @@ private:
 	bool parsePreKeyWhisperMessage(std::string, std::string, std::string, unsigned long long, Tree);
 	SessionCipher *getSessionCipher(uint64_t recepient);
 	void sendMessageRetry(const std::string &from, const std::string &msgid, unsigned long long t);
+	void sendGetCipherKeysFromUser(std::string jid);
 
 	void receiveMessage(const Message & m);
 	void notifyPresence(std::string from, std::string presence, std::string last);
@@ -195,6 +197,7 @@ public:
 	int getUserStatus(const std::string & who);
 	std::string getUserStatusString(const std::string & who);
 	unsigned long long getLastSeen(const std::string & who);
+	void processMsgQueue();
 
 	void manageParticipant(std::string group, std::string participant, std::string command);
 	void leaveGroup(std::string group);

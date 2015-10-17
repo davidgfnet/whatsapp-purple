@@ -42,6 +42,10 @@ static int isbroadcast(const std::string user)
 	return (user.find("@broadcast") != std::string::npos);
 }
 
+static uint64_t JidAsInt(const std::string & s) {
+	return std::stoull(s.substr(0, s.find("@")));
+}
+
 DataBuffer WhatsappConnection::generateResponse(std::string from, std::string type, std::string id)
 {
 	if (type == "") { // Auto 
@@ -60,6 +64,51 @@ std::string WhatsappConnection::tohex(uint64_t n) {
 	while (cnum > 0) {
 		ret += hext[cnum&15];
 		cnum >>= 4;
+	}
+	return ret;
+}
+
+std::string decode7bit(std::string s) {
+	if (s.size() && s[0] == '\n') {
+		s = s.substr(1); // Remove first \n
+		while (s.size() && (s[0] & 0x80))
+			s = s.substr(1);
+		if (s.size())
+			s = s.substr(1);
+		if (s.size())
+			s = s.substr(0, s.size()-1);
+	}
+	return s;
+}
+std::string encode7bit(std::string s) {
+	std::string enclen;
+	int len = s.size();
+	while (len > 0) {
+		if (len >= 128)
+			enclen += (char)((len | 128) & 255);
+		else
+			enclen += (char)(len & 255);
+		len = len >> 7;
+	}
+	return "\n" + enclen + s + "\1";
+}
+
+#define adjustId(id) numToBytesZPadded(id, 3)
+static std::string numToBytesZPadded(uint64_t n, unsigned int padding) {
+	std::string ret;
+	while (n > 0) {
+		ret = std::string(1, (char)(n&255)) + ret;
+		n = n >> 8;
+	}
+	while (ret.size() < padding)
+		ret = '\0' + ret;
+	return ret;
+}
+static uint64_t num2int64(std::string s) {
+	uint64_t ret = 0;
+	for (auto c: s) {
+		ret = ret << 8;
+		ret |= (unsigned char)c;
 	}
 	return ret;
 }
@@ -295,6 +344,9 @@ bool WhatsappConnection::hasDataToSend()
 			notifyMyPresence();
 	}
 
+	// Retry messages in the queue
+	processMsgQueue();
+
 	return outbuffer.size() != 0;
 }
 
@@ -503,6 +555,55 @@ std::string WhatsappConnection::getMessageId()
 	return std::to_string(t) + "-" + std::to_string(mid);
 }
 
+
+void WhatsappConnection::processMsgQueue() {
+	for (auto msg: queue_messages) {
+		DataBuffer buf;
+		if (!msg->axolotl) {
+			buf = msg->serialize();
+			msg->retries = -1;
+		}
+		else {
+			uint64_t recepientId = JidAsInt(msg->from);
+			if (!axolotlStore->containsSession(recepientId, 1)) {
+				DEBUG_PRINT("Cannot find session " << recepientId);
+				// Schedule key retrieval
+				if (msg->retries == 0)
+					sendGetCipherKeysFromUser(msg->from);
+
+				msg->retries++;
+				if (msg->retries > 8)
+					msg->axolotl = false;
+			}
+			else {
+				DEBUG_PRINT("Session found!");
+				ChatMessage * txtmsg = dynamic_cast<ChatMessage*>(msg);
+				if (txtmsg) {
+					SessionCipher *cipher = getSessionCipher(recepientId);
+					std::shared_ptr<CiphertextMessage> ciphertext(cipher->encrypt(encode7bit(txtmsg->message).c_str()));
+
+					CipheredChatMessage cmsg(
+						this, msg->from, msg->t, msg->id, ciphertext->serialize(), txtmsg->author, 
+						ciphertext->getType() == CiphertextMessage::WHISPER_TYPE ? "msg" : "pkmsg"
+					);
+					buf = cmsg.serialize();
+					msg->retries = -1;
+				}
+			}
+		}
+
+		outbuffer = outbuffer + buf;
+	}
+
+	auto it = queue_messages.begin();
+	while (it != queue_messages.end()) {
+		if ((*it)->retries < 0)
+			it = queue_messages.erase(it);
+		else
+			it++;
+	}
+}
+
 void WhatsappConnection::sendVCard(const std::string msgid, const std::string to, const std::string name, const std::string vcard)
 {
 	VCardMessage msg(this, to, time(NULL), msgid, nickname, name, vcard);
@@ -513,10 +614,9 @@ void WhatsappConnection::sendVCard(const std::string msgid, const std::string to
 
 void WhatsappConnection::sendChat(std::string msgid, std::string to, std::string message)
 {
-	ChatMessage msg(this, to, time(NULL), msgid, message, nickname);
-	DataBuffer buf = msg.serialize();
+	queue_messages.push_back(new ChatMessage(this, to, time(NULL), msgid, message, nickname));
 
-	outbuffer = outbuffer + buf;
+	processMsgQueue();
 }
 
 void WhatsappConnection::sendGroupChat(std::string msgid, std::string to, std::string message)
@@ -1167,6 +1267,56 @@ void WhatsappConnection::processIncomingData()
 					}
 					sync_result[tl["id"]] = ct_in;
 				}
+
+				if (tl.getChild("list", t)) {
+					for (auto & tt: t.getChildren()) {
+						if (tt.getTag() == "user") {
+							// Read subchild
+							Tree tident, treg, tskey, tkey;
+							if (tt.getChild("identity", tident) and tt.getChild("registration", treg) and 
+								tt.getChild("skey", tskey) and tt.getChild("skey", tkey)) {
+
+								IdentityKey identityKey(DjbECPublicKey(tident.getData()));
+								uint64_t registrationId = num2int64(treg.getData());
+
+								Tree tid, tvalue, tsig;
+
+								tkey.getChild("id", tid);
+								tkey.getChild("value", tvalue);
+								uint64_t preKeyId = num2int64(tid.getData());
+								DjbECPublicKey preKeyPublic(tvalue.getData());
+
+								tskey.getChild("id", tid);
+								tskey.getChild("value", tvalue);
+								tskey.getChild("signature", tsig);
+								uint64_t skeyId = num2int64(tid.getData());
+								DjbECPublicKey signedKey(tvalue.getData());
+								std::string signedSignature = tsig.getData();
+
+								PreKeyBundle bundle(registrationId, 1, preKeyId, preKeyPublic, skeyId, signedKey, signedSignature, identityKey);
+								uint64_t recepientId = JidAsInt(tt["jid"]);
+								SessionBuilder *sessionBuilder = new SessionBuilder(axolotlStore, recepientId, 1);
+
+								try {
+									sessionBuilder->process(bundle);
+								}
+								catch (WhisperException &e) {
+									DEBUG_PRINT("Axolotl exception (parse user key list iq reply): "
+										<< e.errorType() << " " << e.errorMessage());
+									/*if (e.errorType() == "UntrustedIdentityException") {
+										axolotlStore->removeIdentity(recepientId);
+										pendingMessages[jid] = text;
+									}
+									else {
+										skipEncodingJids.append(jid);
+									Q_EMIT q_ptr->encryptionStatus(jid, false);*/
+								}
+
+							}
+						}
+					}
+				}
+
 			}
 			if (tl.hasAttribute("from") and tl.hasAttribute("id") and 
 				tl.hasAttributeValue("xmlns","urn:xmpp:ping")) {
@@ -1183,22 +1333,6 @@ bool WhatsappConnection::receiveCipheredMessage(std::string from, std::string id
 		return this->parsePreKeyWhisperMessage(from, id, author, time, enc);
 	else
 		return this->parseWhisperMessage(from, id, author, time, enc);
-}
-
-static uint64_t JidAsInt(const std::string & s) {
-	return std::stoull(s.substr(0, s.find("@")));
-}
-
-#define adjustId(id) numToBytesZPadded(id, 3)
-static std::string numToBytesZPadded(uint64_t n, unsigned int padding) {
-	std::string ret;
-	while (n > 0) {
-		ret = std::string(1, (char)(n&255)) + ret;
-		n = n >> 8;
-	}
-	while (ret.size() < padding)
-		ret = '\0' + ret;
-	return ret;
 }
 
 void WhatsappConnection::sendEncrypt()
@@ -1288,19 +1422,6 @@ SessionCipher *WhatsappConnection::getSessionCipher(uint64_t recepient) {
 	return cipherHash[recepient];
 }
 
-std::string decode7bit(std::string s) {
-	if (s.size() && s[0] == '\n') {
-		s = s.substr(1); // Remove first \n
-		do {
-			s = s.substr(1);
-		} while (s.size() && (s[0] & 0x80));
-
-		if (s.size())
-			s = s.substr(0, s.size()-1);
-	}
-	return s;
-}
-
 bool WhatsappConnection::parsePreKeyWhisperMessage(std::string jid, std::string id,
 	std::string author, unsigned long long time, Tree enc) {
 
@@ -1341,6 +1462,16 @@ bool WhatsappConnection::parseWhisperMessage(std::string jid, std::string id,
 		return false;
 	}
 	return true;
+}
+
+void WhatsappConnection::sendGetCipherKeysFromUser(std::string jid) {
+	Tree iq("iq", makeat({"id", getNextIqId(), "type", "get", "to", whatsappserver, "xmlns", "encrypt"}));
+	Tree kn("key");
+	Tree un("user", makeat({"jid", jid + "@" + whatsappserver}));
+	kn.addChild(un);
+	iq.addChild(kn);
+
+	outbuffer = outbuffer + serialize_tree(&iq);
 }
 
 

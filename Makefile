@@ -22,14 +22,16 @@ INCLUDES = -I./libaxolotl-cpp/ecc \
            -I./libaxolotl-cpp/groups/state \
            -I./libaxolotl-cpp/kdf \
            -I./libaxolotl-cpp/ratchet \
-           -I./libaxolotl-cpp/sqli-store \
+           -I./libaxolotl-cpp/mem-store \
            -I./libaxolotl-cpp
+
+#           -I./libaxolotl-cpp/sqli-store \
 
 C_SRCS = tinfl.c imgutil.c 
 CXX_SRCS = whatsapp-protocol.cc wa_util.cc rc4.cc keygen.cc tree.cc databuffer.cc message.cc wa_purple.cc
 
 C_OBJS = $(C_SRCS:.c=.o)
-CXX_OBJS = $(CXX_SRCS:.cc=.o)
+CXX_OBJS = $(CXX_SRCS:.cc=.o) AxolotlMessages.pb.o
 
 PKG_CONFIG = pkg-config
 STRIP = strip
@@ -51,13 +53,18 @@ CFLAGS += \
 
 CXXFLAGS += -std=c++11
 
-LIBS_PURPLE = $(shell $(PKG_CONFIG) --libs purple) -lfreeimage -L./libaxolotl-cpp -laxolotl
+LIBS_PURPLE = $(shell $(PKG_CONFIG) --libs purple) -lfreeimage ./libaxolotl-cpp/libaxolotl.a -lprotobuf -lcrypto ./libaxolotl-cpp/libcurve25519/libcurve25519.a
 LDFLAGS ?= $(ARCHFLAGS)
 LDFLAGS += -shared -pipe
 
+AxolotlMessages.pb.h:	AxolotlMessages.proto
+	protoc --cpp_out=. AxolotlMessages.proto
+AxolotlMessages.pb.cc:	AxolotlMessages.pb.h
+	# Do nothing
+
 %.o: %.c
 	$(CC) -c $(CFLAGS) -o $@ $<
-%.o: %.cc
+%.o: %.cc AxolotlMessages.pb.h
 	$(CXX) -c $(CFLAGS) $(CXXFLAGS) -o $@ $<
 
 $(LIBNAME): $(C_OBJS) $(CXX_OBJS) 
@@ -90,6 +97,7 @@ uninstall: $(LIBNAME)
 
 .PHONY: clean
 clean:
+	-rm -f AxolotlMessages.pb.cc AxolotlMessages.pb.h
 	-rm -f *.o
 	-rm -f $(LIBNAME)
 

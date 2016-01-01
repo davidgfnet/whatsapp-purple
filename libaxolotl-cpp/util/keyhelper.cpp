@@ -1,6 +1,5 @@
 #include "keyhelper.h"
 
-#include <openssl/rand.h>
 #include <string.h>
 
 #include "eckeypair.h"
@@ -8,54 +7,25 @@
 
 uint64_t KeyHelper::getRandomFFFF()
 {
-	RAND_poll();
-
-	unsigned char buff1[2];
-	memset(buff1, 0, 2);
-	RAND_bytes(buff1, 2);
-	uint64_t rand1 = ((unsigned int)buff1[1] << 8) + (unsigned int)buff1[0];
-
-	return rand1;
+	return getRandomFFFFFFFF() & 0xFFFF;
 }
 
 uint64_t KeyHelper::getRandom7FFFFFFF()
 {
-	RAND_poll();
-
-	uint64_t rand2 = 0;
-	for (int i = 0; i < 0x80; i++) {
-		unsigned char buff0[3];
-		memset(buff0, 0, 3);
-		RAND_bytes(buff0, 3);
-		rand2 += ((unsigned int)buff0[2] << 16);
-		rand2 += ((unsigned int)buff0[1] << 8);
-		rand2 += (unsigned int)buff0[0];
-	}
-
-	return rand2;
+	return getRandomFFFFFFFF() & 0x7FFFFFFF;
 }
 
 uint64_t KeyHelper::getRandomFFFFFFFF()
 {
-	RAND_poll();
-
-	unsigned char buff1[4];
-	memset(buff1, 0, 4);
-	RAND_bytes(buff1, 4);
-	uint64_t rand1 = ((uint64_t)buff1[3] << 24) + ((uint64_t)buff1[2] << 16)
-					   +  ((uint64_t)buff1[1] << 8)  +  (uint64_t)buff1[0];
-
-	return rand1;
+	return (rand() ^ (rand() << 8) ^ (rand() << 16) ^ (rand() << 24)) & 0xFFFFFFFF;
 }
 
 ByteArray KeyHelper::getRandomBytes(int bytes)
 {
-	RAND_poll();
-
-	unsigned char buff1[bytes];
-	memset(buff1, 0, bytes);
-	RAND_bytes(buff1, bytes);
-	return ByteArray((const char *)buff1, bytes);
+	unsigned char buff[bytes];
+	for (unsigned i = 0; i < bytes; i++)
+		buff[i] = rand();
+	return ByteArray((const char *)buff, bytes);
 }
 
 IdentityKeyPair KeyHelper::generateIdentityKeyPair()
@@ -68,7 +38,7 @@ IdentityKeyPair KeyHelper::generateIdentityKeyPair()
 
 uint64_t KeyHelper::generateRegistrationId()
 {
-	return getRandomFFFFFFFF() & 0x7FFFFFFF;
+	return getRandom7FFFFFFF();
 }
 
 std::vector<PreKeyRecord> KeyHelper::generatePreKeys(uint64_t start, unsigned int count)
@@ -95,13 +65,7 @@ ECKeyPair KeyHelper::generateSenderSigningKey()
 
 ByteArray KeyHelper::generateSenderKey()
 {
-	RAND_poll();
-
-	unsigned char buff1[32];
-	memset(buff1, 0, 32);
-	RAND_bytes(buff1, 32);
-
-	return ByteArray ((const char*)buff1, 32);
+	return getRandomBytes(32);
 }
 
 unsigned long KeyHelper::generateSenderKeyId()

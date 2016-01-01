@@ -41,6 +41,8 @@ public:
 	bool hasChild(std::string tag) const;
 
 	std::string toString(int sp = 0);
+
+	static std::string escapeStrings(std::string);
 };
 
 #endif

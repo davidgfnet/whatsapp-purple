@@ -786,6 +786,7 @@ static void waprpl_connect_cb(gpointer data, gint source, const gchar * error_me
 
 	PurpleAccount *acct = purple_connection_get_account(gc);
 	const char *resource = purple_account_get_string(acct, "resource", default_resource);
+	gboolean send_ciphered = purple_account_get_bool(acct, "send_ciphered", TRUE);
 
 	if (source < 0) {
 		gchar *tmp = g_strdup_printf("Unable to connect: %s", error_message);
@@ -793,7 +794,7 @@ static void waprpl_connect_cb(gpointer data, gint source, const gchar * error_me
 		g_free(tmp);
 	} else {
 		wconn->fd = source;
-		wconn->waAPI->doLogin(resource);
+		wconn->waAPI->doLogin(resource, send_ciphered);
 		wconn->rh = purple_input_add(wconn->fd, PURPLE_INPUT_READ, waprpl_input_cb, gc);
 		wconn->timer = purple_timeout_add_seconds(20, wa_timer_cb, gc);
 
@@ -1584,6 +1585,9 @@ static void waprpl_init(PurplePlugin * plugin)
 	option = purple_account_option_string_new("Resource", "resource", default_resource);
 	prpl_info.protocol_options = g_list_append(prpl_info.protocol_options, option);
 
+	option = purple_account_option_bool_new("Send ciphered messages (when possible)", "send_ciphered", TRUE);
+	prpl_info.protocol_options = g_list_append(prpl_info.protocol_options, option);
+
 	_whatsapp_protocol = plugin;
 
 	// Some signals which can be caught by plugins
@@ -1602,7 +1606,12 @@ static void waprpl_init(PurplePlugin * plugin)
 			purple_value_new(PURPLE_TYPE_STRING),  /* id */
 			purple_value_new(PURPLE_TYPE_INT)      /* reception-types */
 	);
-
+	purple_signal_register(plugin, "whatsapp-message-error",
+			purple_marshal_VOID__POINTER_POINTER_UINT,
+			NULL, 2,
+			purple_value_new(PURPLE_TYPE_SUBTYPE, PURPLE_SUBTYPE_CONNECTION),
+			purple_value_new(PURPLE_TYPE_STRING)  /* id */
+	);
 }
 
 static PurplePluginInfo info = {

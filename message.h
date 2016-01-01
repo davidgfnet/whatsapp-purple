@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#include "AxolotlMessages.pb.h"
+
 #define CHAT_MESSAGE  0
 #define IMAGE_MESSAGE 1
 #define LOCAT_MESSAGE 2
@@ -103,6 +105,9 @@ public:
 	std::string encoding;
 	std::string preview;
 	unsigned int width, height, size;
+
+	static ImageMessage parseProtobuf(const WhatsappConnection * wc, const std::string from, const unsigned long long time,
+		const std::string id, const std::string author, const std::string & buf);
 };
 
 class SoundMessage: public MediaMessage {

@@ -109,6 +109,21 @@ bool Tree::hasChild(std::string tag) const
 	return false;
 }
 
+std::string Tree::escapeStrings(std::string s) {
+	std::string ret;
+	for (auto c: s) {
+		if (c < 32 || c > 126) {
+			ret += "\\";
+			ret += ('0' + (c / 64));
+			ret += ('0' + (c / 8)%8);
+			ret += ('0' + (c % 8));
+		}
+		else
+			ret += c;
+	}
+	return ret;
+}
+
 std::string Tree::toString(int sp)
 {
 	std::string ret;
@@ -118,7 +133,7 @@ std::string Tree::toString(int sp)
 		ret += spacing + "at[" + iter->first + "]=" + iter->second + "\n";
 	}
 	std::string piece = data.substr(0,10) + " ...";
-	ret += spacing + "Data: " + piece + "\n";
+	ret += spacing + "Data: " + escapeStrings(piece) + "\n";
 
 	for (unsigned int i = 0; i < children.size(); i++) {
 		ret += children[i].toString(sp + 1);

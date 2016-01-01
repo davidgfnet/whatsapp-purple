@@ -4,6 +4,8 @@
 #include "wa_connection.h"
 #include "tree.h"
 
+using namespace wapurple;
+
 std::string basename(std::string s) {
 	while (s.find("/") != std::string::npos)
 		s = s.substr(s.find("/")+1);
@@ -147,6 +149,18 @@ Message *ImageMessage::copy() const
 	return new ImageMessage(wc, from, t, id, author, url, caption, ip, width, height, size, encoding, hash, filetype, preview);
 }
 
+
+ImageMessage ImageMessage::parseProtobuf(const WhatsappConnection * wc, const std::string from, const unsigned long long time,
+		const std::string id, const std::string author, const std::string & buf) {
+
+	AxolotlMessage pbuf;
+	pbuf.ParseFromString(buf);
+
+	return ImageMessage(wc, from, time, id, author,
+		pbuf.imagemsg().url(), pbuf.imagemsg().caption(), "",
+		pbuf.imagemsg().width(), pbuf.imagemsg().height(), pbuf.imagemsg().length(), "",
+		pbuf.imagemsg().sha256(), pbuf.imagemsg().mimetype(), pbuf.imagemsg().thumbnail());
+}
 
 SoundMessage::SoundMessage(const WhatsappConnection * wc, const std::string from, const unsigned long long time,
 	const std::string id, const std::string author, const std::string url, const std::string caption,

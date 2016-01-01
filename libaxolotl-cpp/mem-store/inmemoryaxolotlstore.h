@@ -1,6 +1,7 @@
 #ifndef INMEMORYAXOLOTLSTORE_H
 #define INMEMORYAXOLOTLSTORE_H
 
+#include <iostream>
 #include "state/axolotlstore.h"
 
 #include "inmemoryidentitykeystore.h"
@@ -28,8 +29,8 @@ public:
 	unsigned int	getLocalRegistrationId();
 	void			saveIdentity(uint64_t recipientId, const IdentityKey &identityKey);
 	bool			isTrustedIdentity(uint64_t recipientId, const IdentityKey &identityKey);
-	void			removeIdentity(uint64_t recipientId) { identityKeyStore.removeIdentity(recipientId); }
-	void			storeLocalData(uint64_t registrationId, const IdentityKeyPair identityKeyPair) {}
+	void			removeIdentity(uint64_t recipientId);
+	void			storeLocalData(uint64_t registrationId, const IdentityKeyPair identityKeyPair);
 
 	PreKeyRecord loadPreKey(uint64_t preKeyId);
 	void		 storePreKey(uint64_t preKeyId, const PreKeyRecord &record);

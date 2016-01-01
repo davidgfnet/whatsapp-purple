@@ -1,0 +1,21 @@
+package wapurple;
+
+message AxolotlMessage {
+	message AxolotlImageMessage {
+		optional string url = 1;
+		optional string mimetype = 2;
+		optional string caption = 3;
+		optional bytes sha256 = 4;
+		optional uint64 length = 5;
+		optional uint32 height = 6;
+		optional uint32 width = 7;
+		optional bytes refkey = 8;
+		optional bytes key = 9;
+		optional bytes iv = 10;
+		optional bytes thumbnail = 16;
+	}
+
+	optional AxolotlImageMessage imageMsg = 3;
+
+}
+

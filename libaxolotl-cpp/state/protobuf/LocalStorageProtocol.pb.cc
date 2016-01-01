@@ -533,6 +533,7 @@ const int SessionStructure_Chain_ChainKey::kKeyFieldNumber;
 SessionStructure_Chain_ChainKey::SessionStructure_Chain_ChainKey()
   : ::google::protobuf::Message() {
   SharedCtor();
+  // @@protoc_insertion_point(constructor:textsecure.SessionStructure.Chain.ChainKey)
 }
 
 void SessionStructure_Chain_ChainKey::InitAsDefaultInstance() {
@@ -542,21 +543,24 @@ SessionStructure_Chain_ChainKey::SessionStructure_Chain_ChainKey(const SessionSt
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
+  // @@protoc_insertion_point(copy_constructor:textsecure.SessionStructure.Chain.ChainKey)
 }
 
 void SessionStructure_Chain_ChainKey::SharedCtor() {
+  ::google::protobuf::internal::GetEmptyString();
   _cached_size_ = 0;
   index_ = 0u;
-  key_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  key_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
 SessionStructure_Chain_ChainKey::~SessionStructure_Chain_ChainKey() {
+  // @@protoc_insertion_point(destructor:textsecure.SessionStructure.Chain.ChainKey)
   SharedDtor();
 }
 
 void SessionStructure_Chain_ChainKey::SharedDtor() {
-  if (key_ != &::google::protobuf::internal::kEmptyString) {
+  if (key_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     delete key_;
   }
   if (this != default_instance_) {
@@ -585,10 +589,10 @@ SessionStructure_Chain_ChainKey* SessionStructure_Chain_ChainKey::New() const {
 }
 
 void SessionStructure_Chain_ChainKey::Clear() {
-  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+  if (_has_bits_[0 / 32] & 3) {
     index_ = 0u;
     if (has_key()) {
-      if (key_ != &::google::protobuf::internal::kEmptyString) {
+      if (key_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
         key_->clear();
       }
     }
@@ -599,20 +603,23 @@ void SessionStructure_Chain_ChainKey::Clear() {
 
 bool SessionStructure_Chain_ChainKey::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
-#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+#define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
   ::google::protobuf::uint32 tag;
-  while ((tag = input->ReadTag()) != 0) {
+  // @@protoc_insertion_point(parse_start:textsecure.SessionStructure.Chain.ChainKey)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
       // optional uint32 index = 1;
       case 1: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+        if (tag == 8) {
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
                  input, &index_)));
           set_has_index();
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
         if (input->ExpectTag(18)) goto parse_key;
         break;
@@ -620,23 +627,23 @@ bool SessionStructure_Chain_ChainKey::MergePartialFromCodedStream(
 
       // optional bytes key = 2;
       case 2: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+        if (tag == 18) {
          parse_key:
           DO_(::google::protobuf::internal::WireFormatLite::ReadBytes(
                 input, this->mutable_key()));
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
-        if (input->ExpectAtEnd()) return true;
+        if (input->ExpectAtEnd()) goto success;
         break;
       }
 
       default: {
-      handle_uninterpreted:
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+      handle_unusual:
+        if (tag == 0 ||
+            ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-          return true;
+          goto success;
         }
         DO_(::google::protobuf::internal::WireFormat::SkipField(
               input, tag, mutable_unknown_fields()));
@@ -644,12 +651,18 @@ bool SessionStructure_Chain_ChainKey::MergePartialFromCodedStream(
       }
     }
   }
+success:
+  // @@protoc_insertion_point(parse_success:textsecure.SessionStructure.Chain.ChainKey)
   return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:textsecure.SessionStructure.Chain.ChainKey)
+  return false;
 #undef DO_
 }
 
 void SessionStructure_Chain_ChainKey::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
+  // @@protoc_insertion_point(serialize_start:textsecure.SessionStructure.Chain.ChainKey)
   // optional uint32 index = 1;
   if (has_index()) {
     ::google::protobuf::internal::WireFormatLite::WriteUInt32(1, this->index(), output);
@@ -657,7 +670,7 @@ void SessionStructure_Chain_ChainKey::SerializeWithCachedSizes(
 
   // optional bytes key = 2;
   if (has_key()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBytes(
+    ::google::protobuf::internal::WireFormatLite::WriteBytesMaybeAliased(
       2, this->key(), output);
   }
 
@@ -665,10 +678,12 @@ void SessionStructure_Chain_ChainKey::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
+  // @@protoc_insertion_point(serialize_end:textsecure.SessionStructure.Chain.ChainKey)
 }
 
 ::google::protobuf::uint8* SessionStructure_Chain_ChainKey::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
+  // @@protoc_insertion_point(serialize_to_array_start:textsecure.SessionStructure.Chain.ChainKey)
   // optional uint32 index = 1;
   if (has_index()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(1, this->index(), target);
@@ -685,6 +700,7 @@ void SessionStructure_Chain_ChainKey::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
+  // @@protoc_insertion_point(serialize_to_array_end:textsecure.SessionStructure.Chain.ChainKey)
   return target;
 }
 
@@ -791,6 +807,7 @@ const int SessionStructure_Chain_MessageKey::kIvFieldNumber;
 SessionStructure_Chain_MessageKey::SessionStructure_Chain_MessageKey()
   : ::google::protobuf::Message() {
   SharedCtor();
+  // @@protoc_insertion_point(constructor:textsecure.SessionStructure.Chain.MessageKey)
 }
 
 void SessionStructure_Chain_MessageKey::InitAsDefaultInstance() {
@@ -800,29 +817,32 @@ SessionStructure_Chain_MessageKey::SessionStructure_Chain_MessageKey(const Sessi
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
+  // @@protoc_insertion_point(copy_constructor:textsecure.SessionStructure.Chain.MessageKey)
 }
 
 void SessionStructure_Chain_MessageKey::SharedCtor() {
+  ::google::protobuf::internal::GetEmptyString();
   _cached_size_ = 0;
   index_ = 0u;
-  cipherkey_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  mackey_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  iv_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  cipherkey_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  mackey_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  iv_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
 SessionStructure_Chain_MessageKey::~SessionStructure_Chain_MessageKey() {
+  // @@protoc_insertion_point(destructor:textsecure.SessionStructure.Chain.MessageKey)
   SharedDtor();
 }
 
 void SessionStructure_Chain_MessageKey::SharedDtor() {
-  if (cipherkey_ != &::google::protobuf::internal::kEmptyString) {
+  if (cipherkey_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     delete cipherkey_;
   }
-  if (mackey_ != &::google::protobuf::internal::kEmptyString) {
+  if (mackey_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     delete mackey_;
   }
-  if (iv_ != &::google::protobuf::internal::kEmptyString) {
+  if (iv_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     delete iv_;
   }
   if (this != default_instance_) {
@@ -851,20 +871,20 @@ SessionStructure_Chain_MessageKey* SessionStructure_Chain_MessageKey::New() cons
 }
 
 void SessionStructure_Chain_MessageKey::Clear() {
-  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+  if (_has_bits_[0 / 32] & 15) {
     index_ = 0u;
     if (has_cipherkey()) {
-      if (cipherkey_ != &::google::protobuf::internal::kEmptyString) {
+      if (cipherkey_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
         cipherkey_->clear();
       }
     }
     if (has_mackey()) {
-      if (mackey_ != &::google::protobuf::internal::kEmptyString) {
+      if (mackey_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
         mackey_->clear();
       }
     }
     if (has_iv()) {
-      if (iv_ != &::google::protobuf::internal::kEmptyString) {
+      if (iv_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
         iv_->clear();
       }
     }
@@ -875,20 +895,23 @@ void SessionStructure_Chain_MessageKey::Clear() {
 
 bool SessionStructure_Chain_MessageKey::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
-#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+#define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
   ::google::protobuf::uint32 tag;
-  while ((tag = input->ReadTag()) != 0) {
+  // @@protoc_insertion_point(parse_start:textsecure.SessionStructure.Chain.MessageKey)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
       // optional uint32 index = 1;
       case 1: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+        if (tag == 8) {
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
                  input, &index_)));
           set_has_index();
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
         if (input->ExpectTag(18)) goto parse_cipherKey;
         break;
@@ -896,13 +919,12 @@ bool SessionStructure_Chain_MessageKey::MergePartialFromCodedStream(
 
       // optional bytes cipherKey = 2;
       case 2: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+        if (tag == 18) {
          parse_cipherKey:
           DO_(::google::protobuf::internal::WireFormatLite::ReadBytes(
                 input, this->mutable_cipherkey()));
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
         if (input->ExpectTag(26)) goto parse_macKey;
         break;
@@ -910,13 +932,12 @@ bool SessionStructure_Chain_MessageKey::MergePartialFromCodedStream(
 
       // optional bytes macKey = 3;
       case 3: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+        if (tag == 26) {
          parse_macKey:
           DO_(::google::protobuf::internal::WireFormatLite::ReadBytes(
                 input, this->mutable_mackey()));
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
         if (input->ExpectTag(34)) goto parse_iv;
         break;
@@ -924,23 +945,23 @@ bool SessionStructure_Chain_MessageKey::MergePartialFromCodedStream(
 
       // optional bytes iv = 4;
       case 4: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+        if (tag == 34) {
          parse_iv:
           DO_(::google::protobuf::internal::WireFormatLite::ReadBytes(
                 input, this->mutable_iv()));
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
-        if (input->ExpectAtEnd()) return true;
+        if (input->ExpectAtEnd()) goto success;
         break;
       }
 
       default: {
-      handle_uninterpreted:
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+      handle_unusual:
+        if (tag == 0 ||
+            ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-          return true;
+          goto success;
         }
         DO_(::google::protobuf::internal::WireFormat::SkipField(
               input, tag, mutable_unknown_fields()));
@@ -948,12 +969,18 @@ bool SessionStructure_Chain_MessageKey::MergePartialFromCodedStream(
       }
     }
   }
+success:
+  // @@protoc_insertion_point(parse_success:textsecure.SessionStructure.Chain.MessageKey)
   return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:textsecure.SessionStructure.Chain.MessageKey)
+  return false;
 #undef DO_
 }
 
 void SessionStructure_Chain_MessageKey::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
+  // @@protoc_insertion_point(serialize_start:textsecure.SessionStructure.Chain.MessageKey)
   // optional uint32 index = 1;
   if (has_index()) {
     ::google::protobuf::internal::WireFormatLite::WriteUInt32(1, this->index(), output);
@@ -961,19 +988,19 @@ void SessionStructure_Chain_MessageKey::SerializeWithCachedSizes(
 
   // optional bytes cipherKey = 2;
   if (has_cipherkey()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBytes(
+    ::google::protobuf::internal::WireFormatLite::WriteBytesMaybeAliased(
       2, this->cipherkey(), output);
   }
 
   // optional bytes macKey = 3;
   if (has_mackey()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBytes(
+    ::google::protobuf::internal::WireFormatLite::WriteBytesMaybeAliased(
       3, this->mackey(), output);
   }
 
   // optional bytes iv = 4;
   if (has_iv()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBytes(
+    ::google::protobuf::internal::WireFormatLite::WriteBytesMaybeAliased(
       4, this->iv(), output);
   }
 
@@ -981,10 +1008,12 @@ void SessionStructure_Chain_MessageKey::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
+  // @@protoc_insertion_point(serialize_end:textsecure.SessionStructure.Chain.MessageKey)
 }
 
 ::google::protobuf::uint8* SessionStructure_Chain_MessageKey::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
+  // @@protoc_insertion_point(serialize_to_array_start:textsecure.SessionStructure.Chain.MessageKey)
   // optional uint32 index = 1;
   if (has_index()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(1, this->index(), target);
@@ -1015,6 +1044,7 @@ void SessionStructure_Chain_MessageKey::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
+  // @@protoc_insertion_point(serialize_to_array_end:textsecure.SessionStructure.Chain.MessageKey)
   return target;
 }
 
@@ -1143,6 +1173,7 @@ const int SessionStructure_Chain::kMessageKeysFieldNumber;
 SessionStructure_Chain::SessionStructure_Chain()
   : ::google::protobuf::Message() {
   SharedCtor();
+  // @@protoc_insertion_point(constructor:textsecure.SessionStructure.Chain)
 }
 
 void SessionStructure_Chain::InitAsDefaultInstance() {
@@ -1153,25 +1184,28 @@ SessionStructure_Chain::SessionStructure_Chain(const SessionStructure_Chain& fro
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
+  // @@protoc_insertion_point(copy_constructor:textsecure.SessionStructure.Chain)
 }
 
 void SessionStructure_Chain::SharedCtor() {
+  ::google::protobuf::internal::GetEmptyString();
   _cached_size_ = 0;
-  senderratchetkey_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  senderratchetkeyprivate_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  senderratchetkey_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  senderratchetkeyprivate_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   chainkey_ = NULL;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
 SessionStructure_Chain::~SessionStructure_Chain() {
+  // @@protoc_insertion_point(destructor:textsecure.SessionStructure.Chain)
   SharedDtor();
 }
 
 void SessionStructure_Chain::SharedDtor() {
-  if (senderratchetkey_ != &::google::protobuf::internal::kEmptyString) {
+  if (senderratchetkey_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     delete senderratchetkey_;
   }
-  if (senderratchetkeyprivate_ != &::google::protobuf::internal::kEmptyString) {
+  if (senderratchetkeyprivate_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     delete senderratchetkeyprivate_;
   }
   if (this != default_instance_) {
@@ -1201,14 +1235,14 @@ SessionStructure_Chain* SessionStructure_Chain::New() const {
 }
 
 void SessionStructure_Chain::Clear() {
-  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+  if (_has_bits_[0 / 32] & 7) {
     if (has_senderratchetkey()) {
-      if (senderratchetkey_ != &::google::protobuf::internal::kEmptyString) {
+      if (senderratchetkey_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
         senderratchetkey_->clear();
       }
     }
     if (has_senderratchetkeyprivate()) {
-      if (senderratchetkeyprivate_ != &::google::protobuf::internal::kEmptyString) {
+      if (senderratchetkeyprivate_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
         senderratchetkeyprivate_->clear();
       }
     }
@@ -1223,18 +1257,21 @@ void SessionStructure_Chain::Clear() {
 
 bool SessionStructure_Chain::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
-#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+#define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
   ::google::protobuf::uint32 tag;
-  while ((tag = input->ReadTag()) != 0) {
+  // @@protoc_insertion_point(parse_start:textsecure.SessionStructure.Chain)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
       // optional bytes senderRatchetKey = 1;
       case 1: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+        if (tag == 10) {
           DO_(::google::protobuf::internal::WireFormatLite::ReadBytes(
                 input, this->mutable_senderratchetkey()));
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
         if (input->ExpectTag(18)) goto parse_senderRatchetKeyPrivate;
         break;
@@ -1242,13 +1279,12 @@ bool SessionStructure_Chain::MergePartialFromCodedStream(
 
       // optional bytes senderRatchetKeyPrivate = 2;
       case 2: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+        if (tag == 18) {
          parse_senderRatchetKeyPrivate:
           DO_(::google::protobuf::internal::WireFormatLite::ReadBytes(
                 input, this->mutable_senderratchetkeyprivate()));
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
         if (input->ExpectTag(26)) goto parse_chainKey;
         break;
@@ -1256,13 +1292,12 @@ bool SessionStructure_Chain::MergePartialFromCodedStream(
 
       // optional .textsecure.SessionStructure.Chain.ChainKey chainKey = 3;
       case 3: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+        if (tag == 26) {
          parse_chainKey:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
                input, mutable_chainkey()));
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
         if (input->ExpectTag(34)) goto parse_messageKeys;
         break;
@@ -1270,24 +1305,24 @@ bool SessionStructure_Chain::MergePartialFromCodedStream(
 
       // repeated .textsecure.SessionStructure.Chain.MessageKey messageKeys = 4;
       case 4: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+        if (tag == 34) {
          parse_messageKeys:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
                 input, add_messagekeys()));
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
         if (input->ExpectTag(34)) goto parse_messageKeys;
-        if (input->ExpectAtEnd()) return true;
+        if (input->ExpectAtEnd()) goto success;
         break;
       }
 
       default: {
-      handle_uninterpreted:
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+      handle_unusual:
+        if (tag == 0 ||
+            ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-          return true;
+          goto success;
         }
         DO_(::google::protobuf::internal::WireFormat::SkipField(
               input, tag, mutable_unknown_fields()));
@@ -1295,21 +1330,27 @@ bool SessionStructure_Chain::MergePartialFromCodedStream(
       }
     }
   }
+success:
+  // @@protoc_insertion_point(parse_success:textsecure.SessionStructure.Chain)
   return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:textsecure.SessionStructure.Chain)
+  return false;
 #undef DO_
 }
 
 void SessionStructure_Chain::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
+  // @@protoc_insertion_point(serialize_start:textsecure.SessionStructure.Chain)
   // optional bytes senderRatchetKey = 1;
   if (has_senderratchetkey()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBytes(
+    ::google::protobuf::internal::WireFormatLite::WriteBytesMaybeAliased(
       1, this->senderratchetkey(), output);
   }
 
   // optional bytes senderRatchetKeyPrivate = 2;
   if (has_senderratchetkeyprivate()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBytes(
+    ::google::protobuf::internal::WireFormatLite::WriteBytesMaybeAliased(
       2, this->senderratchetkeyprivate(), output);
   }
 
@@ -1329,10 +1370,12 @@ void SessionStructure_Chain::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
+  // @@protoc_insertion_point(serialize_end:textsecure.SessionStructure.Chain)
 }
 
 ::google::protobuf::uint8* SessionStructure_Chain::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
+  // @@protoc_insertion_point(serialize_to_array_start:textsecure.SessionStructure.Chain)
   // optional bytes senderRatchetKey = 1;
   if (has_senderratchetkey()) {
     target =
@@ -1365,6 +1408,7 @@ void SessionStructure_Chain::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
+  // @@protoc_insertion_point(serialize_to_array_end:textsecure.SessionStructure.Chain)
   return target;
 }
 
@@ -1495,6 +1539,7 @@ const int SessionStructure_PendingKeyExchange::kLocalIdentityKeyPrivateFieldNumb
 SessionStructure_PendingKeyExchange::SessionStructure_PendingKeyExchange()
   : ::google::protobuf::Message() {
   SharedCtor();
+  // @@protoc_insertion_point(constructor:textsecure.SessionStructure.PendingKeyExchange)
 }
 
 void SessionStructure_PendingKeyExchange::InitAsDefaultInstance() {
@@ -1504,41 +1549,44 @@ SessionStructure_PendingKeyExchange::SessionStructure_PendingKeyExchange(const S
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
+  // @@protoc_insertion_point(copy_constructor:textsecure.SessionStructure.PendingKeyExchange)
 }
 
 void SessionStructure_PendingKeyExchange::SharedCtor() {
+  ::google::protobuf::internal::GetEmptyString();
   _cached_size_ = 0;
   sequence_ = 0u;
-  localbasekey_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  localbasekeyprivate_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  localratchetkey_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  localratchetkeyprivate_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  localidentitykey_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  localidentitykeyprivate_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  localbasekey_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  localbasekeyprivate_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  localratchetkey_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  localratchetkeyprivate_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  localidentitykey_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  localidentitykeyprivate_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
 SessionStructure_PendingKeyExchange::~SessionStructure_PendingKeyExchange() {
+  // @@protoc_insertion_point(destructor:textsecure.SessionStructure.PendingKeyExchange)
   SharedDtor();
 }
 
 void SessionStructure_PendingKeyExchange::SharedDtor() {
-  if (localbasekey_ != &::google::protobuf::internal::kEmptyString) {
+  if (localbasekey_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     delete localbasekey_;
   }
-  if (localbasekeyprivate_ != &::google::protobuf::internal::kEmptyString) {
+  if (localbasekeyprivate_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     delete localbasekeyprivate_;
   }
-  if (localratchetkey_ != &::google::protobuf::internal::kEmptyString) {
+  if (localratchetkey_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     delete localratchetkey_;
   }
-  if (localratchetkeyprivate_ != &::google::protobuf::internal::kEmptyString) {
+  if (localratchetkeyprivate_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     delete localratchetkeyprivate_;
   }
-  if (localidentitykey_ != &::google::protobuf::internal::kEmptyString) {
+  if (localidentitykey_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     delete localidentitykey_;
   }
-  if (localidentitykeyprivate_ != &::google::protobuf::internal::kEmptyString) {
+  if (localidentitykeyprivate_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     delete localidentitykeyprivate_;
   }
   if (this != default_instance_) {
@@ -1567,35 +1615,35 @@ SessionStructure_PendingKeyExchange* SessionStructure_PendingKeyExchange::New() 
 }
 
 void SessionStructure_PendingKeyExchange::Clear() {
-  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+  if (_has_bits_[0 / 32] & 127) {
     sequence_ = 0u;
     if (has_localbasekey()) {
-      if (localbasekey_ != &::google::protobuf::internal::kEmptyString) {
+      if (localbasekey_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
         localbasekey_->clear();
       }
     }
     if (has_localbasekeyprivate()) {
-      if (localbasekeyprivate_ != &::google::protobuf::internal::kEmptyString) {
+      if (localbasekeyprivate_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
         localbasekeyprivate_->clear();
       }
     }
     if (has_localratchetkey()) {
-      if (localratchetkey_ != &::google::protobuf::internal::kEmptyString) {
+      if (localratchetkey_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
         localratchetkey_->clear();
       }
     }
     if (has_localratchetkeyprivate()) {
-      if (localratchetkeyprivate_ != &::google::protobuf::internal::kEmptyString) {
+      if (localratchetkeyprivate_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
         localratchetkeyprivate_->clear();
       }
     }
     if (has_localidentitykey()) {
-      if (localidentitykey_ != &::google::protobuf::internal::kEmptyString) {
+      if (localidentitykey_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
         localidentitykey_->clear();
       }
     }
     if (has_localidentitykeyprivate()) {
-      if (localidentitykeyprivate_ != &::google::protobuf::internal::kEmptyString) {
+      if (localidentitykeyprivate_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
         localidentitykeyprivate_->clear();
       }
     }
@@ -1606,20 +1654,23 @@ void SessionStructure_PendingKeyExchange::Clear() {
 
 bool SessionStructure_PendingKeyExchange::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
-#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+#define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
   ::google::protobuf::uint32 tag;
-  while ((tag = input->ReadTag()) != 0) {
+  // @@protoc_insertion_point(parse_start:textsecure.SessionStructure.PendingKeyExchange)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
       // optional uint32 sequence = 1;
       case 1: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+        if (tag == 8) {
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
                  input, &sequence_)));
           set_has_sequence();
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
         if (input->ExpectTag(18)) goto parse_localBaseKey;
         break;
@@ -1627,13 +1678,12 @@ bool SessionStructure_PendingKeyExchange::MergePartialFromCodedStream(
 
       // optional bytes localBaseKey = 2;
       case 2: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+        if (tag == 18) {
          parse_localBaseKey:
           DO_(::google::protobuf::internal::WireFormatLite::ReadBytes(
                 input, this->mutable_localbasekey()));
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
         if (input->ExpectTag(26)) goto parse_localBaseKeyPrivate;
         break;
@@ -1641,13 +1691,12 @@ bool SessionStructure_PendingKeyExchange::MergePartialFromCodedStream(
 
       // optional bytes localBaseKeyPrivate = 3;
       case 3: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+        if (tag == 26) {
          parse_localBaseKeyPrivate:
           DO_(::google::protobuf::internal::WireFormatLite::ReadBytes(
                 input, this->mutable_localbasekeyprivate()));
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
         if (input->ExpectTag(34)) goto parse_localRatchetKey;
         break;
@@ -1655,13 +1704,12 @@ bool SessionStructure_PendingKeyExchange::MergePartialFromCodedStream(
 
       // optional bytes localRatchetKey = 4;
       case 4: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+        if (tag == 34) {
          parse_localRatchetKey:
           DO_(::google::protobuf::internal::WireFormatLite::ReadBytes(
                 input, this->mutable_localratchetkey()));
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
         if (input->ExpectTag(42)) goto parse_localRatchetKeyPrivate;
         break;
@@ -1669,13 +1717,12 @@ bool SessionStructure_PendingKeyExchange::MergePartialFromCodedStream(
 
       // optional bytes localRatchetKeyPrivate = 5;
       case 5: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+        if (tag == 42) {
          parse_localRatchetKeyPrivate:
           DO_(::google::protobuf::internal::WireFormatLite::ReadBytes(
                 input, this->mutable_localratchetkeyprivate()));
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
         if (input->ExpectTag(58)) goto parse_localIdentityKey;
         break;
@@ -1683,13 +1730,12 @@ bool SessionStructure_PendingKeyExchange::MergePartialFromCodedStream(
 
       // optional bytes localIdentityKey = 7;
       case 7: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+        if (tag == 58) {
          parse_localIdentityKey:
           DO_(::google::protobuf::internal::WireFormatLite::ReadBytes(
                 input, this->mutable_localidentitykey()));
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
         if (input->ExpectTag(66)) goto parse_localIdentityKeyPrivate;
         break;
@@ -1697,23 +1743,23 @@ bool SessionStructure_PendingKeyExchange::MergePartialFromCodedStream(
 
       // optional bytes localIdentityKeyPrivate = 8;
       case 8: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+        if (tag == 66) {
          parse_localIdentityKeyPrivate:
           DO_(::google::protobuf::internal::WireFormatLite::ReadBytes(
                 input, this->mutable_localidentitykeyprivate()));
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
-        if (input->ExpectAtEnd()) return true;
+        if (input->ExpectAtEnd()) goto success;
         break;
       }
 
       default: {
-      handle_uninterpreted:
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+      handle_unusual:
+        if (tag == 0 ||
+            ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-          return true;
+          goto success;
         }
         DO_(::google::protobuf::internal::WireFormat::SkipField(
               input, tag, mutable_unknown_fields()));
@@ -1721,12 +1767,18 @@ bool SessionStructure_PendingKeyExchange::MergePartialFromCodedStream(
       }
     }
   }
+success:
+  // @@protoc_insertion_point(parse_success:textsecure.SessionStructure.PendingKeyExchange)
   return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:textsecure.SessionStructure.PendingKeyExchange)
+  return false;
 #undef DO_
 }
 
 void SessionStructure_PendingKeyExchange::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
+  // @@protoc_insertion_point(serialize_start:textsecure.SessionStructure.PendingKeyExchange)
   // optional uint32 sequence = 1;
   if (has_sequence()) {
     ::google::protobuf::internal::WireFormatLite::WriteUInt32(1, this->sequence(), output);
@@ -1734,37 +1786,37 @@ void SessionStructure_PendingKeyExchange::SerializeWithCachedSizes(
 
   // optional bytes localBaseKey = 2;
   if (has_localbasekey()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBytes(
+    ::google::protobuf::internal::WireFormatLite::WriteBytesMaybeAliased(
       2, this->localbasekey(), output);
   }
 
   // optional bytes localBaseKeyPrivate = 3;
   if (has_localbasekeyprivate()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBytes(
+    ::google::protobuf::internal::WireFormatLite::WriteBytesMaybeAliased(
       3, this->localbasekeyprivate(), output);
   }
 
   // optional bytes localRatchetKey = 4;
   if (has_localratchetkey()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBytes(
+    ::google::protobuf::internal::WireFormatLite::WriteBytesMaybeAliased(
       4, this->localratchetkey(), output);
   }
 
   // optional bytes localRatchetKeyPrivate = 5;
   if (has_localratchetkeyprivate()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBytes(
+    ::google::protobuf::internal::WireFormatLite::WriteBytesMaybeAliased(
       5, this->localratchetkeyprivate(), output);
   }
 
   // optional bytes localIdentityKey = 7;
   if (has_localidentitykey()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBytes(
+    ::google::protobuf::internal::WireFormatLite::WriteBytesMaybeAliased(
       7, this->localidentitykey(), output);
   }
 
   // optional bytes localIdentityKeyPrivate = 8;
   if (has_localidentitykeyprivate()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBytes(
+    ::google::protobuf::internal::WireFormatLite::WriteBytesMaybeAliased(
       8, this->localidentitykeyprivate(), output);
   }
 
@@ -1772,10 +1824,12 @@ void SessionStructure_PendingKeyExchange::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
+  // @@protoc_insertion_point(serialize_end:textsecure.SessionStructure.PendingKeyExchange)
 }
 
 ::google::protobuf::uint8* SessionStructure_PendingKeyExchange::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
+  // @@protoc_insertion_point(serialize_to_array_start:textsecure.SessionStructure.PendingKeyExchange)
   // optional uint32 sequence = 1;
   if (has_sequence()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(1, this->sequence(), target);
@@ -1827,6 +1881,7 @@ void SessionStructure_PendingKeyExchange::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
+  // @@protoc_insertion_point(serialize_to_array_end:textsecure.SessionStructure.PendingKeyExchange)
   return target;
 }
 
@@ -1987,6 +2042,7 @@ const int SessionStructure_PendingPreKey::kBaseKeyFieldNumber;
 SessionStructure_PendingPreKey::SessionStructure_PendingPreKey()
   : ::google::protobuf::Message() {
   SharedCtor();
+  // @@protoc_insertion_point(constructor:textsecure.SessionStructure.PendingPreKey)
 }
 
 void SessionStructure_PendingPreKey::InitAsDefaultInstance() {
@@ -1996,22 +2052,25 @@ SessionStructure_PendingPreKey::SessionStructure_PendingPreKey(const SessionStru
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
+  // @@protoc_insertion_point(copy_constructor:textsecure.SessionStructure.PendingPreKey)
 }
 
 void SessionStructure_PendingPreKey::SharedCtor() {
+  ::google::protobuf::internal::GetEmptyString();
   _cached_size_ = 0;
   prekeyid_ = 0u;
   signedprekeyid_ = 0;
-  basekey_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  basekey_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
 SessionStructure_PendingPreKey::~SessionStructure_PendingPreKey() {
+  // @@protoc_insertion_point(destructor:textsecure.SessionStructure.PendingPreKey)
   SharedDtor();
 }
 
 void SessionStructure_PendingPreKey::SharedDtor() {
-  if (basekey_ != &::google::protobuf::internal::kEmptyString) {
+  if (basekey_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     delete basekey_;
   }
   if (this != default_instance_) {
@@ -2040,35 +2099,51 @@ SessionStructure_PendingPreKey* SessionStructure_PendingPreKey::New() const {
 }
 
 void SessionStructure_PendingPreKey::Clear() {
-  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    prekeyid_ = 0u;
-    signedprekeyid_ = 0;
+#define OFFSET_OF_FIELD_(f) (reinterpret_cast<char*>(      \
+  &reinterpret_cast<SessionStructure_PendingPreKey*>(16)->f) - \
+   reinterpret_cast<char*>(16))
+
+#define ZR_(first, last) do {                              \
+    size_t f = OFFSET_OF_FIELD_(first);                    \
+    size_t n = OFFSET_OF_FIELD_(last) - f + sizeof(last);  \
+    ::memset(&first, 0, n);                                \
+  } while (0)
+
+  if (_has_bits_[0 / 32] & 7) {
+    ZR_(prekeyid_, signedprekeyid_);
     if (has_basekey()) {
-      if (basekey_ != &::google::protobuf::internal::kEmptyString) {
+      if (basekey_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
         basekey_->clear();
       }
     }
   }
+
+#undef OFFSET_OF_FIELD_
+#undef ZR_
+
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
 }
 
 bool SessionStructure_PendingPreKey::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
-#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+#define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
   ::google::protobuf::uint32 tag;
-  while ((tag = input->ReadTag()) != 0) {
+  // @@protoc_insertion_point(parse_start:textsecure.SessionStructure.PendingPreKey)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
       // optional uint32 preKeyId = 1;
       case 1: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+        if (tag == 8) {
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
                  input, &prekeyid_)));
           set_has_prekeyid();
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
         if (input->ExpectTag(18)) goto parse_baseKey;
         break;
@@ -2076,13 +2151,12 @@ bool SessionStructure_PendingPreKey::MergePartialFromCodedStream(
 
       // optional bytes baseKey = 2;
       case 2: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+        if (tag == 18) {
          parse_baseKey:
           DO_(::google::protobuf::internal::WireFormatLite::ReadBytes(
                 input, this->mutable_basekey()));
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
         if (input->ExpectTag(24)) goto parse_signedPreKeyId;
         break;
@@ -2090,25 +2164,25 @@ bool SessionStructure_PendingPreKey::MergePartialFromCodedStream(
 
       // optional int32 signedPreKeyId = 3;
       case 3: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+        if (tag == 24) {
          parse_signedPreKeyId:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
                  input, &signedprekeyid_)));
           set_has_signedprekeyid();
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
-        if (input->ExpectAtEnd()) return true;
+        if (input->ExpectAtEnd()) goto success;
         break;
       }
 
       default: {
-      handle_uninterpreted:
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+      handle_unusual:
+        if (tag == 0 ||
+            ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-          return true;
+          goto success;
         }
         DO_(::google::protobuf::internal::WireFormat::SkipField(
               input, tag, mutable_unknown_fields()));
@@ -2116,12 +2190,18 @@ bool SessionStructure_PendingPreKey::MergePartialFromCodedStream(
       }
     }
   }
+success:
+  // @@protoc_insertion_point(parse_success:textsecure.SessionStructure.PendingPreKey)
   return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:textsecure.SessionStructure.PendingPreKey)
+  return false;
 #undef DO_
 }
 
 void SessionStructure_PendingPreKey::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
+  // @@protoc_insertion_point(serialize_start:textsecure.SessionStructure.PendingPreKey)
   // optional uint32 preKeyId = 1;
   if (has_prekeyid()) {
     ::google::protobuf::internal::WireFormatLite::WriteUInt32(1, this->prekeyid(), output);
@@ -2129,7 +2209,7 @@ void SessionStructure_PendingPreKey::SerializeWithCachedSizes(
 
   // optional bytes baseKey = 2;
   if (has_basekey()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBytes(
+    ::google::protobuf::internal::WireFormatLite::WriteBytesMaybeAliased(
       2, this->basekey(), output);
   }
 
@@ -2142,10 +2222,12 @@ void SessionStructure_PendingPreKey::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
+  // @@protoc_insertion_point(serialize_end:textsecure.SessionStructure.PendingPreKey)
 }
 
 ::google::protobuf::uint8* SessionStructure_PendingPreKey::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
+  // @@protoc_insertion_point(serialize_to_array_start:textsecure.SessionStructure.PendingPreKey)
   // optional uint32 preKeyId = 1;
   if (has_prekeyid()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(1, this->prekeyid(), target);
@@ -2167,6 +2249,7 @@ void SessionStructure_PendingPreKey::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
+  // @@protoc_insertion_point(serialize_to_array_end:textsecure.SessionStructure.PendingPreKey)
   return target;
 }
 
@@ -2293,6 +2376,7 @@ const int SessionStructure::kAliceBaseKeyFieldNumber;
 SessionStructure::SessionStructure()
   : ::google::protobuf::Message() {
   SharedCtor();
+  // @@protoc_insertion_point(constructor:textsecure.SessionStructure)
 }
 
 void SessionStructure::InitAsDefaultInstance() {
@@ -2305,14 +2389,16 @@ SessionStructure::SessionStructure(const SessionStructure& from)
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
+  // @@protoc_insertion_point(copy_constructor:textsecure.SessionStructure)
 }
 
 void SessionStructure::SharedCtor() {
+  ::google::protobuf::internal::GetEmptyString();
   _cached_size_ = 0;
   sessionversion_ = 0u;
-  localidentitypublic_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  remoteidentitypublic_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  rootkey_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  localidentitypublic_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  remoteidentitypublic_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  rootkey_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   previouscounter_ = 0u;
   senderchain_ = NULL;
   pendingkeyexchange_ = NULL;
@@ -2320,25 +2406,26 @@ void SessionStructure::SharedCtor() {
   remoteregistrationid_ = 0u;
   localregistrationid_ = 0u;
   needsrefresh_ = false;
-  alicebasekey_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  alicebasekey_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
 SessionStructure::~SessionStructure() {
+  // @@protoc_insertion_point(destructor:textsecure.SessionStructure)
   SharedDtor();
 }
 
 void SessionStructure::SharedDtor() {
-  if (localidentitypublic_ != &::google::protobuf::internal::kEmptyString) {
+  if (localidentitypublic_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     delete localidentitypublic_;
   }
-  if (remoteidentitypublic_ != &::google::protobuf::internal::kEmptyString) {
+  if (remoteidentitypublic_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     delete remoteidentitypublic_;
   }
-  if (rootkey_ != &::google::protobuf::internal::kEmptyString) {
+  if (rootkey_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     delete rootkey_;
   }
-  if (alicebasekey_ != &::google::protobuf::internal::kEmptyString) {
+  if (alicebasekey_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     delete alicebasekey_;
   }
   if (this != default_instance_) {
@@ -2370,24 +2457,33 @@ SessionStructure* SessionStructure::New() const {
 }
 
 void SessionStructure::Clear() {
-  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    sessionversion_ = 0u;
+#define OFFSET_OF_FIELD_(f) (reinterpret_cast<char*>(      \
+  &reinterpret_cast<SessionStructure*>(16)->f) - \
+   reinterpret_cast<char*>(16))
+
+#define ZR_(first, last) do {                              \
+    size_t f = OFFSET_OF_FIELD_(first);                    \
+    size_t n = OFFSET_OF_FIELD_(last) - f + sizeof(last);  \
+    ::memset(&first, 0, n);                                \
+  } while (0)
+
+  if (_has_bits_[0 / 32] & 191) {
+    ZR_(sessionversion_, previouscounter_);
     if (has_localidentitypublic()) {
-      if (localidentitypublic_ != &::google::protobuf::internal::kEmptyString) {
+      if (localidentitypublic_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
         localidentitypublic_->clear();
       }
     }
     if (has_remoteidentitypublic()) {
-      if (remoteidentitypublic_ != &::google::protobuf::internal::kEmptyString) {
+      if (remoteidentitypublic_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
         remoteidentitypublic_->clear();
       }
     }
     if (has_rootkey()) {
-      if (rootkey_ != &::google::protobuf::internal::kEmptyString) {
+      if (rootkey_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
         rootkey_->clear();
       }
     }
-    previouscounter_ = 0u;
     if (has_senderchain()) {
       if (senderchain_ != NULL) senderchain_->::textsecure::SessionStructure_Chain::Clear();
     }
@@ -2395,19 +2491,22 @@ void SessionStructure::Clear() {
       if (pendingkeyexchange_ != NULL) pendingkeyexchange_->::textsecure::SessionStructure_PendingKeyExchange::Clear();
     }
   }
-  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+  if (_has_bits_[8 / 32] & 7936) {
+    ZR_(remoteregistrationid_, localregistrationid_);
     if (has_pendingprekey()) {
       if (pendingprekey_ != NULL) pendingprekey_->::textsecure::SessionStructure_PendingPreKey::Clear();
     }
-    remoteregistrationid_ = 0u;
-    localregistrationid_ = 0u;
     needsrefresh_ = false;
     if (has_alicebasekey()) {
-      if (alicebasekey_ != &::google::protobuf::internal::kEmptyString) {
+      if (alicebasekey_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
         alicebasekey_->clear();
       }
     }
   }
+
+#undef OFFSET_OF_FIELD_
+#undef ZR_
+
   receiverchains_.Clear();
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
@@ -2415,20 +2514,23 @@ void SessionStructure::Clear() {
 
 bool SessionStructure::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
-#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+#define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
   ::google::protobuf::uint32 tag;
-  while ((tag = input->ReadTag()) != 0) {
+  // @@protoc_insertion_point(parse_start:textsecure.SessionStructure)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
       // optional uint32 sessionVersion = 1;
       case 1: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+        if (tag == 8) {
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
                  input, &sessionversion_)));
           set_has_sessionversion();
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
         if (input->ExpectTag(18)) goto parse_localIdentityPublic;
         break;
@@ -2436,13 +2538,12 @@ bool SessionStructure::MergePartialFromCodedStream(
 
       // optional bytes localIdentityPublic = 2;
       case 2: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+        if (tag == 18) {
          parse_localIdentityPublic:
           DO_(::google::protobuf::internal::WireFormatLite::ReadBytes(
                 input, this->mutable_localidentitypublic()));
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
         if (input->ExpectTag(26)) goto parse_remoteIdentityPublic;
         break;
@@ -2450,13 +2551,12 @@ bool SessionStructure::MergePartialFromCodedStream(
 
       // optional bytes remoteIdentityPublic = 3;
       case 3: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+        if (tag == 26) {
          parse_remoteIdentityPublic:
           DO_(::google::protobuf::internal::WireFormatLite::ReadBytes(
                 input, this->mutable_remoteidentitypublic()));
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
         if (input->ExpectTag(34)) goto parse_rootKey;
         break;
@@ -2464,13 +2564,12 @@ bool SessionStructure::MergePartialFromCodedStream(
 
       // optional bytes rootKey = 4;
       case 4: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+        if (tag == 34) {
          parse_rootKey:
           DO_(::google::protobuf::internal::WireFormatLite::ReadBytes(
                 input, this->mutable_rootkey()));
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
         if (input->ExpectTag(40)) goto parse_previousCounter;
         break;
@@ -2478,15 +2577,14 @@ bool SessionStructure::MergePartialFromCodedStream(
 
       // optional uint32 previousCounter = 5;
       case 5: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+        if (tag == 40) {
          parse_previousCounter:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
                  input, &previouscounter_)));
           set_has_previouscounter();
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
         if (input->ExpectTag(50)) goto parse_senderChain;
         break;
@@ -2494,13 +2592,12 @@ bool SessionStructure::MergePartialFromCodedStream(
 
       // optional .textsecure.SessionStructure.Chain senderChain = 6;
       case 6: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+        if (tag == 50) {
          parse_senderChain:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
                input, mutable_senderchain()));
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
         if (input->ExpectTag(58)) goto parse_receiverChains;
         break;
@@ -2508,13 +2605,12 @@ bool SessionStructure::MergePartialFromCodedStream(
 
       // repeated .textsecure.SessionStructure.Chain receiverChains = 7;
       case 7: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+        if (tag == 58) {
          parse_receiverChains:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
                 input, add_receiverchains()));
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
         if (input->ExpectTag(58)) goto parse_receiverChains;
         if (input->ExpectTag(66)) goto parse_pendingKeyExchange;
@@ -2523,13 +2619,12 @@ bool SessionStructure::MergePartialFromCodedStream(
 
       // optional .textsecure.SessionStructure.PendingKeyExchange pendingKeyExchange = 8;
       case 8: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+        if (tag == 66) {
          parse_pendingKeyExchange:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
                input, mutable_pendingkeyexchange()));
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
         if (input->ExpectTag(74)) goto parse_pendingPreKey;
         break;
@@ -2537,13 +2632,12 @@ bool SessionStructure::MergePartialFromCodedStream(
 
       // optional .textsecure.SessionStructure.PendingPreKey pendingPreKey = 9;
       case 9: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+        if (tag == 74) {
          parse_pendingPreKey:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
                input, mutable_pendingprekey()));
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
         if (input->ExpectTag(80)) goto parse_remoteRegistrationId;
         break;
@@ -2551,15 +2645,14 @@ bool SessionStructure::MergePartialFromCodedStream(
 
       // optional uint32 remoteRegistrationId = 10;
       case 10: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+        if (tag == 80) {
          parse_remoteRegistrationId:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
                  input, &remoteregistrationid_)));
           set_has_remoteregistrationid();
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
         if (input->ExpectTag(88)) goto parse_localRegistrationId;
         break;
@@ -2567,15 +2660,14 @@ bool SessionStructure::MergePartialFromCodedStream(
 
       // optional uint32 localRegistrationId = 11;
       case 11: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+        if (tag == 88) {
          parse_localRegistrationId:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
                  input, &localregistrationid_)));
           set_has_localregistrationid();
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
         if (input->ExpectTag(96)) goto parse_needsRefresh;
         break;
@@ -2583,15 +2675,14 @@ bool SessionStructure::MergePartialFromCodedStream(
 
       // optional bool needsRefresh = 12;
       case 12: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+        if (tag == 96) {
          parse_needsRefresh:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
                  input, &needsrefresh_)));
           set_has_needsrefresh();
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
         if (input->ExpectTag(106)) goto parse_aliceBaseKey;
         break;
@@ -2599,23 +2690,23 @@ bool SessionStructure::MergePartialFromCodedStream(
 
       // optional bytes aliceBaseKey = 13;
       case 13: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+        if (tag == 106) {
          parse_aliceBaseKey:
           DO_(::google::protobuf::internal::WireFormatLite::ReadBytes(
                 input, this->mutable_alicebasekey()));
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
-        if (input->ExpectAtEnd()) return true;
+        if (input->ExpectAtEnd()) goto success;
         break;
       }
 
       default: {
-      handle_uninterpreted:
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+      handle_unusual:
+        if (tag == 0 ||
+            ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-          return true;
+          goto success;
         }
         DO_(::google::protobuf::internal::WireFormat::SkipField(
               input, tag, mutable_unknown_fields()));
@@ -2623,12 +2714,18 @@ bool SessionStructure::MergePartialFromCodedStream(
       }
     }
   }
+success:
+  // @@protoc_insertion_point(parse_success:textsecure.SessionStructure)
   return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:textsecure.SessionStructure)
+  return false;
 #undef DO_
 }
 
 void SessionStructure::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
+  // @@protoc_insertion_point(serialize_start:textsecure.SessionStructure)
   // optional uint32 sessionVersion = 1;
   if (has_sessionversion()) {
     ::google::protobuf::internal::WireFormatLite::WriteUInt32(1, this->sessionversion(), output);
@@ -2636,19 +2733,19 @@ void SessionStructure::SerializeWithCachedSizes(
 
   // optional bytes localIdentityPublic = 2;
   if (has_localidentitypublic()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBytes(
+    ::google::protobuf::internal::WireFormatLite::WriteBytesMaybeAliased(
       2, this->localidentitypublic(), output);
   }
 
   // optional bytes remoteIdentityPublic = 3;
   if (has_remoteidentitypublic()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBytes(
+    ::google::protobuf::internal::WireFormatLite::WriteBytesMaybeAliased(
       3, this->remoteidentitypublic(), output);
   }
 
   // optional bytes rootKey = 4;
   if (has_rootkey()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBytes(
+    ::google::protobuf::internal::WireFormatLite::WriteBytesMaybeAliased(
       4, this->rootkey(), output);
   }
 
@@ -2698,7 +2795,7 @@ void SessionStructure::SerializeWithCachedSizes(
 
   // optional bytes aliceBaseKey = 13;
   if (has_alicebasekey()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBytes(
+    ::google::protobuf::internal::WireFormatLite::WriteBytesMaybeAliased(
       13, this->alicebasekey(), output);
   }
 
@@ -2706,10 +2803,12 @@ void SessionStructure::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
+  // @@protoc_insertion_point(serialize_end:textsecure.SessionStructure)
 }
 
 ::google::protobuf::uint8* SessionStructure::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
+  // @@protoc_insertion_point(serialize_to_array_start:textsecure.SessionStructure)
   // optional uint32 sessionVersion = 1;
   if (has_sessionversion()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(1, this->sessionversion(), target);
@@ -2795,6 +2894,7 @@ void SessionStructure::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
+  // @@protoc_insertion_point(serialize_to_array_end:textsecure.SessionStructure)
   return target;
 }
 
@@ -3021,6 +3121,7 @@ const int RecordStructure::kPreviousSessionsFieldNumber;
 RecordStructure::RecordStructure()
   : ::google::protobuf::Message() {
   SharedCtor();
+  // @@protoc_insertion_point(constructor:textsecure.RecordStructure)
 }
 
 void RecordStructure::InitAsDefaultInstance() {
@@ -3031,6 +3132,7 @@ RecordStructure::RecordStructure(const RecordStructure& from)
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
+  // @@protoc_insertion_point(copy_constructor:textsecure.RecordStructure)
 }
 
 void RecordStructure::SharedCtor() {
@@ -3040,6 +3142,7 @@ void RecordStructure::SharedCtor() {
 }
 
 RecordStructure::~RecordStructure() {
+  // @@protoc_insertion_point(destructor:textsecure.RecordStructure)
   SharedDtor();
 }
 
@@ -3071,10 +3174,8 @@ RecordStructure* RecordStructure::New() const {
 }
 
 void RecordStructure::Clear() {
-  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    if (has_currentsession()) {
-      if (currentsession_ != NULL) currentsession_->::textsecure::SessionStructure::Clear();
-    }
+  if (has_currentsession()) {
+    if (currentsession_ != NULL) currentsession_->::textsecure::SessionStructure::Clear();
   }
   previoussessions_.Clear();
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
@@ -3083,18 +3184,21 @@ void RecordStructure::Clear() {
 
 bool RecordStructure::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
-#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+#define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
   ::google::protobuf::uint32 tag;
-  while ((tag = input->ReadTag()) != 0) {
+  // @@protoc_insertion_point(parse_start:textsecure.RecordStructure)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
       // optional .textsecure.SessionStructure currentSession = 1;
       case 1: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+        if (tag == 10) {
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
                input, mutable_currentsession()));
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
         if (input->ExpectTag(18)) goto parse_previousSessions;
         break;
@@ -3102,24 +3206,24 @@ bool RecordStructure::MergePartialFromCodedStream(
 
       // repeated .textsecure.SessionStructure previousSessions = 2;
       case 2: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+        if (tag == 18) {
          parse_previousSessions:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
                 input, add_previoussessions()));
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
         if (input->ExpectTag(18)) goto parse_previousSessions;
-        if (input->ExpectAtEnd()) return true;
+        if (input->ExpectAtEnd()) goto success;
         break;
       }
 
       default: {
-      handle_uninterpreted:
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+      handle_unusual:
+        if (tag == 0 ||
+            ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-          return true;
+          goto success;
         }
         DO_(::google::protobuf::internal::WireFormat::SkipField(
               input, tag, mutable_unknown_fields()));
@@ -3127,12 +3231,18 @@ bool RecordStructure::MergePartialFromCodedStream(
       }
     }
   }
+success:
+  // @@protoc_insertion_point(parse_success:textsecure.RecordStructure)
   return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:textsecure.RecordStructure)
+  return false;
 #undef DO_
 }
 
 void RecordStructure::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
+  // @@protoc_insertion_point(serialize_start:textsecure.RecordStructure)
   // optional .textsecure.SessionStructure currentSession = 1;
   if (has_currentsession()) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
@@ -3149,10 +3259,12 @@ void RecordStructure::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
+  // @@protoc_insertion_point(serialize_end:textsecure.RecordStructure)
 }
 
 ::google::protobuf::uint8* RecordStructure::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
+  // @@protoc_insertion_point(serialize_to_array_start:textsecure.RecordStructure)
   // optional .textsecure.SessionStructure currentSession = 1;
   if (has_currentsession()) {
     target = ::google::protobuf::internal::WireFormatLite::
@@ -3171,6 +3283,7 @@ void RecordStructure::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
+  // @@protoc_insertion_point(serialize_to_array_end:textsecure.RecordStructure)
   return target;
 }
 
@@ -3275,6 +3388,7 @@ const int PreKeyRecordStructure::kPrivateKeyFieldNumber;
 PreKeyRecordStructure::PreKeyRecordStructure()
   : ::google::protobuf::Message() {
   SharedCtor();
+  // @@protoc_insertion_point(constructor:textsecure.PreKeyRecordStructure)
 }
 
 void PreKeyRecordStructure::InitAsDefaultInstance() {
@@ -3284,25 +3398,28 @@ PreKeyRecordStructure::PreKeyRecordStructure(const PreKeyRecordStructure& from)
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
+  // @@protoc_insertion_point(copy_constructor:textsecure.PreKeyRecordStructure)
 }
 
 void PreKeyRecordStructure::SharedCtor() {
+  ::google::protobuf::internal::GetEmptyString();
   _cached_size_ = 0;
   id_ = 0u;
-  publickey_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  privatekey_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  publickey_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  privatekey_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
 PreKeyRecordStructure::~PreKeyRecordStructure() {
+  // @@protoc_insertion_point(destructor:textsecure.PreKeyRecordStructure)
   SharedDtor();
 }
 
 void PreKeyRecordStructure::SharedDtor() {
-  if (publickey_ != &::google::protobuf::internal::kEmptyString) {
+  if (publickey_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     delete publickey_;
   }
-  if (privatekey_ != &::google::protobuf::internal::kEmptyString) {
+  if (privatekey_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     delete privatekey_;
   }
   if (this != default_instance_) {
@@ -3331,15 +3448,15 @@ PreKeyRecordStructure* PreKeyRecordStructure::New() const {
 }
 
 void PreKeyRecordStructure::Clear() {
-  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+  if (_has_bits_[0 / 32] & 7) {
     id_ = 0u;
     if (has_publickey()) {
-      if (publickey_ != &::google::protobuf::internal::kEmptyString) {
+      if (publickey_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
         publickey_->clear();
       }
     }
     if (has_privatekey()) {
-      if (privatekey_ != &::google::protobuf::internal::kEmptyString) {
+      if (privatekey_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
         privatekey_->clear();
       }
     }
@@ -3350,20 +3467,23 @@ void PreKeyRecordStructure::Clear() {
 
 bool PreKeyRecordStructure::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
-#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+#define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
   ::google::protobuf::uint32 tag;
-  while ((tag = input->ReadTag()) != 0) {
+  // @@protoc_insertion_point(parse_start:textsecure.PreKeyRecordStructure)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
       // optional uint32 id = 1;
       case 1: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+        if (tag == 8) {
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
                  input, &id_)));
           set_has_id();
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
         if (input->ExpectTag(18)) goto parse_publicKey;
         break;
@@ -3371,13 +3491,12 @@ bool PreKeyRecordStructure::MergePartialFromCodedStream(
 
       // optional bytes publicKey = 2;
       case 2: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+        if (tag == 18) {
          parse_publicKey:
           DO_(::google::protobuf::internal::WireFormatLite::ReadBytes(
                 input, this->mutable_publickey()));
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
         if (input->ExpectTag(26)) goto parse_privateKey;
         break;
@@ -3385,23 +3504,23 @@ bool PreKeyRecordStructure::MergePartialFromCodedStream(
 
       // optional bytes privateKey = 3;
       case 3: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+        if (tag == 26) {
          parse_privateKey:
           DO_(::google::protobuf::internal::WireFormatLite::ReadBytes(
                 input, this->mutable_privatekey()));
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
-        if (input->ExpectAtEnd()) return true;
+        if (input->ExpectAtEnd()) goto success;
         break;
       }
 
       default: {
-      handle_uninterpreted:
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+      handle_unusual:
+        if (tag == 0 ||
+            ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-          return true;
+          goto success;
         }
         DO_(::google::protobuf::internal::WireFormat::SkipField(
               input, tag, mutable_unknown_fields()));
@@ -3409,12 +3528,18 @@ bool PreKeyRecordStructure::MergePartialFromCodedStream(
       }
     }
   }
+success:
+  // @@protoc_insertion_point(parse_success:textsecure.PreKeyRecordStructure)
   return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:textsecure.PreKeyRecordStructure)
+  return false;
 #undef DO_
 }
 
 void PreKeyRecordStructure::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
+  // @@protoc_insertion_point(serialize_start:textsecure.PreKeyRecordStructure)
   // optional uint32 id = 1;
   if (has_id()) {
     ::google::protobuf::internal::WireFormatLite::WriteUInt32(1, this->id(), output);
@@ -3422,13 +3547,13 @@ void PreKeyRecordStructure::SerializeWithCachedSizes(
 
   // optional bytes publicKey = 2;
   if (has_publickey()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBytes(
+    ::google::protobuf::internal::WireFormatLite::WriteBytesMaybeAliased(
       2, this->publickey(), output);
   }
 
   // optional bytes privateKey = 3;
   if (has_privatekey()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBytes(
+    ::google::protobuf::internal::WireFormatLite::WriteBytesMaybeAliased(
       3, this->privatekey(), output);
   }
 
@@ -3436,10 +3561,12 @@ void PreKeyRecordStructure::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
+  // @@protoc_insertion_point(serialize_end:textsecure.PreKeyRecordStructure)
 }
 
 ::google::protobuf::uint8* PreKeyRecordStructure::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
+  // @@protoc_insertion_point(serialize_to_array_start:textsecure.PreKeyRecordStructure)
   // optional uint32 id = 1;
   if (has_id()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(1, this->id(), target);
@@ -3463,6 +3590,7 @@ void PreKeyRecordStructure::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
+  // @@protoc_insertion_point(serialize_to_array_end:textsecure.PreKeyRecordStructure)
   return target;
 }
 
@@ -3581,6 +3709,7 @@ const int SignedPreKeyRecordStructure::kTimestampFieldNumber;
 SignedPreKeyRecordStructure::SignedPreKeyRecordStructure()
   : ::google::protobuf::Message() {
   SharedCtor();
+  // @@protoc_insertion_point(constructor:textsecure.SignedPreKeyRecordStructure)
 }
 
 void SignedPreKeyRecordStructure::InitAsDefaultInstance() {
@@ -3590,30 +3719,33 @@ SignedPreKeyRecordStructure::SignedPreKeyRecordStructure(const SignedPreKeyRecor
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
+  // @@protoc_insertion_point(copy_constructor:textsecure.SignedPreKeyRecordStructure)
 }
 
 void SignedPreKeyRecordStructure::SharedCtor() {
+  ::google::protobuf::internal::GetEmptyString();
   _cached_size_ = 0;
   id_ = 0u;
-  publickey_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  privatekey_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  signature_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  publickey_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  privatekey_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  signature_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   timestamp_ = GOOGLE_ULONGLONG(0);
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
 SignedPreKeyRecordStructure::~SignedPreKeyRecordStructure() {
+  // @@protoc_insertion_point(destructor:textsecure.SignedPreKeyRecordStructure)
   SharedDtor();
 }
 
 void SignedPreKeyRecordStructure::SharedDtor() {
-  if (publickey_ != &::google::protobuf::internal::kEmptyString) {
+  if (publickey_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     delete publickey_;
   }
-  if (privatekey_ != &::google::protobuf::internal::kEmptyString) {
+  if (privatekey_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     delete privatekey_;
   }
-  if (signature_ != &::google::protobuf::internal::kEmptyString) {
+  if (signature_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     delete signature_;
   }
   if (this != default_instance_) {
@@ -3642,45 +3774,61 @@ SignedPreKeyRecordStructure* SignedPreKeyRecordStructure::New() const {
 }
 
 void SignedPreKeyRecordStructure::Clear() {
-  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    id_ = 0u;
+#define OFFSET_OF_FIELD_(f) (reinterpret_cast<char*>(      \
+  &reinterpret_cast<SignedPreKeyRecordStructure*>(16)->f) - \
+   reinterpret_cast<char*>(16))
+
+#define ZR_(first, last) do {                              \
+    size_t f = OFFSET_OF_FIELD_(first);                    \
+    size_t n = OFFSET_OF_FIELD_(last) - f + sizeof(last);  \
+    ::memset(&first, 0, n);                                \
+  } while (0)
+
+  if (_has_bits_[0 / 32] & 31) {
+    ZR_(timestamp_, id_);
     if (has_publickey()) {
-      if (publickey_ != &::google::protobuf::internal::kEmptyString) {
+      if (publickey_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
         publickey_->clear();
       }
     }
     if (has_privatekey()) {
-      if (privatekey_ != &::google::protobuf::internal::kEmptyString) {
+      if (privatekey_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
         privatekey_->clear();
       }
     }
     if (has_signature()) {
-      if (signature_ != &::google::protobuf::internal::kEmptyString) {
+      if (signature_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
         signature_->clear();
       }
     }
-    timestamp_ = GOOGLE_ULONGLONG(0);
   }
+
+#undef OFFSET_OF_FIELD_
+#undef ZR_
+
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
 }
 
 bool SignedPreKeyRecordStructure::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
-#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+#define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
   ::google::protobuf::uint32 tag;
-  while ((tag = input->ReadTag()) != 0) {
+  // @@protoc_insertion_point(parse_start:textsecure.SignedPreKeyRecordStructure)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
       // optional uint32 id = 1;
       case 1: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+        if (tag == 8) {
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
                  input, &id_)));
           set_has_id();
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
         if (input->ExpectTag(18)) goto parse_publicKey;
         break;
@@ -3688,13 +3836,12 @@ bool SignedPreKeyRecordStructure::MergePartialFromCodedStream(
 
       // optional bytes publicKey = 2;
       case 2: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+        if (tag == 18) {
          parse_publicKey:
           DO_(::google::protobuf::internal::WireFormatLite::ReadBytes(
                 input, this->mutable_publickey()));
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
         if (input->ExpectTag(26)) goto parse_privateKey;
         break;
@@ -3702,13 +3849,12 @@ bool SignedPreKeyRecordStructure::MergePartialFromCodedStream(
 
       // optional bytes privateKey = 3;
       case 3: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+        if (tag == 26) {
          parse_privateKey:
           DO_(::google::protobuf::internal::WireFormatLite::ReadBytes(
                 input, this->mutable_privatekey()));
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
         if (input->ExpectTag(34)) goto parse_signature;
         break;
@@ -3716,13 +3862,12 @@ bool SignedPreKeyRecordStructure::MergePartialFromCodedStream(
 
       // optional bytes signature = 4;
       case 4: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+        if (tag == 34) {
          parse_signature:
           DO_(::google::protobuf::internal::WireFormatLite::ReadBytes(
                 input, this->mutable_signature()));
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
         if (input->ExpectTag(41)) goto parse_timestamp;
         break;
@@ -3730,25 +3875,25 @@ bool SignedPreKeyRecordStructure::MergePartialFromCodedStream(
 
       // optional fixed64 timestamp = 5;
       case 5: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
+        if (tag == 41) {
          parse_timestamp:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::uint64, ::google::protobuf::internal::WireFormatLite::TYPE_FIXED64>(
                  input, &timestamp_)));
           set_has_timestamp();
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
-        if (input->ExpectAtEnd()) return true;
+        if (input->ExpectAtEnd()) goto success;
         break;
       }
 
       default: {
-      handle_uninterpreted:
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+      handle_unusual:
+        if (tag == 0 ||
+            ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-          return true;
+          goto success;
         }
         DO_(::google::protobuf::internal::WireFormat::SkipField(
               input, tag, mutable_unknown_fields()));
@@ -3756,12 +3901,18 @@ bool SignedPreKeyRecordStructure::MergePartialFromCodedStream(
       }
     }
   }
+success:
+  // @@protoc_insertion_point(parse_success:textsecure.SignedPreKeyRecordStructure)
   return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:textsecure.SignedPreKeyRecordStructure)
+  return false;
 #undef DO_
 }
 
 void SignedPreKeyRecordStructure::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
+  // @@protoc_insertion_point(serialize_start:textsecure.SignedPreKeyRecordStructure)
   // optional uint32 id = 1;
   if (has_id()) {
     ::google::protobuf::internal::WireFormatLite::WriteUInt32(1, this->id(), output);
@@ -3769,19 +3920,19 @@ void SignedPreKeyRecordStructure::SerializeWithCachedSizes(
 
   // optional bytes publicKey = 2;
   if (has_publickey()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBytes(
+    ::google::protobuf::internal::WireFormatLite::WriteBytesMaybeAliased(
       2, this->publickey(), output);
   }
 
   // optional bytes privateKey = 3;
   if (has_privatekey()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBytes(
+    ::google::protobuf::internal::WireFormatLite::WriteBytesMaybeAliased(
       3, this->privatekey(), output);
   }
 
   // optional bytes signature = 4;
   if (has_signature()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBytes(
+    ::google::protobuf::internal::WireFormatLite::WriteBytesMaybeAliased(
       4, this->signature(), output);
   }
 
@@ -3794,10 +3945,12 @@ void SignedPreKeyRecordStructure::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
+  // @@protoc_insertion_point(serialize_end:textsecure.SignedPreKeyRecordStructure)
 }
 
 ::google::protobuf::uint8* SignedPreKeyRecordStructure::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
+  // @@protoc_insertion_point(serialize_to_array_start:textsecure.SignedPreKeyRecordStructure)
   // optional uint32 id = 1;
   if (has_id()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(1, this->id(), target);
@@ -3833,6 +3986,7 @@ void SignedPreKeyRecordStructure::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
+  // @@protoc_insertion_point(serialize_to_array_end:textsecure.SignedPreKeyRecordStructure)
   return target;
 }
 
@@ -3968,6 +4122,7 @@ const int IdentityKeyPairStructure::kPrivateKeyFieldNumber;
 IdentityKeyPairStructure::IdentityKeyPairStructure()
   : ::google::protobuf::Message() {
   SharedCtor();
+  // @@protoc_insertion_point(constructor:textsecure.IdentityKeyPairStructure)
 }
 
 void IdentityKeyPairStructure::InitAsDefaultInstance() {
@@ -3977,24 +4132,27 @@ IdentityKeyPairStructure::IdentityKeyPairStructure(const IdentityKeyPairStructur
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
+  // @@protoc_insertion_point(copy_constructor:textsecure.IdentityKeyPairStructure)
 }
 
 void IdentityKeyPairStructure::SharedCtor() {
+  ::google::protobuf::internal::GetEmptyString();
   _cached_size_ = 0;
-  publickey_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  privatekey_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  publickey_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  privatekey_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
 IdentityKeyPairStructure::~IdentityKeyPairStructure() {
+  // @@protoc_insertion_point(destructor:textsecure.IdentityKeyPairStructure)
   SharedDtor();
 }
 
 void IdentityKeyPairStructure::SharedDtor() {
-  if (publickey_ != &::google::protobuf::internal::kEmptyString) {
+  if (publickey_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     delete publickey_;
   }
-  if (privatekey_ != &::google::protobuf::internal::kEmptyString) {
+  if (privatekey_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     delete privatekey_;
   }
   if (this != default_instance_) {
@@ -4023,14 +4181,14 @@ IdentityKeyPairStructure* IdentityKeyPairStructure::New() const {
 }
 
 void IdentityKeyPairStructure::Clear() {
-  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+  if (_has_bits_[0 / 32] & 3) {
     if (has_publickey()) {
-      if (publickey_ != &::google::protobuf::internal::kEmptyString) {
+      if (publickey_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
         publickey_->clear();
       }
     }
     if (has_privatekey()) {
-      if (privatekey_ != &::google::protobuf::internal::kEmptyString) {
+      if (privatekey_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
         privatekey_->clear();
       }
     }
@@ -4041,18 +4199,21 @@ void IdentityKeyPairStructure::Clear() {
 
 bool IdentityKeyPairStructure::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
-#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+#define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
   ::google::protobuf::uint32 tag;
-  while ((tag = input->ReadTag()) != 0) {
+  // @@protoc_insertion_point(parse_start:textsecure.IdentityKeyPairStructure)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
       // optional bytes publicKey = 1;
       case 1: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+        if (tag == 10) {
           DO_(::google::protobuf::internal::WireFormatLite::ReadBytes(
                 input, this->mutable_publickey()));
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
         if (input->ExpectTag(18)) goto parse_privateKey;
         break;
@@ -4060,23 +4221,23 @@ bool IdentityKeyPairStructure::MergePartialFromCodedStream(
 
       // optional bytes privateKey = 2;
       case 2: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+        if (tag == 18) {
          parse_privateKey:
           DO_(::google::protobuf::internal::WireFormatLite::ReadBytes(
                 input, this->mutable_privatekey()));
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
-        if (input->ExpectAtEnd()) return true;
+        if (input->ExpectAtEnd()) goto success;
         break;
       }
 
       default: {
-      handle_uninterpreted:
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+      handle_unusual:
+        if (tag == 0 ||
+            ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-          return true;
+          goto success;
         }
         DO_(::google::protobuf::internal::WireFormat::SkipField(
               input, tag, mutable_unknown_fields()));
@@ -4084,21 +4245,27 @@ bool IdentityKeyPairStructure::MergePartialFromCodedStream(
       }
     }
   }
+success:
+  // @@protoc_insertion_point(parse_success:textsecure.IdentityKeyPairStructure)
   return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:textsecure.IdentityKeyPairStructure)
+  return false;
 #undef DO_
 }
 
 void IdentityKeyPairStructure::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
+  // @@protoc_insertion_point(serialize_start:textsecure.IdentityKeyPairStructure)
   // optional bytes publicKey = 1;
   if (has_publickey()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBytes(
+    ::google::protobuf::internal::WireFormatLite::WriteBytesMaybeAliased(
       1, this->publickey(), output);
   }
 
   // optional bytes privateKey = 2;
   if (has_privatekey()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBytes(
+    ::google::protobuf::internal::WireFormatLite::WriteBytesMaybeAliased(
       2, this->privatekey(), output);
   }
 
@@ -4106,10 +4273,12 @@ void IdentityKeyPairStructure::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
+  // @@protoc_insertion_point(serialize_end:textsecure.IdentityKeyPairStructure)
 }
 
 ::google::protobuf::uint8* IdentityKeyPairStructure::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
+  // @@protoc_insertion_point(serialize_to_array_start:textsecure.IdentityKeyPairStructure)
   // optional bytes publicKey = 1;
   if (has_publickey()) {
     target =
@@ -4128,6 +4297,7 @@ void IdentityKeyPairStructure::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
+  // @@protoc_insertion_point(serialize_to_array_end:textsecure.IdentityKeyPairStructure)
   return target;
 }
 
@@ -4232,6 +4402,7 @@ const int SenderKeyStateStructure_SenderChainKey::kSeedFieldNumber;
 SenderKeyStateStructure_SenderChainKey::SenderKeyStateStructure_SenderChainKey()
   : ::google::protobuf::Message() {
   SharedCtor();
+  // @@protoc_insertion_point(constructor:textsecure.SenderKeyStateStructure.SenderChainKey)
 }
 
 void SenderKeyStateStructure_SenderChainKey::InitAsDefaultInstance() {
@@ -4241,21 +4412,24 @@ SenderKeyStateStructure_SenderChainKey::SenderKeyStateStructure_SenderChainKey(c
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
+  // @@protoc_insertion_point(copy_constructor:textsecure.SenderKeyStateStructure.SenderChainKey)
 }
 
 void SenderKeyStateStructure_SenderChainKey::SharedCtor() {
+  ::google::protobuf::internal::GetEmptyString();
   _cached_size_ = 0;
   iteration_ = 0u;
-  seed_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  seed_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
 SenderKeyStateStructure_SenderChainKey::~SenderKeyStateStructure_SenderChainKey() {
+  // @@protoc_insertion_point(destructor:textsecure.SenderKeyStateStructure.SenderChainKey)
   SharedDtor();
 }
 
 void SenderKeyStateStructure_SenderChainKey::SharedDtor() {
-  if (seed_ != &::google::protobuf::internal::kEmptyString) {
+  if (seed_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     delete seed_;
   }
   if (this != default_instance_) {
@@ -4284,10 +4458,10 @@ SenderKeyStateStructure_SenderChainKey* SenderKeyStateStructure_SenderChainKey::
 }
 
 void SenderKeyStateStructure_SenderChainKey::Clear() {
-  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+  if (_has_bits_[0 / 32] & 3) {
     iteration_ = 0u;
     if (has_seed()) {
-      if (seed_ != &::google::protobuf::internal::kEmptyString) {
+      if (seed_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
         seed_->clear();
       }
     }
@@ -4298,20 +4472,23 @@ void SenderKeyStateStructure_SenderChainKey::Clear() {
 
 bool SenderKeyStateStructure_SenderChainKey::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
-#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+#define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
   ::google::protobuf::uint32 tag;
-  while ((tag = input->ReadTag()) != 0) {
+  // @@protoc_insertion_point(parse_start:textsecure.SenderKeyStateStructure.SenderChainKey)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
       // optional uint32 iteration = 1;
       case 1: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+        if (tag == 8) {
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
                  input, &iteration_)));
           set_has_iteration();
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
         if (input->ExpectTag(18)) goto parse_seed;
         break;
@@ -4319,23 +4496,23 @@ bool SenderKeyStateStructure_SenderChainKey::MergePartialFromCodedStream(
 
       // optional bytes seed = 2;
       case 2: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+        if (tag == 18) {
          parse_seed:
           DO_(::google::protobuf::internal::WireFormatLite::ReadBytes(
                 input, this->mutable_seed()));
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
-        if (input->ExpectAtEnd()) return true;
+        if (input->ExpectAtEnd()) goto success;
         break;
       }
 
       default: {
-      handle_uninterpreted:
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+      handle_unusual:
+        if (tag == 0 ||
+            ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-          return true;
+          goto success;
         }
         DO_(::google::protobuf::internal::WireFormat::SkipField(
               input, tag, mutable_unknown_fields()));
@@ -4343,12 +4520,18 @@ bool SenderKeyStateStructure_SenderChainKey::MergePartialFromCodedStream(
       }
     }
   }
+success:
+  // @@protoc_insertion_point(parse_success:textsecure.SenderKeyStateStructure.SenderChainKey)
   return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:textsecure.SenderKeyStateStructure.SenderChainKey)
+  return false;
 #undef DO_
 }
 
 void SenderKeyStateStructure_SenderChainKey::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
+  // @@protoc_insertion_point(serialize_start:textsecure.SenderKeyStateStructure.SenderChainKey)
   // optional uint32 iteration = 1;
   if (has_iteration()) {
     ::google::protobuf::internal::WireFormatLite::WriteUInt32(1, this->iteration(), output);
@@ -4356,7 +4539,7 @@ void SenderKeyStateStructure_SenderChainKey::SerializeWithCachedSizes(
 
   // optional bytes seed = 2;
   if (has_seed()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBytes(
+    ::google::protobuf::internal::WireFormatLite::WriteBytesMaybeAliased(
       2, this->seed(), output);
   }
 
@@ -4364,10 +4547,12 @@ void SenderKeyStateStructure_SenderChainKey::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
+  // @@protoc_insertion_point(serialize_end:textsecure.SenderKeyStateStructure.SenderChainKey)
 }
 
 ::google::protobuf::uint8* SenderKeyStateStructure_SenderChainKey::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
+  // @@protoc_insertion_point(serialize_to_array_start:textsecure.SenderKeyStateStructure.SenderChainKey)
   // optional uint32 iteration = 1;
   if (has_iteration()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(1, this->iteration(), target);
@@ -4384,6 +4569,7 @@ void SenderKeyStateStructure_SenderChainKey::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
+  // @@protoc_insertion_point(serialize_to_array_end:textsecure.SenderKeyStateStructure.SenderChainKey)
   return target;
 }
 
@@ -4488,6 +4674,7 @@ const int SenderKeyStateStructure_SenderMessageKey::kSeedFieldNumber;
 SenderKeyStateStructure_SenderMessageKey::SenderKeyStateStructure_SenderMessageKey()
   : ::google::protobuf::Message() {
   SharedCtor();
+  // @@protoc_insertion_point(constructor:textsecure.SenderKeyStateStructure.SenderMessageKey)
 }
 
 void SenderKeyStateStructure_SenderMessageKey::InitAsDefaultInstance() {
@@ -4497,21 +4684,24 @@ SenderKeyStateStructure_SenderMessageKey::SenderKeyStateStructure_SenderMessageK
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
+  // @@protoc_insertion_point(copy_constructor:textsecure.SenderKeyStateStructure.SenderMessageKey)
 }
 
 void SenderKeyStateStructure_SenderMessageKey::SharedCtor() {
+  ::google::protobuf::internal::GetEmptyString();
   _cached_size_ = 0;
   iteration_ = 0u;
-  seed_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  seed_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
 SenderKeyStateStructure_SenderMessageKey::~SenderKeyStateStructure_SenderMessageKey() {
+  // @@protoc_insertion_point(destructor:textsecure.SenderKeyStateStructure.SenderMessageKey)
   SharedDtor();
 }
 
 void SenderKeyStateStructure_SenderMessageKey::SharedDtor() {
-  if (seed_ != &::google::protobuf::internal::kEmptyString) {
+  if (seed_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     delete seed_;
   }
   if (this != default_instance_) {
@@ -4540,10 +4730,10 @@ SenderKeyStateStructure_SenderMessageKey* SenderKeyStateStructure_SenderMessageK
 }
 
 void SenderKeyStateStructure_SenderMessageKey::Clear() {
-  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+  if (_has_bits_[0 / 32] & 3) {
     iteration_ = 0u;
     if (has_seed()) {
-      if (seed_ != &::google::protobuf::internal::kEmptyString) {
+      if (seed_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
         seed_->clear();
       }
     }
@@ -4554,20 +4744,23 @@ void SenderKeyStateStructure_SenderMessageKey::Clear() {
 
 bool SenderKeyStateStructure_SenderMessageKey::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
-#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+#define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
   ::google::protobuf::uint32 tag;
-  while ((tag = input->ReadTag()) != 0) {
+  // @@protoc_insertion_point(parse_start:textsecure.SenderKeyStateStructure.SenderMessageKey)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
       // optional uint32 iteration = 1;
       case 1: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+        if (tag == 8) {
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
                  input, &iteration_)));
           set_has_iteration();
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
         if (input->ExpectTag(18)) goto parse_seed;
         break;
@@ -4575,23 +4768,23 @@ bool SenderKeyStateStructure_SenderMessageKey::MergePartialFromCodedStream(
 
       // optional bytes seed = 2;
       case 2: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+        if (tag == 18) {
          parse_seed:
           DO_(::google::protobuf::internal::WireFormatLite::ReadBytes(
                 input, this->mutable_seed()));
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
-        if (input->ExpectAtEnd()) return true;
+        if (input->ExpectAtEnd()) goto success;
         break;
       }
 
       default: {
-      handle_uninterpreted:
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+      handle_unusual:
+        if (tag == 0 ||
+            ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-          return true;
+          goto success;
         }
         DO_(::google::protobuf::internal::WireFormat::SkipField(
               input, tag, mutable_unknown_fields()));
@@ -4599,12 +4792,18 @@ bool SenderKeyStateStructure_SenderMessageKey::MergePartialFromCodedStream(
       }
     }
   }
+success:
+  // @@protoc_insertion_point(parse_success:textsecure.SenderKeyStateStructure.SenderMessageKey)
   return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:textsecure.SenderKeyStateStructure.SenderMessageKey)
+  return false;
 #undef DO_
 }
 
 void SenderKeyStateStructure_SenderMessageKey::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
+  // @@protoc_insertion_point(serialize_start:textsecure.SenderKeyStateStructure.SenderMessageKey)
   // optional uint32 iteration = 1;
   if (has_iteration()) {
     ::google::protobuf::internal::WireFormatLite::WriteUInt32(1, this->iteration(), output);
@@ -4612,7 +4811,7 @@ void SenderKeyStateStructure_SenderMessageKey::SerializeWithCachedSizes(
 
   // optional bytes seed = 2;
   if (has_seed()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBytes(
+    ::google::protobuf::internal::WireFormatLite::WriteBytesMaybeAliased(
       2, this->seed(), output);
   }
 
@@ -4620,10 +4819,12 @@ void SenderKeyStateStructure_SenderMessageKey::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
+  // @@protoc_insertion_point(serialize_end:textsecure.SenderKeyStateStructure.SenderMessageKey)
 }
 
 ::google::protobuf::uint8* SenderKeyStateStructure_SenderMessageKey::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
+  // @@protoc_insertion_point(serialize_to_array_start:textsecure.SenderKeyStateStructure.SenderMessageKey)
   // optional uint32 iteration = 1;
   if (has_iteration()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(1, this->iteration(), target);
@@ -4640,6 +4841,7 @@ void SenderKeyStateStructure_SenderMessageKey::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
+  // @@protoc_insertion_point(serialize_to_array_end:textsecure.SenderKeyStateStructure.SenderMessageKey)
   return target;
 }
 
@@ -4744,6 +4946,7 @@ const int SenderKeyStateStructure_SenderSigningKey::kPrivateFieldNumber;
 SenderKeyStateStructure_SenderSigningKey::SenderKeyStateStructure_SenderSigningKey()
   : ::google::protobuf::Message() {
   SharedCtor();
+  // @@protoc_insertion_point(constructor:textsecure.SenderKeyStateStructure.SenderSigningKey)
 }
 
 void SenderKeyStateStructure_SenderSigningKey::InitAsDefaultInstance() {
@@ -4753,24 +4956,27 @@ SenderKeyStateStructure_SenderSigningKey::SenderKeyStateStructure_SenderSigningK
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
+  // @@protoc_insertion_point(copy_constructor:textsecure.SenderKeyStateStructure.SenderSigningKey)
 }
 
 void SenderKeyStateStructure_SenderSigningKey::SharedCtor() {
+  ::google::protobuf::internal::GetEmptyString();
   _cached_size_ = 0;
-  public__ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  private__ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  public__ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  private__ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
 SenderKeyStateStructure_SenderSigningKey::~SenderKeyStateStructure_SenderSigningKey() {
+  // @@protoc_insertion_point(destructor:textsecure.SenderKeyStateStructure.SenderSigningKey)
   SharedDtor();
 }
 
 void SenderKeyStateStructure_SenderSigningKey::SharedDtor() {
-  if (public__ != &::google::protobuf::internal::kEmptyString) {
+  if (public__ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     delete public__;
   }
-  if (private__ != &::google::protobuf::internal::kEmptyString) {
+  if (private__ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     delete private__;
   }
   if (this != default_instance_) {
@@ -4799,14 +5005,14 @@ SenderKeyStateStructure_SenderSigningKey* SenderKeyStateStructure_SenderSigningK
 }
 
 void SenderKeyStateStructure_SenderSigningKey::Clear() {
-  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+  if (_has_bits_[0 / 32] & 3) {
     if (has_public_()) {
-      if (public__ != &::google::protobuf::internal::kEmptyString) {
+      if (public__ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
         public__->clear();
       }
     }
     if (has_private_()) {
-      if (private__ != &::google::protobuf::internal::kEmptyString) {
+      if (private__ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
         private__->clear();
       }
     }
@@ -4817,18 +5023,21 @@ void SenderKeyStateStructure_SenderSigningKey::Clear() {
 
 bool SenderKeyStateStructure_SenderSigningKey::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
-#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+#define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
   ::google::protobuf::uint32 tag;
-  while ((tag = input->ReadTag()) != 0) {
+  // @@protoc_insertion_point(parse_start:textsecure.SenderKeyStateStructure.SenderSigningKey)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
       // optional bytes public = 1;
       case 1: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+        if (tag == 10) {
           DO_(::google::protobuf::internal::WireFormatLite::ReadBytes(
                 input, this->mutable_public_()));
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
         if (input->ExpectTag(18)) goto parse_private;
         break;
@@ -4836,23 +5045,23 @@ bool SenderKeyStateStructure_SenderSigningKey::MergePartialFromCodedStream(
 
       // optional bytes private = 2;
       case 2: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+        if (tag == 18) {
          parse_private:
           DO_(::google::protobuf::internal::WireFormatLite::ReadBytes(
                 input, this->mutable_private_()));
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
-        if (input->ExpectAtEnd()) return true;
+        if (input->ExpectAtEnd()) goto success;
         break;
       }
 
       default: {
-      handle_uninterpreted:
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+      handle_unusual:
+        if (tag == 0 ||
+            ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-          return true;
+          goto success;
         }
         DO_(::google::protobuf::internal::WireFormat::SkipField(
               input, tag, mutable_unknown_fields()));
@@ -4860,21 +5069,27 @@ bool SenderKeyStateStructure_SenderSigningKey::MergePartialFromCodedStream(
       }
     }
   }
+success:
+  // @@protoc_insertion_point(parse_success:textsecure.SenderKeyStateStructure.SenderSigningKey)
   return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:textsecure.SenderKeyStateStructure.SenderSigningKey)
+  return false;
 #undef DO_
 }
 
 void SenderKeyStateStructure_SenderSigningKey::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
+  // @@protoc_insertion_point(serialize_start:textsecure.SenderKeyStateStructure.SenderSigningKey)
   // optional bytes public = 1;
   if (has_public_()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBytes(
+    ::google::protobuf::internal::WireFormatLite::WriteBytesMaybeAliased(
       1, this->public_(), output);
   }
 
   // optional bytes private = 2;
   if (has_private_()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBytes(
+    ::google::protobuf::internal::WireFormatLite::WriteBytesMaybeAliased(
       2, this->private_(), output);
   }
 
@@ -4882,10 +5097,12 @@ void SenderKeyStateStructure_SenderSigningKey::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
+  // @@protoc_insertion_point(serialize_end:textsecure.SenderKeyStateStructure.SenderSigningKey)
 }
 
 ::google::protobuf::uint8* SenderKeyStateStructure_SenderSigningKey::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
+  // @@protoc_insertion_point(serialize_to_array_start:textsecure.SenderKeyStateStructure.SenderSigningKey)
   // optional bytes public = 1;
   if (has_public_()) {
     target =
@@ -4904,6 +5121,7 @@ void SenderKeyStateStructure_SenderSigningKey::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
+  // @@protoc_insertion_point(serialize_to_array_end:textsecure.SenderKeyStateStructure.SenderSigningKey)
   return target;
 }
 
@@ -5010,6 +5228,7 @@ const int SenderKeyStateStructure::kSenderMessageKeysFieldNumber;
 SenderKeyStateStructure::SenderKeyStateStructure()
   : ::google::protobuf::Message() {
   SharedCtor();
+  // @@protoc_insertion_point(constructor:textsecure.SenderKeyStateStructure)
 }
 
 void SenderKeyStateStructure::InitAsDefaultInstance() {
@@ -5021,6 +5240,7 @@ SenderKeyStateStructure::SenderKeyStateStructure(const SenderKeyStateStructure& 
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
+  // @@protoc_insertion_point(copy_constructor:textsecure.SenderKeyStateStructure)
 }
 
 void SenderKeyStateStructure::SharedCtor() {
@@ -5032,6 +5252,7 @@ void SenderKeyStateStructure::SharedCtor() {
 }
 
 SenderKeyStateStructure::~SenderKeyStateStructure() {
+  // @@protoc_insertion_point(destructor:textsecure.SenderKeyStateStructure)
   SharedDtor();
 }
 
@@ -5064,7 +5285,7 @@ SenderKeyStateStructure* SenderKeyStateStructure::New() const {
 }
 
 void SenderKeyStateStructure::Clear() {
-  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+  if (_has_bits_[0 / 32] & 7) {
     senderkeyid_ = 0u;
     if (has_senderchainkey()) {
       if (senderchainkey_ != NULL) senderchainkey_->::textsecure::SenderKeyStateStructure_SenderChainKey::Clear();
@@ -5080,20 +5301,23 @@ void SenderKeyStateStructure::Clear() {
 
 bool SenderKeyStateStructure::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
-#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+#define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
   ::google::protobuf::uint32 tag;
-  while ((tag = input->ReadTag()) != 0) {
+  // @@protoc_insertion_point(parse_start:textsecure.SenderKeyStateStructure)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
       // optional uint32 senderKeyId = 1;
       case 1: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+        if (tag == 8) {
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
                  input, &senderkeyid_)));
           set_has_senderkeyid();
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
         if (input->ExpectTag(18)) goto parse_senderChainKey;
         break;
@@ -5101,13 +5325,12 @@ bool SenderKeyStateStructure::MergePartialFromCodedStream(
 
       // optional .textsecure.SenderKeyStateStructure.SenderChainKey senderChainKey = 2;
       case 2: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+        if (tag == 18) {
          parse_senderChainKey:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
                input, mutable_senderchainkey()));
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
         if (input->ExpectTag(26)) goto parse_senderSigningKey;
         break;
@@ -5115,13 +5338,12 @@ bool SenderKeyStateStructure::MergePartialFromCodedStream(
 
       // optional .textsecure.SenderKeyStateStructure.SenderSigningKey senderSigningKey = 3;
       case 3: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+        if (tag == 26) {
          parse_senderSigningKey:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
                input, mutable_sendersigningkey()));
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
         if (input->ExpectTag(34)) goto parse_senderMessageKeys;
         break;
@@ -5129,24 +5351,24 @@ bool SenderKeyStateStructure::MergePartialFromCodedStream(
 
       // repeated .textsecure.SenderKeyStateStructure.SenderMessageKey senderMessageKeys = 4;
       case 4: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+        if (tag == 34) {
          parse_senderMessageKeys:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
                 input, add_sendermessagekeys()));
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
         if (input->ExpectTag(34)) goto parse_senderMessageKeys;
-        if (input->ExpectAtEnd()) return true;
+        if (input->ExpectAtEnd()) goto success;
         break;
       }
 
       default: {
-      handle_uninterpreted:
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+      handle_unusual:
+        if (tag == 0 ||
+            ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-          return true;
+          goto success;
         }
         DO_(::google::protobuf::internal::WireFormat::SkipField(
               input, tag, mutable_unknown_fields()));
@@ -5154,12 +5376,18 @@ bool SenderKeyStateStructure::MergePartialFromCodedStream(
       }
     }
   }
+success:
+  // @@protoc_insertion_point(parse_success:textsecure.SenderKeyStateStructure)
   return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:textsecure.SenderKeyStateStructure)
+  return false;
 #undef DO_
 }
 
 void SenderKeyStateStructure::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
+  // @@protoc_insertion_point(serialize_start:textsecure.SenderKeyStateStructure)
   // optional uint32 senderKeyId = 1;
   if (has_senderkeyid()) {
     ::google::protobuf::internal::WireFormatLite::WriteUInt32(1, this->senderkeyid(), output);
@@ -5187,10 +5415,12 @@ void SenderKeyStateStructure::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
+  // @@protoc_insertion_point(serialize_end:textsecure.SenderKeyStateStructure)
 }
 
 ::google::protobuf::uint8* SenderKeyStateStructure::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
+  // @@protoc_insertion_point(serialize_to_array_start:textsecure.SenderKeyStateStructure)
   // optional uint32 senderKeyId = 1;
   if (has_senderkeyid()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(1, this->senderkeyid(), target);
@@ -5221,6 +5451,7 @@ void SenderKeyStateStructure::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
+  // @@protoc_insertion_point(serialize_to_array_end:textsecure.SenderKeyStateStructure)
   return target;
 }
 
@@ -5345,6 +5576,7 @@ const int SenderKeyRecordStructure::kSenderKeyStatesFieldNumber;
 SenderKeyRecordStructure::SenderKeyRecordStructure()
   : ::google::protobuf::Message() {
   SharedCtor();
+  // @@protoc_insertion_point(constructor:textsecure.SenderKeyRecordStructure)
 }
 
 void SenderKeyRecordStructure::InitAsDefaultInstance() {
@@ -5354,6 +5586,7 @@ SenderKeyRecordStructure::SenderKeyRecordStructure(const SenderKeyRecordStructur
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
+  // @@protoc_insertion_point(copy_constructor:textsecure.SenderKeyRecordStructure)
 }
 
 void SenderKeyRecordStructure::SharedCtor() {
@@ -5362,6 +5595,7 @@ void SenderKeyRecordStructure::SharedCtor() {
 }
 
 SenderKeyRecordStructure::~SenderKeyRecordStructure() {
+  // @@protoc_insertion_point(destructor:textsecure.SenderKeyRecordStructure)
   SharedDtor();
 }
 
@@ -5399,30 +5633,34 @@ void SenderKeyRecordStructure::Clear() {
 
 bool SenderKeyRecordStructure::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
-#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+#define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
   ::google::protobuf::uint32 tag;
-  while ((tag = input->ReadTag()) != 0) {
+  // @@protoc_insertion_point(parse_start:textsecure.SenderKeyRecordStructure)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
       // repeated .textsecure.SenderKeyStateStructure senderKeyStates = 1;
       case 1: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+        if (tag == 10) {
          parse_senderKeyStates:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
                 input, add_senderkeystates()));
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
         if (input->ExpectTag(10)) goto parse_senderKeyStates;
-        if (input->ExpectAtEnd()) return true;
+        if (input->ExpectAtEnd()) goto success;
         break;
       }
 
       default: {
-      handle_uninterpreted:
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+      handle_unusual:
+        if (tag == 0 ||
+            ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-          return true;
+          goto success;
         }
         DO_(::google::protobuf::internal::WireFormat::SkipField(
               input, tag, mutable_unknown_fields()));
@@ -5430,12 +5668,18 @@ bool SenderKeyRecordStructure::MergePartialFromCodedStream(
       }
     }
   }
+success:
+  // @@protoc_insertion_point(parse_success:textsecure.SenderKeyRecordStructure)
   return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:textsecure.SenderKeyRecordStructure)
+  return false;
 #undef DO_
 }
 
 void SenderKeyRecordStructure::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
+  // @@protoc_insertion_point(serialize_start:textsecure.SenderKeyRecordStructure)
   // repeated .textsecure.SenderKeyStateStructure senderKeyStates = 1;
   for (int i = 0; i < this->senderkeystates_size(); i++) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
@@ -5446,10 +5690,12 @@ void SenderKeyRecordStructure::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
+  // @@protoc_insertion_point(serialize_end:textsecure.SenderKeyRecordStructure)
 }
 
 ::google::protobuf::uint8* SenderKeyRecordStructure::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
+  // @@protoc_insertion_point(serialize_to_array_start:textsecure.SenderKeyRecordStructure)
   // repeated .textsecure.SenderKeyStateStructure senderKeyStates = 1;
   for (int i = 0; i < this->senderkeystates_size(); i++) {
     target = ::google::protobuf::internal::WireFormatLite::
@@ -5461,6 +5707,7 @@ void SenderKeyRecordStructure::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
+  // @@protoc_insertion_point(serialize_to_array_end:textsecure.SenderKeyRecordStructure)
   return target;
 }
 

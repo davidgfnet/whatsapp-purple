@@ -3,17 +3,14 @@
 #include "libcurve25519/curve.h"
 
 #include <string.h>
-#include <openssl/rand.h>
 
 const int Curve::DJB_TYPE = 5;
 
 ECKeyPair Curve::generateKeyPair()
 {
-    RAND_poll();
-
     unsigned char buff1[32];
-    memset(buff1, 0, 32);
-    RAND_bytes(buff1, 32);
+    for (unsigned i = 0; i < 32; i++)
+        buff1[i] = rand();
 
     Curve25519::generatePrivateKey((char*)buff1);
     ByteArray privateKey((const char*)buff1, 32);
@@ -79,11 +76,9 @@ bool Curve::verifySignature(const DjbECPublicKey &signingKey, const ByteArray &m
 ByteArray Curve::calculateSignature(const DjbECPrivateKey &signingKey, const ByteArray &message)
 {
     if (signingKey.getType() == DJB_TYPE) {
-        RAND_poll();
-
         unsigned char buff1[64];
-        memset(buff1, 0, 64);
-        RAND_bytes(buff1, 64);
+        for (unsigned i = 0; i < 64; i++)
+            buff1[i] = rand();
 
         ByteArray random64((const char*)buff1, 64);
         ByteArray signature(64, '\0');

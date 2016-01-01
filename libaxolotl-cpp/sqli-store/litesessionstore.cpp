@@ -1,5 +1,7 @@
 #include "litesessionstore.h"
 #include "sqliutil.h"
+#include <iostream>
+
 
 LiteSessionStore::LiteSessionStore(sqlite::connection &db)
  : _db(db)

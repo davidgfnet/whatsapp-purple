@@ -11,7 +11,8 @@
 #include "wacommon.h"
 #include "databuffer.h"
 #include "contacts.h"
-#include "liteaxolotlstore.h"
+#include "inmemoryaxolotlstore.h"
+//#include "liteaxolotlstore.h"
 
 class SessionCipher;
 
@@ -114,13 +115,14 @@ private:
 	/* 5/6 for image upload */
 
 	/* New Axolotl stuff */
-	std::shared_ptr<LiteAxolotlStore> axolotlStore;
+	std::shared_ptr<AxolotlStore> axolotlStore;
 	std::map<uint64_t, SessionCipher*> cipherHash;
+	bool send_ciphered;
 
 	void sendEncrypt();
-	bool receiveCipheredMessage(std::string, std::string, std::string, unsigned long long, Tree);
-	bool parseWhisperMessage(std::string, std::string, std::string, unsigned long long, Tree);
-	bool parsePreKeyWhisperMessage(std::string, std::string, std::string, unsigned long long, Tree);
+	bool receiveCipheredMessage(std::string, std::string, std::string, unsigned long long, Tree, std::string);
+	bool parseWhisperMessage(std::string, std::string, std::string, unsigned long long, Tree, std::string);
+	bool parsePreKeyWhisperMessage(std::string, std::string, std::string, unsigned long long, Tree, std::string);
 	SessionCipher *getSessionCipher(uint64_t recepient);
 	void sendMessageRetry(const std::string &from, const std::string &msgid, unsigned long long t);
 	void sendGetCipherKeysFromUser(std::string jid);
@@ -166,7 +168,7 @@ public:
 
 	std::string getPhone() const { return phone; }
 
-	void doLogin(std::string);
+	void doLogin(std::string, bool);
 	void receiveCallback(const char *data, int len);
 	int sendCallback(char *data, int len);
 	void sentCallback(int len);

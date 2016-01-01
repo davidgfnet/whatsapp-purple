@@ -1,6 +1,7 @@
 #include "liteprekeystore.h"
 #include "whisperexception.h"
 #include "sqliutil.h"
+#include <iostream>
 
 LitePreKeyStore::LitePreKeyStore(sqlite::connection &db)
  : _db(db)

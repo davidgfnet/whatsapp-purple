@@ -1,6 +1,7 @@
 
 CC=gcc
 CXX=g++
+AR=ar
 
 TARGET=libcurve25519.a
 INCLUDES=-I./src/ed25519/ -I./src/ed25519/additions/ -I./src/ed25519/nacl_includes/
@@ -68,7 +69,7 @@ CXXOBJS = $(CXXSOURCES:%.cpp=%.o)
 	$(CXX) -o $@ -c $< $(CFLAGS)
 
 all:	$(COBJS) $(CXXOBJS)
-	ar rcs $(TARGET) $(COBJS) $(CXXOBJS)
+	$(AR) rcs $(TARGET) $(COBJS) $(CXXOBJS)
 
 clean:
 	rm -f $(TARGET) $(COBJS) $(CXXOBJS)

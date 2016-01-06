@@ -80,6 +80,6 @@ state/LocalStorageProtocol.pb.h:
 	$(CXX) -o $@ -c $< $(CFLAGS)
 
 clean:
-	rm -f $(OBJS) state/LocalStorageProtocol.pb.cc protocol/WhisperTextProtocol.pb.cc state/LocalStorageProtocol.pb.h protocol/WhisperTextProtocol.pb.h
+	rm -f libaxolotl.a libaxolotl.so $(OBJS) state/LocalStorageProtocol.pb.cc protocol/WhisperTextProtocol.pb.cc state/LocalStorageProtocol.pb.h protocol/WhisperTextProtocol.pb.h
 
 

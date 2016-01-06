@@ -57,14 +57,20 @@ LIBS_PURPLE = $(shell $(PKG_CONFIG) --libs purple) -lfreeimage ./libaxolotl-cpp/
 LDFLAGS ?= $(ARCHFLAGS)
 LDFLAGS += -shared -pipe
 
+libaxolotl-cpp/libcurve25519/libcurve25519.a:
+	make -C libaxolotl-cpp/libcurve25519
+
+libaxolotl-cpp/libaxolotl.a:	libaxolotl-cpp/libcurve25519/libcurve25519.a
+	make -C libaxolotl-cpp
+
 AxolotlMessages.pb.h:	AxolotlMessages.proto
 	protoc --cpp_out=. AxolotlMessages.proto
 AxolotlMessages.pb.cc:	AxolotlMessages.pb.h
 	# Do nothing
 
-%.o: %.c
+%.o: %.c libaxolotl-cpp/libaxolotl.a
 	$(CC) -c $(CFLAGS) -o $@ $<
-%.o: %.cc AxolotlMessages.pb.h
+%.o: %.cc AxolotlMessages.pb.h libaxolotl-cpp/libaxolotl.a
 	$(CXX) -c $(CFLAGS) $(CXXFLAGS) -o $@ $<
 
 $(LIBNAME): $(C_OBJS) $(CXX_OBJS) 

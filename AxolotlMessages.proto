@@ -15,7 +15,10 @@ message AxolotlMessage {
 		optional bytes thumbnail = 16;
 	}
 
+	optional string textMsg = 1;
+
 	optional AxolotlImageMessage imageMsg = 3;
 
 }
+
 

@@ -2,8 +2,9 @@
 #include "byteutil.h"
 #include <cmath>
 #include <algorithm>
-#include <openssl/hmac.h>
-#include <openssl/sha.h>
+#include <iostream>
+
+void HMAC_SHA256(const unsigned char *text, int text_len, const unsigned char *key, int key_len, unsigned char *digest);
 
 const float HKDF::HASH_OUTPUT_SIZE = 32;
 
@@ -42,10 +43,9 @@ ByteArray HKDF::expand(const ByteArray &prk, const ByteArray &info, int outputSi
 
         message += ByteArray(1, (char)(i % 256));
 
-        unsigned char out[EVP_MAX_MD_SIZE];
-        unsigned int outlen;
-        HMAC(EVP_sha256(), prk.c_str(), prk.size(), (unsigned char*)message.c_str(), message.size(), out, &outlen);
-        ByteArray stepResult((const char*)out, outlen);
+		unsigned char out[32];
+		HMAC_SHA256((unsigned char*)message.c_str(), message.size(), (unsigned char*)prk.c_str(), prk.size(), out);
+        ByteArray stepResult((const char*)out, 32);
 
         int stepSize = std::min((int)remainingBytes, (int)stepResult.size());
         results += stepResult.substr(0, stepSize);
@@ -57,10 +57,9 @@ ByteArray HKDF::expand(const ByteArray &prk, const ByteArray &info, int outputSi
 
 ByteArray HKDF::extract(const ByteArray &salt, const ByteArray &inputKeyMaterial) const
 {
-    unsigned char out[EVP_MAX_MD_SIZE];
-    unsigned int outlen;
-    HMAC(EVP_sha256(), salt.c_str(), salt.size(), (unsigned char*)inputKeyMaterial.c_str(), inputKeyMaterial.size(), out, &outlen);
-    return ByteArray((const char*)out, outlen);
+    unsigned char out[32];
+	HMAC_SHA256((unsigned char*)inputKeyMaterial.c_str(), inputKeyMaterial.size(), (unsigned char*)salt.c_str(), salt.size(), out);
+    return ByteArray((const char*)out, 32);
 }
 
 ByteArray HKDF::deriveSecrets(const ByteArray &inputKeyMaterial, const ByteArray &info, int outputLength, const ByteArray &saltFirst) const

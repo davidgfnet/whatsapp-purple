@@ -9,10 +9,10 @@ void InMemorySenderKeyStore::storeSenderKey(const QByteArray &senderKeyId, Sende
     store[senderKeyId] = record;
 }
 
-SenderKeyRecord *InMemorySenderKeyStore::loadSenderKey(const QByteArray &senderKeyId)
+SenderKeyRecord InMemorySenderKeyStore::loadSenderKey(const QByteArray &senderKeyId)
 {
     if (store.contains(senderKeyId))
-        return new SenderKeyRecord(store[senderKeyId]->serialize());
+        return SenderKeyRecord(store[senderKeyId]->serialize());
 
-    return new SenderKeyRecord();
+    return SenderKeyRecord();
 }

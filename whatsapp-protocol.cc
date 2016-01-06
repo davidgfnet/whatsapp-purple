@@ -36,6 +36,7 @@
 #include "sessioncipher.h"
 #include "whisperexception.h"
 #include "sessioncipher.h"
+#include "axolotl_groups.h"
 
 static int isbroadcast(const std::string user)
 {
@@ -1301,13 +1302,6 @@ void WhatsappConnection::processIncomingData()
 								catch (WhisperException &e) {
 									DEBUG_PRINT("Axolotl exception (parse user key list iq reply): "
 										<< e.errorType() << " " << e.errorMessage());
-									/*if (e.errorType() == "UntrustedIdentityException") {
-										axolotlStore->removeIdentity(recepientId);
-										pendingMessages[jid] = text;
-									}
-									else {
-										skipEncodingJids.append(jid);
-									Q_EMIT q_ptr->encryptionStatus(jid, false);*/
 								}
 
 							}
@@ -1329,6 +1323,8 @@ bool WhatsappConnection::receiveCipheredMessage(std::string from, std::string id
 
 	if (enc["type"] == "pkmsg")
 		return this->parsePreKeyWhisperMessage(from, id, author, time, enc, mtype);
+	else if (enc["type"] == "skmsg")
+		return this->parseGroupWhisperMessage(from, id, author, time, enc, mtype);
 	else
 		return this->parseWhisperMessage(from, id, author, time, enc, mtype);
 }
@@ -1420,6 +1416,14 @@ SessionCipher *WhatsappConnection::getSessionCipher(uint64_t recepient) {
 	return cipherHash[recepient];
 }
 
+GroupCipher *WhatsappConnection::getGroupCipher(std::string recepient) {
+	if (gcipherHash.find(recepient) == gcipherHash.end()) {
+		GroupCipher *cipher = new GroupCipher(axolotlStore, recepient);
+		gcipherHash[recepient] = cipher;
+	}
+	return gcipherHash[recepient];
+}
+
 bool WhatsappConnection::parsePreKeyWhisperMessage(std::string jid, std::string id,
 	std::string author, unsigned long long time, Tree enc, std::string mtype) {
 
@@ -1431,7 +1435,7 @@ bool WhatsappConnection::parsePreKeyWhisperMessage(std::string jid, std::string 
 		std::string plaintext = cipher->decrypt(message);
 
 		if (mtype == "text")
-			this->receiveMessage(ChatMessage(this, jid, time, id, plaintext, author));
+			this->receiveMessage(ChatMessage::parseProtobuf(this, jid, time, id, author, plaintext));
 		else if (mtype == "media")
 			this->receiveMessage(ImageMessage::parseProtobuf(this, jid, time, id, author, plaintext));
 
@@ -1456,7 +1460,7 @@ bool WhatsappConnection::parseWhisperMessage(std::string jid, std::string id,
 		std::string plaintext = cipher->decrypt(message);
 
 		if (mtype == "text")
-			this->receiveMessage(ChatMessage(this, jid, time, id, plaintext, author));
+			this->receiveMessage(ChatMessage::parseProtobuf(this, jid, time, id, author, plaintext));
 		else if (mtype == "media")
 			this->receiveMessage(ImageMessage::parseProtobuf(this, jid, time, id, author, plaintext));
 	}
@@ -1468,6 +1472,31 @@ bool WhatsappConnection::parseWhisperMessage(std::string jid, std::string id,
 	}
 	return true;
 }
+
+bool WhatsappConnection::parseGroupWhisperMessage(std::string jid, std::string id,
+	std::string author, unsigned long long time, Tree enc, std::string mtype) {
+
+	std::cerr << "Received group ciphered message!" << std::endl;
+	try {
+		GroupCipher *cipher = getGroupCipher(jid);
+		std::string plaintext = cipher->decrypt(enc.getData());
+		std::cerr << "Plaintext is " << plaintext << std::endl;
+
+		if (mtype == "text")
+			this->receiveMessage(ChatMessage::parseProtobuf(this, jid, time, id, author, plaintext));
+		else if (mtype == "media")
+			this->receiveMessage(ImageMessage::parseProtobuf(this, jid, time, id, author, plaintext));
+	}
+	catch (WhisperException &e) {
+		DEBUG_PRINT("Axolotl exception (parseGroupWhisperMessage): "
+			<< e.errorType() << " " << e.errorMessage());
+		std::string fromretry = jid.substr(0, jid.find("-")) + "@s.whatsapp.net";
+		sendMessageRetry(fromretry, id, time);
+		return false;
+	}
+	return true;
+}
+
 
 void WhatsappConnection::sendGetCipherKeysFromUser(std::string jid) {
 	Tree iq("iq", makeat({"id", getNextIqId(), "type", "get", "to", whatsappserver, "xmlns", "encrypt"}));

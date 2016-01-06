@@ -6,8 +6,8 @@
 #include "curve.h"
 
 #include <iostream>
-#include <openssl/hmac.h>
-#include <openssl/sha.h>
+
+void HMAC_SHA256(const unsigned char *text, int text_len, const unsigned char *key, int key_len, unsigned char *digest);
 
 WhisperMessage::WhisperMessage()
 {
@@ -118,10 +118,8 @@ ByteArray WhisperMessage::getMac(int messageVersion, const IdentityKey &senderId
 
     data += serialized;
 
-    unsigned char out[EVP_MAX_MD_SIZE];
-    unsigned int outlen;
-    HMAC(EVP_sha256(), macKey.c_str(), macKey.size(), (unsigned char*)data.c_str(), data.size(), out, &outlen);
-
+    unsigned char out[32];
+	HMAC_SHA256((unsigned char*)data.c_str(), data.size(), (unsigned char*)macKey.c_str(), macKey.size(), out);
     return ByteArray((const char*)out, MAC_LENGTH);
 }
 

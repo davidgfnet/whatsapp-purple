@@ -47,6 +47,20 @@ unsigned char *SHA1(const unsigned char *d, int n, unsigned char *md)
 	return md;
 }
 
+unsigned char *SHA256(const unsigned char *d, int n, unsigned char *md)
+{
+	PurpleCipher *sha256_cipher;
+	PurpleCipherContext *sha256_ctx;
+
+	sha256_cipher = purple_ciphers_find_cipher("sha256");
+	sha256_ctx = purple_cipher_context_new(sha256_cipher, NULL);
+	purple_cipher_context_append(sha256_ctx, (guchar *) d, n);
+	purple_cipher_context_digest(sha256_ctx, 32, md, NULL);
+	purple_cipher_context_destroy(sha256_ctx);
+
+	return md;
+}
+
 #endif
 
 const char hmap[16] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
@@ -193,11 +207,11 @@ std::string md5raw(std::string target)
 }
 
 #ifndef ENABLE_OPENSSL
-int PKCS5_PBKDF2_HMAC_SHA1(const char *pass, int passlen, const unsigned char *salt, int saltlen, int iter, int keylen, unsigned char *out)
+
+int PKCS5_PBKDF2_HMAC_HASH(const char *pass, int passlen, const unsigned char *salt, int saltlen, int iter, int keylen, unsigned char *out, const char * hashname, int mdlen)
 {
-	unsigned char digtmp[20], *p, itmp[4];
+	unsigned char digtmp[64], *p, itmp[4];
 	int cplen, j, k, tkeylen;
-	int mdlen = 20;		/* SHA1 */
 	unsigned long i = 1;
 
 	PurpleCipherContext *context = purple_cipher_context_new_by_name("hmac", NULL);
@@ -218,7 +232,7 @@ int PKCS5_PBKDF2_HMAC_SHA1(const char *pass, int passlen, const unsigned char *s
 		itmp[3] = (unsigned char)(i & 0xff);
 
 		purple_cipher_context_reset(context, NULL);
-		purple_cipher_context_set_option(context, "hash", (gpointer) "sha1");
+		purple_cipher_context_set_option(context, "hash", (gpointer) hashname);
 		purple_cipher_context_set_key_with_len(context, (guchar *) pass, passlen);
 		purple_cipher_context_append(context, (guchar *) salt, saltlen);
 		purple_cipher_context_append(context, (guchar *) itmp, 4);
@@ -228,7 +242,7 @@ int PKCS5_PBKDF2_HMAC_SHA1(const char *pass, int passlen, const unsigned char *s
 		for (j = 1; j < iter; j++) {
 
 			purple_cipher_context_reset(context, NULL);
-			purple_cipher_context_set_option(context, "hash", (gpointer) "sha1");
+			purple_cipher_context_set_option(context, "hash", (gpointer) hashname);
 			purple_cipher_context_set_key_with_len(context, (guchar *) pass, passlen);
 			purple_cipher_context_append(context, (guchar *) digtmp, mdlen);
 			purple_cipher_context_digest(context, mdlen, digtmp, NULL);
@@ -245,6 +259,49 @@ int PKCS5_PBKDF2_HMAC_SHA1(const char *pass, int passlen, const unsigned char *s
 
 	return 1;
 }
+
+int PKCS5_PBKDF2_HMAC_SHA1(const char *pass, int passlen, const unsigned char *salt, int saltlen, int iter, int keylen, unsigned char *out) {
+	return PKCS5_PBKDF2_HMAC_HASH(pass, passlen, salt, saltlen, iter, keylen, out, "sha1", 20);
+}
+
+int PKCS5_PBKDF2_HMAC_SHA256(const char *pass, int passlen, const unsigned char *salt, int saltlen, int iter, int keylen, unsigned char *out) {
+	return PKCS5_PBKDF2_HMAC_HASH(pass, passlen, salt, saltlen, iter, keylen, out, "sha256", 32);
+}
+
+void HMAC_SHA256(const unsigned char *text, int text_len, const unsigned char *key, int key_len, unsigned char *digest)
+{
+	unsigned char SHA256_Key[4096], AppendBuf2[4096], szReport[4096];
+	unsigned char *AppendBuf1 = new unsigned char[text_len + 64];
+	unsigned char m_ipad[64], m_opad[64];
+
+	memset(SHA256_Key, 0, 64);
+	memset(m_ipad, 0x36, sizeof(m_ipad));
+	memset(m_opad, 0x5c, sizeof(m_opad));
+
+	if (key_len > 64)
+		SHA256(key, key_len, SHA256_Key);
+	else
+		memcpy(SHA256_Key, key, key_len);
+
+	for (unsigned int i = 0; i < sizeof(m_ipad); i++)
+		m_ipad[i] ^= SHA256_Key[i];
+
+	memcpy(AppendBuf1, m_ipad, sizeof(m_ipad));
+	memcpy(AppendBuf1 + sizeof(m_ipad), text, text_len);
+
+	SHA256(AppendBuf1, sizeof(m_ipad) + text_len, szReport);
+
+	for (unsigned int j = 0; j < sizeof(m_opad); j++)
+		m_opad[j] ^= SHA256_Key[j];
+
+	memcpy(AppendBuf2, m_opad, sizeof(m_opad));
+	memcpy(AppendBuf2 + sizeof(m_opad), szReport, 32);
+
+	SHA256(AppendBuf2, sizeof(m_opad) + 32, digest);
+
+	delete[]AppendBuf1;
+}
+
 #endif
 
 /* MIME type, copied from mxit */

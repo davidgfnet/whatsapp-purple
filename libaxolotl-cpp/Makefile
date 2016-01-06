@@ -38,17 +38,12 @@ CPP_FILES = identitykey.cpp \
 			protocol/prekeywhispermessage.cpp \
 			protocol/senderkeymessage.cpp \
 			protocol/ciphertextmessage.cpp \
-			sqli-store/liteaxolotlstore.cpp \
-			sqli-store/liteidentitykeystore.cpp \
-			sqli-store/liteprekeystore.cpp \
-			sqli-store/litesignedprekeystore.cpp \
-			sqli-store/litesessionstore.cpp \
-			sqli-store/sqliutil.cpp \
 			mem-store/inmemoryaxolotlstore.cpp \
 			mem-store/inmemoryidentitykeystore.cpp \
 			mem-store/inmemoryprekeystore.cpp \
 			mem-store/inmemorysignedprekeystore.cpp \
 			mem-store/inmemorysessionstore.cpp \
+			mem-store/inmemorysenderkeystore.cpp \
 			mem-store/serializer.cpp \
 			state/LocalStorageProtocol.pb.cc \
 			protocol/WhisperTextProtocol.pb.cc

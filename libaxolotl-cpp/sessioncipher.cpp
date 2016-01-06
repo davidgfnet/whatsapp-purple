@@ -303,6 +303,7 @@ ByteArray SessionCipher::getCiphertext(int version, const MessageKeys &messageKe
 ByteArray SessionCipher::getPlaintext(int version, const MessageKeys &messageKeys, const ByteArray &cipherText)
 {
     //qDebug() << version << cipherText.toHex();
+	std::cerr << "=============================== getPlaintext " << cipherText << std::endl;
     AES_KEY dec_key;
     ByteArray key = messageKeys.getCipherKey();
     ByteArray out(cipherText.size(), '\0');

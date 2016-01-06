@@ -17,11 +17,13 @@ uint64_t KeyHelper::getRandom7FFFFFFF()
 
 uint64_t KeyHelper::getRandomFFFFFFFF()
 {
+	srand(time(0));
 	return (rand() ^ (rand() << 8) ^ (rand() << 16) ^ (rand() << 24)) & 0xFFFFFFFF;
 }
 
 ByteArray KeyHelper::getRandomBytes(int bytes)
 {
+	srand(time(0));
 	unsigned char buff[bytes];
 	for (unsigned i = 0; i < bytes; i++)
 		buff[i] = rand();

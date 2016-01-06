@@ -1,6 +1,6 @@
 #include "senderchainkey.h"
-#include <openssl/hmac.h>
-#include <openssl/sha.h>
+
+void HMAC_SHA256(const unsigned char *text, int text_len, const unsigned char *key, int key_len, unsigned char *digest);
 
 const ByteArray SenderChainKey::MESSAGE_KEY_SEED = ByteArray("\0x01");
 const ByteArray SenderChainKey::CHAIN_KEY_SEED = ByteArray("\0x02");
@@ -33,8 +33,7 @@ ByteArray SenderChainKey::getSeed() const
 
 ByteArray SenderChainKey::getDerivative(const ByteArray &seed, const ByteArray &key) const
 {
-    unsigned char out[EVP_MAX_MD_SIZE];
-    unsigned int outlen;
-    HMAC(EVP_sha256(), key.c_str(), key.size(), (unsigned char*)seed.c_str(), seed.size(), out, &outlen);
-    return ByteArray((const char*)out, outlen);
+    unsigned char out[32];
+	HMAC_SHA256((unsigned char*)seed.c_str(), seed.size(), (unsigned char*)key.c_str(), key.size(), out);
+    return ByteArray((const char*)out, 32);
 }

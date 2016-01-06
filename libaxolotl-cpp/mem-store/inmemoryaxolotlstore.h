@@ -8,6 +8,7 @@
 #include "inmemoryprekeystore.h"
 #include "inmemorysessionstore.h"
 #include "inmemorysignedprekeystore.h"
+#include "inmemorysenderkeystore.h"
 
 #include <vector>
 
@@ -51,6 +52,9 @@ public:
 	bool containsSignedPreKey(uint64_t signedPreKeyId);
 	void removeSignedPreKey(uint64_t signedPreKeyId);
 
+    void storeSenderKey(const ByteArray &senderKeyId, SenderKeyRecord *record);
+    SenderKeyRecord loadSenderKey(const ByteArray &senderKeyId) const;
+
 	std::string serialize() const;
 
 private:
@@ -58,6 +62,7 @@ private:
 	InMemoryPreKeyStore	   preKeyStore;
 	InMemorySessionStore	  sessionStore;
 	InMemorySignedPreKeyStore signedPreKeyStore;
+	InMemorySenderKeyStore senderKeyStore;
 };
 
 #endif // INMEMORYAXOLOTLSTORE_H

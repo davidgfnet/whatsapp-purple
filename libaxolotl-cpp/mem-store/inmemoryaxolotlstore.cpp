@@ -138,6 +138,15 @@ void InMemoryAxolotlStore::removeSignedPreKey(uint64_t signedPreKeyId)
 	signedPreKeyStore.removeSignedPreKey(signedPreKeyId);
 }
 
+void InMemoryAxolotlStore::storeSenderKey(const ByteArray &senderKeyId, SenderKeyRecord *record) {
+	senderKeyStore.storeSenderKey(senderKeyId, record);
+}
+
+SenderKeyRecord InMemoryAxolotlStore::loadSenderKey(const ByteArray &senderKeyId) const {
+	return senderKeyStore.loadSenderKey(senderKeyId);
+}
+
+
 std::string InMemoryAxolotlStore::serialize() const {
 	return 
 		identityKeyStore.serialize() +

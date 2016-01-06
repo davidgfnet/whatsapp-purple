@@ -1,6 +1,6 @@
 #include "chainkey.h"
-#include <openssl/hmac.h>
-#include <openssl/sha.h>
+
+void HMAC_SHA256(const unsigned char *text, int text_len, const unsigned char *key, int key_len, unsigned char *digest);
 
 const ByteArray ChainKey::MESSAGE_KEY_SEED = ByteArray("\x01");
 const ByteArray ChainKey::CHAIN_KEY_SEED = ByteArray("\x02");
@@ -29,10 +29,9 @@ unsigned int ChainKey::getIndex() const
 
 ByteArray ChainKey::getBaseMaterial(const ByteArray &seed) const
 {
-    unsigned char out[EVP_MAX_MD_SIZE];
-    unsigned int outlen;
-    HMAC(EVP_sha256(), key.c_str(), key.size(), (unsigned char*)seed.c_str(), seed.size(), out, &outlen);
-    return ByteArray((const char*)out, outlen);
+    unsigned char out[32];
+	HMAC_SHA256((unsigned char*)seed.c_str(), seed.size(), (unsigned char*)key.c_str(), key.size(), out);
+    return ByteArray((const char*)out, 32);
 }
 
 ChainKey ChainKey::getNextChainKey() const

@@ -5,8 +5,9 @@
 #include "prekeystore.h"
 #include "sessionstore.h"
 #include "signedprekeystore.h"
+#include "senderkeystore.h"
 
-class AxolotlStore: public IdentityKeyStore, public PreKeyStore, public SessionStore, public SignedPreKeyStore {
+class AxolotlStore: public IdentityKeyStore, public PreKeyStore, public SessionStore, public SignedPreKeyStore, public SenderKeyStore {
 
 };
 

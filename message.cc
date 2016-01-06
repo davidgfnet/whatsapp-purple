@@ -73,6 +73,16 @@ Message *ChatMessage::copy() const
 	return new ChatMessage(wc, from, t, id, message, author);
 }
 
+ChatMessage ChatMessage::parseProtobuf(const WhatsappConnection * wc, const std::string from, const unsigned long long time,
+	const std::string id, const std::string author, const std::string & buf) {
+
+	AxolotlMessage pbuf;
+	pbuf.ParseFromString(buf);
+
+	return ChatMessage(wc, from, time, id, pbuf.textmsg(), author);
+}
+
+
 CipheredChatMessage::CipheredChatMessage(const WhatsappConnection * wc, const std::string from, const unsigned long long time,
 	const std::string id, const std::string message, const std::string author, const std::string ctype) : 
 	ChatMessage(wc, from, time, id, message, author)

@@ -1,8 +1,9 @@
 #include "senderkeyrecord.h"
 
 #include "LocalStorageProtocol.pb.h"
-
 #include "invalidkeyidexception.h"
+
+#include <iostream>
 
 SenderKeyRecord::SenderKeyRecord()
 {
@@ -24,6 +25,7 @@ SenderKeyRecord::SenderKeyRecord(const ByteArray &serialized)
 
 SenderKeyState *SenderKeyRecord::getSenderKeyState(int keyId)
 {
+	std::cerr << "senderKeyStates has " << senderKeyStates.size() << " elements" << std::endl;
     if (!senderKeyStates.empty() && (keyId < senderKeyStates.size())) {
         return senderKeyStates.at(keyId);
     } else {

@@ -12,6 +12,7 @@
 #include "databuffer.h"
 #include "contacts.h"
 #include "inmemoryaxolotlstore.h"
+#include "axolotl_groups.h"
 //#include "liteaxolotlstore.h"
 
 class SessionCipher;
@@ -117,13 +118,17 @@ private:
 	/* New Axolotl stuff */
 	std::shared_ptr<AxolotlStore> axolotlStore;
 	std::map<uint64_t, SessionCipher*> cipherHash;
+	std::map<std::string, GroupCipher*> gcipherHash;
+
 	bool send_ciphered;
 
 	void sendEncrypt();
 	bool receiveCipheredMessage(std::string, std::string, std::string, unsigned long long, Tree, std::string);
 	bool parseWhisperMessage(std::string, std::string, std::string, unsigned long long, Tree, std::string);
 	bool parsePreKeyWhisperMessage(std::string, std::string, std::string, unsigned long long, Tree, std::string);
+	bool parseGroupWhisperMessage(std::string, std::string, std::string, unsigned long long, Tree, std::string);
 	SessionCipher *getSessionCipher(uint64_t recepient);
+	GroupCipher *getGroupCipher(std::string recepient);
 	void sendMessageRetry(const std::string &from, const std::string &msgid, unsigned long long t);
 	void sendGetCipherKeysFromUser(std::string jid);
 

@@ -3,21 +3,35 @@ LIBNAME = libwhatsapp.dll
 .PHONY: all
 all: $(LIBNAME)
 
-C_SRCS = wa_purple.c tinfl.c imgutil.c
+C_SRCS = wa_purple.c tinfl.c imgutil.c aes.c
 CXX_SRCS = whatsapp-protocol.cc wa_util.cc rc4.cc keygen.cc tree.cc databuffer.cc message.cc
 
 C_OBJS = $(C_SRCS:.c=.o)
-CXX_OBJS = $(CXX_SRCS:.cc=.o)
+CXX_OBJS = $(CXX_SRCS:.cc=.o) AxolotlMessages.pb.o
 RESOURCES = libwhatsapp.res
 
 PIDGIN_INCLUDE_WIN32_DEV= -I "$(PIDGIN_DEV_ROOT)/pidgin/libpurple/" \
                           -I "$(PIDGIN_DEV_ROOT)/win32-dev/gtk_2_0-2.14/include/glib-2.0/" \
-                          -I "$(PIDGIN_DEV_ROOT)/win32-dev/gtk_2_0-2.14/lib/glib-2.0/include/"
+                          -I "$(PIDGIN_DEV_ROOT)/win32-dev/gtk_2_0-2.14/lib/glib-2.0/include/" \
+                          -I "$(PBUF_ROOT)/include/"
 
 PIDGIN_LIB_WIN32_DEV= -L "$(PIDGIN_DEV_ROOT)/win32-dev/gtk_2_0-2.14/lib/" \
                       -L "$(PIDGIN_DEV_ROOT)/pidgin/libpurple/" \
+                      -L "$(PBUF_ROOT)/lib/" \
                       -lglib-2.0 -lpurple
 
+INCLUDES = -I./libaxolotl-cpp/ecc \
+           -I./libaxolotl-cpp/exception \
+           -I./libaxolotl-cpp/util \
+           -I./libaxolotl-cpp/state \
+           -I./libaxolotl-cpp/protocol \
+           -I./libaxolotl-cpp/groups/ratchet \
+           -I./libaxolotl-cpp/groups/state \
+           -I./libaxolotl-cpp/groups \
+           -I./libaxolotl-cpp/kdf \
+           -I./libaxolotl-cpp/ratchet \
+           -I./libaxolotl-cpp/mem-store \
+           -I./libaxolotl-cpp
 
 
 STRIP = strip
@@ -28,7 +42,7 @@ RES = i686-w64-mingw32-windres
 LD = $(CXX)
 CFLAGS_PURPLE = $(shell mingw32-pkg-config --cflags purple)
 CFLAGS = \
-    -std=c++11 \
+    -std=c99 \
     -Wno-unused-parameter \
     -O2 \
     -m32 \
@@ -39,15 +53,29 @@ CFLAGS = \
     -DPIC \
     $(CFLAGS_PURPLE) \
     $(EXTRAINCLUDES) \
-    $(PIDGIN_INCLUDE_WIN32_DEV)
+    $(PIDGIN_INCLUDE_WIN32_DEV) \
+    $(INCLUDES)
+CXXFLAGS = $(CFLAGS) -std=c++11
 
-LIBS_PURPLE = $(shell mingw32-pkg-config --libs purple) $(EXTRALIBS) -lfreeimage
+LIBS_PURPLE = $(shell mingw32-pkg-config --libs purple) $(EXTRALIBS) -lfreeimage ./libaxolotl-cpp/libaxolotl.a -lprotobuf ./libaxolotl-cpp/libcurve25519/libcurve25519.a
+
 LDFLAGS = -shared 
 
-%.o: %.c
+AxolotlMessages.pb.h:	AxolotlMessages.proto
+	protoc --cpp_out=. AxolotlMessages.proto
+AxolotlMessages.pb.cc:	AxolotlMessages.pb.h
+	# Do nothing
+
+libaxolotl-cpp/libcurve25519/libcurve25519.a:
+	+make -C libaxolotl-cpp/libcurve25519 CC=$(CC) CXX=$(CXX)
+
+libaxolotl-cpp/libaxolotl.a:	libaxolotl-cpp/libcurve25519/libcurve25519.a
+	+make -C libaxolotl-cpp CC=$(CC) CXX=$(CXX) EXTRA_INCLUDES='$(PIDGIN_INCLUDE_WIN32_DEV)' EXTRA_LIBS='$(PIDGIN_LIB_WIN32_DEV)'
+
+%.o: %.c libaxolotl-cpp/libaxolotl.a
 	$(CC) -c $(CFLAGS) -o $@ $<
-%.o: %.cc
-	$(CXX) -c $(CFLAGS) -o $@ $<
+%.o: %.cc AxolotlMessages.pb.h libaxolotl-cpp/libaxolotl.a
+	$(CXX) -c $(CXXFLAGS) -o $@ $<
 %.res: %.rc
 	$(RES) $< -O coff -o $@
 

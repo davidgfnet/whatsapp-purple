@@ -13,16 +13,16 @@ class PreKeyWhisperMessage : public CiphertextMessage
 {
 public:
     PreKeyWhisperMessage(const ByteArray &serialized);
-    PreKeyWhisperMessage(int messageVersion, ulong registrationId, ulong preKeyId,
-                         ulong signedPreKeyId, const DjbECPublicKey &baseKey, const IdentityKey &identityKey,
+    PreKeyWhisperMessage(int messageVersion, uint64_t registrationId, uint64_t preKeyId,
+                         uint64_t signedPreKeyId, const DjbECPublicKey &baseKey, const IdentityKey &identityKey,
                          std::shared_ptr<WhisperMessage> message);
     virtual ~PreKeyWhisperMessage() {}
 
     int getMessageVersion() const;
     IdentityKey getIdentityKey() const;
-    ulong getRegistrationId() const;
-    ulong getPreKeyId() const;
-    ulong getSignedPreKeyId() const;
+    uint64_t getRegistrationId() const;
+    uint64_t getPreKeyId() const;
+    uint64_t getSignedPreKeyId() const;
     DjbECPublicKey getBaseKey() const;
     std::shared_ptr<WhisperMessage> getWhisperMessage();
     ByteArray serialize() const;
@@ -30,9 +30,9 @@ public:
 
 private:
     int               version;
-    ulong             registrationId;
-    ulong             preKeyId;
-    ulong             signedPreKeyId;
+    uint64_t          registrationId;
+    uint64_t          preKeyId;
+    uint64_t          signedPreKeyId;
     DjbECPublicKey    baseKey;
     IdentityKey       identityKey;
     std::shared_ptr<WhisperMessage> message;

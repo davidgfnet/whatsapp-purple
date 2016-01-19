@@ -15,7 +15,7 @@ public:
     virtual ~WhisperMessage() {}
     WhisperMessage(const ByteArray &serialized);
     WhisperMessage(int messageVersion, const ByteArray &macKey, const DjbECPublicKey &senderRatchetKey,
-                   uint counter, uint previousCounter, const ByteArray &ciphertext,
+                   unsigned counter, unsigned previousCounter, const ByteArray &ciphertext,
                    const IdentityKey &senderIdentityKey,
                    const IdentityKey &receiverIdentityKey);
     void verifyMac(int messageVersion, const IdentityKey &senderIdentityKey,
@@ -23,7 +23,7 @@ public:
 
     DjbECPublicKey getSenderRatchetKey() const;
     int getMessageVersion() const;
-    uint getCounter() const;
+    unsigned getCounter() const;
     ByteArray getBody() const;
     ByteArray serialize() const;
     int getType() const;
@@ -41,8 +41,8 @@ private:
 
     int         messageVersion;
     DjbECPublicKey senderRatchetKey;
-    uint        counter;
-    uint        previousCounter;
+    unsigned        counter;
+    unsigned        previousCounter;
     ByteArray  ciphertext;
     ByteArray  serialized;
 };

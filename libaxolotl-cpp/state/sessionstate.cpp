@@ -255,7 +255,7 @@ void SessionState::setSenderChainKey(const ChainKey &nextChainKey)
     sessionStructure.mutable_senderchain()->CopyFrom(chain);*/
 }
 
-bool SessionState::hasMessageKeys(const DjbECPublicKey &senderEphemeral, uint counter)
+bool SessionState::hasMessageKeys(const DjbECPublicKey &senderEphemeral, unsigned counter)
 {
     int chainIndex = getReceiverChain(senderEphemeral);
 
@@ -274,7 +274,7 @@ bool SessionState::hasMessageKeys(const DjbECPublicKey &senderEphemeral, uint co
     return false;
 }
 
-MessageKeys SessionState::removeMessageKeys(const DjbECPublicKey &senderEphemeral, uint counter)
+MessageKeys SessionState::removeMessageKeys(const DjbECPublicKey &senderEphemeral, unsigned counter)
 {
     int chainIndex = getReceiverChain(senderEphemeral);
 

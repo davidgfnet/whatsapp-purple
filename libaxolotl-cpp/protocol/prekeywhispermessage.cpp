@@ -54,7 +54,7 @@ PreKeyWhisperMessage::PreKeyWhisperMessage(const ByteArray &serialized)
     }
 }
 
-PreKeyWhisperMessage::PreKeyWhisperMessage(int messageVersion, ulong registrationId, ulong preKeyId, ulong signedPreKeyId, const DjbECPublicKey &baseKey, const IdentityKey &identityKey, std::shared_ptr<WhisperMessage> message)
+PreKeyWhisperMessage::PreKeyWhisperMessage(int messageVersion, uint64_t registrationId, uint64_t preKeyId, uint64_t signedPreKeyId, const DjbECPublicKey &baseKey, const IdentityKey &identityKey, std::shared_ptr<WhisperMessage> message)
 {
     this->version        = messageVersion;
     this->registrationId = registrationId;
@@ -95,17 +95,17 @@ IdentityKey PreKeyWhisperMessage::getIdentityKey() const
     return identityKey;
 }
 
-ulong PreKeyWhisperMessage::getRegistrationId() const
+uint64_t PreKeyWhisperMessage::getRegistrationId() const
 {
     return registrationId;
 }
 
-ulong PreKeyWhisperMessage::getPreKeyId() const
+uint64_t PreKeyWhisperMessage::getPreKeyId() const
 {
     return preKeyId;
 }
 
-ulong PreKeyWhisperMessage::getSignedPreKeyId() const
+uint64_t PreKeyWhisperMessage::getSignedPreKeyId() const
 {
     return signedPreKeyId;
 }

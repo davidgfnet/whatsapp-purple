@@ -56,7 +56,7 @@ WhisperMessage::WhisperMessage(const ByteArray &serialized)
     }
 }
 
-WhisperMessage::WhisperMessage(int messageVersion, const ByteArray &macKey, const DjbECPublicKey &senderRatchetKey, uint counter, uint previousCounter, const ByteArray &ciphertext, const IdentityKey &senderIdentityKey, const IdentityKey &receiverIdentityKey)
+WhisperMessage::WhisperMessage(int messageVersion, const ByteArray &macKey, const DjbECPublicKey &senderRatchetKey, unsigned counter, unsigned previousCounter, const ByteArray &ciphertext, const IdentityKey &senderIdentityKey, const IdentityKey &receiverIdentityKey)
 {
     textsecure::WhisperMessage whisperMessage;
     ByteArray ratchetKey = senderRatchetKey.serialize();
@@ -88,7 +88,7 @@ int WhisperMessage::getMessageVersion() const
     return messageVersion;
 }
 
-uint WhisperMessage::getCounter() const
+unsigned WhisperMessage::getCounter() const
 {
     return counter;
 }

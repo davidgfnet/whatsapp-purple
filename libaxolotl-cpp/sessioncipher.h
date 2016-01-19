@@ -29,7 +29,7 @@ private:
     ChainKey getOrCreateChainKey(SessionState *sessionState, const DjbECPublicKey &theirEphemeral);
     MessageKeys getOrCreateMessageKeys(SessionState *sessionState,
                                        const DjbECPublicKey &theirEphemeral,
-                                       const ChainKey &chainKey, uint counter);
+                                       const ChainKey &chainKey, unsigned counter);
     ByteArray getCiphertext(int version, const MessageKeys &messageKeys, const ByteArray &plaintext);
     ByteArray getPlaintext(int version, const MessageKeys &messageKeys, const ByteArray &cipherText);
 

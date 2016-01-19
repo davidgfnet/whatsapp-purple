@@ -7,18 +7,18 @@ class MessageKeys
 {
 public:
     MessageKeys();
-    MessageKeys(const ByteArray &cipherKey, const ByteArray &macKey, const ByteArray &iv, uint counter);
+    MessageKeys(const ByteArray &cipherKey, const ByteArray &macKey, const ByteArray &iv, unsigned counter);
 
     ByteArray getCipherKey() const;
     ByteArray getMacKey() const;
     ByteArray getIv() const;
-    uint getCounter() const;
+    unsigned getCounter() const;
 
 private:
     ByteArray cipherKey;
     ByteArray macKey;
     ByteArray iv;
-    uint counter;
+    unsigned counter;
 
 };
 

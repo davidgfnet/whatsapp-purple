@@ -53,8 +53,8 @@ public:
     void setSenderChain(const ECKeyPair &senderRatchetKeyPair, const ChainKey &chainKey);
     ChainKey getSenderChainKey() const;
     void setSenderChainKey(const ChainKey &nextChainKey);
-    bool hasMessageKeys(const DjbECPublicKey &senderEphemeral, uint counter);
-    MessageKeys removeMessageKeys(const DjbECPublicKey &senderEphemeral, uint counter);
+    bool hasMessageKeys(const DjbECPublicKey &senderEphemeral, unsigned counter);
+    MessageKeys removeMessageKeys(const DjbECPublicKey &senderEphemeral, unsigned counter);
     void setMessageKeys(const DjbECPublicKey &senderEphemeral, const MessageKeys &messageKeys);
     void setReceiverChainKey(const DjbECPublicKey &senderEphemeral, const ChainKey &chainKey);
     void setPendingKeyExchange(int sequence,

@@ -180,7 +180,7 @@ ByteArray SessionCipher::decrypt(SessionState *sessionState, std::shared_ptr<Whi
 
     int            messageVersion    = ciphertextMessage->getMessageVersion();
     DjbECPublicKey theirEphemeral    = ciphertextMessage->getSenderRatchetKey();
-    uint           counter           = ciphertextMessage->getCounter();
+    unsigned       counter           = ciphertextMessage->getCounter();
     ChainKey       chainKey          = getOrCreateChainKey(sessionState, theirEphemeral);
     MessageKeys    messageKeys       = getOrCreateMessageKeys(sessionState, theirEphemeral,
                                                               chainKey, counter);
@@ -228,7 +228,7 @@ ChainKey SessionCipher::getOrCreateChainKey(SessionState *sessionState, const Dj
 
             sessionState->setRootKey(senderChain.first);
             sessionState->addReceiverChain(theirEphemeral, receiverChain.second);
-            sessionState->setPreviousCounter(std::max(sessionState->getSenderChainKey().getIndex() - 1, (uint)0));
+            sessionState->setPreviousCounter(std::max(sessionState->getSenderChainKey().getIndex() - 1, (unsigned)0));
             sessionState->setSenderChain(ourNewEphemeral, senderChain.second);
 
             return receiverChain.second;
@@ -238,7 +238,7 @@ ChainKey SessionCipher::getOrCreateChainKey(SessionState *sessionState, const Dj
     }
 }
 
-MessageKeys SessionCipher::getOrCreateMessageKeys(SessionState *sessionState, const DjbECPublicKey &theirEphemeral, const ChainKey &chainKey, uint counter)
+MessageKeys SessionCipher::getOrCreateMessageKeys(SessionState *sessionState, const DjbECPublicKey &theirEphemeral, const ChainKey &chainKey, unsigned counter)
 {
     if (chainKey.getIndex() > counter) {
         if (sessionState->hasMessageKeys(theirEphemeral, counter)) {

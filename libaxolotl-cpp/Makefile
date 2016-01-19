@@ -2,7 +2,7 @@
 CXX=g++
 GCC=gcc
 
-CFLAGS = -I./ecc -I./exception -I./util -I./state -I./groups/ratchet -I./groups/state -I./kdf -I./ratchet -I./protocol -I./ -std=c++11 -fPIC -O0 -ggdb
+CFLAGS = -I./ecc -I./exception -I./util -I./state -I./groups/ratchet -I./groups/state -I./kdf -I./ratchet -I./protocol -I./ -std=c++11 -fPIC -O0 -ggdb $(EXTRA_INCLUDES)
 
 CPP_FILES = identitykey.cpp \
 			identitykeypair.cpp \
@@ -55,7 +55,6 @@ OBJS1 = $(CPP_FILES:%.cpp=%.o)
 OBJS =  $(OBJS1:%.cc=%.o)
 
 all:	$(HEADERS) $(OBJS)
-	$(CXX) -shared -o libaxolotl.so $(OBJS) -lprotobuf libcurve25519/libcurve25519.a
 	$(AR) rcs libaxolotl.a $(OBJS)
 
 protocol/WhisperTextProtocol.pb.cc:	protocol/WhisperTextProtocol.pb.h

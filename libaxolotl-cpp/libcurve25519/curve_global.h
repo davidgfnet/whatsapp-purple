@@ -2,6 +2,8 @@
 #define CURVE_GLOBAL_H
 
 // from https://gcc.gnu.org/wiki/Visibility
+// Since we are statically linking get rid of this shit
+/*
 #if defined _WIN32 || defined __CYGWIN__
   #ifdef LIBCURVE25519_LIBRARY
     #ifdef __GNUC__
@@ -24,5 +26,7 @@
     #define LIBCURVE_DLL
   #endif
 #endif
+*/
+#define LIBCURVE_DLL  
 
 #endif // CURVE_GLOBAL_H

@@ -1,6 +1,7 @@
 #include "keyhelper.h"
 
 #include <string.h>
+#include <time.h>
 
 #include "eckeypair.h"
 #include "curve.h"

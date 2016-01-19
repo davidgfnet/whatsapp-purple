@@ -2,7 +2,7 @@
 CXX=g++
 GCC=gcc
 
-CFLAGS = -I./ecc -I./exception -I./util -I./state -I./groups/ratchet -I./groups/state -I./kdf -I./ratchet -I./ -std=c++11 -fPIC -O0 -ggdb
+CFLAGS = -I./ecc -I./exception -I./util -I./state -I./groups/ratchet -I./groups/state -I./kdf -I./ratchet -I./protocol -I./ -std=c++11 -fPIC -O0 -ggdb
 
 CPP_FILES = identitykey.cpp \
 			identitykeypair.cpp \
@@ -14,6 +14,7 @@ CPP_FILES = identitykey.cpp \
 			kdf/derivedmessagesecrets.cpp \
 			kdf/derivedrootsecrets.cpp \
 			kdf/hkdf.cpp \
+			groups/group_session_builder.cpp \
 			groups/state/senderkeystate.cpp \
 			groups/state/senderkeyrecord.cpp \
 			groups/ratchet/senderchainkey.cpp \

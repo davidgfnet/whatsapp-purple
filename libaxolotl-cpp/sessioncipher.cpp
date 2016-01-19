@@ -6,7 +6,7 @@
 
 #include <iostream>
 #include <memory>
-#include <openssl/aes.h>
+#include "aes.h"
 
 static void ctr128_inc(unsigned char *counter) {
     unsigned int  n=16;
@@ -281,7 +281,7 @@ ByteArray SessionCipher::getCiphertext(int version, const MessageKeys &messageKe
                         (unsigned char*)ivec.data(), AES_ENCRYPT);
         return out;
     } else {
-        AES_set_encrypt_key((const unsigned char*)key.c_str(), 128, &enc_key);
+        /*AES_set_encrypt_key((const unsigned char*)key.c_str(), 128, &enc_key);
         ByteArray out(plaintext.size(), '\0');
         unsigned int counter = 0;
         ByteArray iv(AES_BLOCK_SIZE, '\0');
@@ -296,14 +296,13 @@ ByteArray SessionCipher::getCiphertext(int version, const MessageKeys &messageKe
         AES_ctr128_encrypt((const unsigned char*)plaintext.c_str(), (unsigned char*)out.data(),
                            plaintext.size(), &enc_key, (unsigned char*)iv.data(),
                            ecount, &counter);
-        return out;
+        return out;*/
+		return "";
     }
 }
 
 ByteArray SessionCipher::getPlaintext(int version, const MessageKeys &messageKeys, const ByteArray &cipherText)
 {
-    //qDebug() << version << cipherText.toHex();
-	std::cerr << "=============================== getPlaintext " << cipherText << std::endl;
     AES_KEY dec_key;
     ByteArray key = messageKeys.getCipherKey();
     ByteArray out(cipherText.size(), '\0');
@@ -316,7 +315,7 @@ ByteArray SessionCipher::getPlaintext(int version, const MessageKeys &messageKey
                         (unsigned char*)ivec.data(), AES_DECRYPT);
         out = out.substr(0, out.size() - (unsigned int)out[out.size() - 1]);
     } else {
-        AES_set_encrypt_key((const unsigned char*)key.c_str(), 128, &dec_key);
+        /*AES_set_encrypt_key((const unsigned char*)key.c_str(), 128, &dec_key);
         unsigned int counter = 0;
         ByteArray iv(AES_BLOCK_SIZE, '\0');
         //ByteUtil::intToByteArray(iv, 0, counter);
@@ -328,7 +327,8 @@ ByteArray SessionCipher::getPlaintext(int version, const MessageKeys &messageKey
         }
         AES_ctr128_encrypt((const unsigned char*)cipherText.c_str(), (unsigned char*)out.data(),
                            cipherText.size(), &dec_key, (unsigned char*)iv.data(),
-                           ecount, &counter);
+                           ecount, &counter);*/
+		out = "[ Message using AES CTR128, not implemented! ]";
     }
     return out;
 }

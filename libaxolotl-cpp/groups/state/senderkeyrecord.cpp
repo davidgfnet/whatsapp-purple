@@ -26,11 +26,11 @@ SenderKeyRecord::SenderKeyRecord(const ByteArray &serialized)
 SenderKeyState *SenderKeyRecord::getSenderKeyState(int keyId)
 {
 	std::cerr << "senderKeyStates has " << senderKeyStates.size() << " elements" << std::endl;
-    if (!senderKeyStates.empty() && (keyId < senderKeyStates.size())) {
-        return senderKeyStates.at(keyId);
-    } else {
-        throw InvalidKeyIdException("No key state " + std::to_string(keyId) + " in record!");
-    }
+	for (auto keys: senderKeyStates)
+		if (keys->getKeyId() == keyId)
+			return keys;
+
+    throw InvalidKeyIdException("No key state " + std::to_string(keyId) + " in record!");
 }
 
 void SenderKeyRecord::addSenderKeyState(int id, int iteration, const ByteArray &chainKey, const DjbECPublicKey &signatureKey)

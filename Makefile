@@ -20,6 +20,7 @@ INCLUDES = -I./libaxolotl-cpp/ecc \
            -I./libaxolotl-cpp/protocol \
            -I./libaxolotl-cpp/groups/ratchet \
            -I./libaxolotl-cpp/groups/state \
+           -I./libaxolotl-cpp/groups \
            -I./libaxolotl-cpp/kdf \
            -I./libaxolotl-cpp/ratchet \
            -I./libaxolotl-cpp/mem-store \
@@ -27,7 +28,7 @@ INCLUDES = -I./libaxolotl-cpp/ecc \
 
 #           -I./libaxolotl-cpp/sqli-store \
 
-C_SRCS = tinfl.c imgutil.c 
+C_SRCS = tinfl.c imgutil.c aes.c
 CXX_SRCS = whatsapp-protocol.cc wa_util.cc rc4.cc keygen.cc tree.cc databuffer.cc message.cc wa_purple.cc
 
 C_OBJS = $(C_SRCS:.c=.o)
@@ -53,15 +54,15 @@ CFLAGS += \
 
 CXXFLAGS += -std=c++11
 
-LIBS_PURPLE = $(shell $(PKG_CONFIG) --libs purple) -lfreeimage ./libaxolotl-cpp/libaxolotl.a -lprotobuf -lcrypto ./libaxolotl-cpp/libcurve25519/libcurve25519.a
+LIBS_PURPLE = $(shell $(PKG_CONFIG) --libs purple) -lfreeimage ./libaxolotl-cpp/libaxolotl.a -lprotobuf ./libaxolotl-cpp/libcurve25519/libcurve25519.a
 LDFLAGS ?= $(ARCHFLAGS)
 LDFLAGS += -shared -pipe
 
 libaxolotl-cpp/libcurve25519/libcurve25519.a:
-	make -C libaxolotl-cpp/libcurve25519
+	+make -C libaxolotl-cpp/libcurve25519
 
 libaxolotl-cpp/libaxolotl.a:	libaxolotl-cpp/libcurve25519/libcurve25519.a
-	make -C libaxolotl-cpp
+	+make -C libaxolotl-cpp
 
 AxolotlMessages.pb.h:	AxolotlMessages.proto
 	protoc --cpp_out=. AxolotlMessages.proto
@@ -82,7 +83,7 @@ strip: $(LIBNAME)
 
 .PHONY: debug
 debug:
-	CFLAGS="$$CFLAGS -DDEBUG -g3 -O0" make all
+	+ CFLAGS="$$CFLAGS -DDEBUG -g3 -O0" make all
 
 PLUGIN_DIR_PURPLE:=$(shell $(PKG_CONFIG) --variable=plugindir purple)
 DATA_ROOT_DIR_PURPLE:=$(shell $(PKG_CONFIG) --variable=datarootdir purple)
@@ -106,4 +107,9 @@ clean:
 	-rm -f AxolotlMessages.pb.cc AxolotlMessages.pb.h
 	-rm -f *.o
 	-rm -f $(LIBNAME)
+
+.PHONY: cleanall
+cleanall:	clean
+	make -C libaxolotl-cpp clean
+	make -C libaxolotl-cpp/libcurve25519/ clean
 

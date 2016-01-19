@@ -31,12 +31,14 @@
 #include "wa_util.h"
 #include "wa_constants.h"
 
+#include "AxolotlMessages.pb.h"
 #include "keyhelper.h"
 #include "prekeywhispermessage.h"
 #include "sessioncipher.h"
 #include "whisperexception.h"
 #include "sessioncipher.h"
 #include "axolotl_groups.h"
+#include "group_session_builder.h"
 
 static int isbroadcast(const std::string user)
 {
@@ -1393,9 +1395,11 @@ void WhatsappConnection::sendEncrypt()
 	outbuffer = outbuffer + serialize_tree(&iq);
 }
 
-void WhatsappConnection::sendMessageRetry(const std::string &from, const std::string &msgid, unsigned long long t)
+void WhatsappConnection::sendMessageRetry(const std::string &from, const std::string &part, const std::string &msgid, unsigned long long t)
 {
 	Tree resp("receipt", makeat({"to", from, "id", msgid, "type", "retry", "t", std::to_string(time(0))}));
+	if (part != "")
+		resp["participant"] = part;
 
 	Tree registrationNode("registration");
 	uint64_t registrationId = axolotlStore->getLocalRegistrationId();
@@ -1439,11 +1443,23 @@ bool WhatsappConnection::parsePreKeyWhisperMessage(std::string jid, std::string 
 		else if (mtype == "media")
 			this->receiveMessage(ImageMessage::parseProtobuf(this, jid, time, id, author, plaintext));
 
+		// Try to parse any sender key
+		wapurple::AxolotlMessage pbuf;
+		pbuf.ParseFromString(plaintext);
+
+		if (pbuf.has_senderkeydistributionmessage()) {
+			// Parse prekey message bundle! (if any)
+			std::string gid = pbuf.senderkeydistributionmessage().groupid();
+			std::string skd = pbuf.senderkeydistributionmessage().axolotlsenderkeydistributionmessage();
+
+			GroupSessionBuilder gs(axolotlStore);
+			gs.process(gid, skd);
+		}
 	}
 	catch (WhisperException &e) {
 		DEBUG_PRINT("Axolotl exception (parseWhisperMessage): "
 			<< e.errorType() << " " << e.errorMessage());
-		sendMessageRetry(jid, id, time);
+		sendMessageRetry(jid, author, id, time);
 		return false;
 	}
 	return true;
@@ -1467,7 +1483,7 @@ bool WhatsappConnection::parseWhisperMessage(std::string jid, std::string id,
 	catch (WhisperException &e) {
 		DEBUG_PRINT("Axolotl exception (parseWhisperMessage): "
 			<< e.errorType() << " " << e.errorMessage());
-		sendMessageRetry(jid, id, time);
+		sendMessageRetry(jid, "", id, time);
 		return false;
 	}
 	return true;
@@ -1491,7 +1507,7 @@ bool WhatsappConnection::parseGroupWhisperMessage(std::string jid, std::string i
 		DEBUG_PRINT("Axolotl exception (parseGroupWhisperMessage): "
 			<< e.errorType() << " " << e.errorMessage());
 		std::string fromretry = jid.substr(0, jid.find("-")) + "@s.whatsapp.net";
-		sendMessageRetry(fromretry, id, time);
+		sendMessageRetry(jid, fromretry, id, time);
 		return false;
 	}
 	return true;

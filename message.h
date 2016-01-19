@@ -108,6 +108,7 @@ public:
 	std::string encoding;
 	std::string preview;
 	unsigned int width, height, size;
+	std::string e2e_key, e2e_iv, e2e_aeskey;
 
 	static ImageMessage parseProtobuf(const WhatsappConnection * wc, const std::string from, const unsigned long long time,
 		const std::string id, const std::string author, const std::string & buf);

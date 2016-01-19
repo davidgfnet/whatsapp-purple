@@ -18,6 +18,9 @@ public:
 	static void calc_hmac_v12(const unsigned char *data, int l, const unsigned char *key, unsigned char *hmac);
 	static void calc_hmac(const unsigned char *data, int l, const unsigned char *key, unsigned char * hmac, unsigned int seq);
 
+	// HKDFv3 key gen
+	static std::string HKDFv3(std::string key, std::string info, unsigned outlen);
+
 private:
 	static void HMAC_SHA1(const unsigned char *text, int text_len, const unsigned char *key, int key_len, unsigned char *digest);
 };

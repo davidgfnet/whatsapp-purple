@@ -53,6 +53,7 @@
 #include "roomlist.h"
 #include "status.h"
 #include "util.h"
+#include "wa_util.h"
 #include "version.h"
 #include "request.h"
 
@@ -630,10 +631,20 @@ static void waprpl_process_incoming_events(PurpleConnection * gc)
 			ImageMessage * im = dynamic_cast<ImageMessage*>(m);
 			purple_debug_info(WHATSAPP_ID, "Got image from %s: %s\n", m->from.c_str(), im->url.c_str());
 			int imgid = purple_imgstore_add_with_id(g_memdup(im->preview.c_str(), im->preview.size()), im->preview.size(), NULL);
-			char *msg = g_strdup_printf("<a href=\"%s\"><img id=\"%u\"></a><br/><a href=\"%s\">%s</a><br />%s",
-				im->url.c_str(), imgid, im->url.c_str(), im->url.c_str(), im->caption.c_str());
-			conv_add_message(gc, m->from.c_str(), msg, m->author.c_str(), m->t);
-			g_free(msg);
+			if (!im->e2e_key.size()) {
+				char *msg = g_strdup_printf("<a href=\"%s\"><img id=\"%u\"></a><br/><a href=\"%s\">%s</a><br />%s",
+					im->url.c_str(), imgid, im->url.c_str(), im->url.c_str(), im->caption.c_str());
+				conv_add_message(gc, m->from.c_str(), msg, m->author.c_str(), m->t);
+				g_free(msg);
+			}else{
+				std::string url = "https://davidgf.net/whatsapp/imgdec.php?url=" + im->url + "&iv=" + tohex(im->e2e_iv.c_str(), 16) + "&key=" + tohex(im->e2e_aeskey.c_str(), 32);
+				std::cout << tohex(im->e2e_aeskey.c_str(), 32) << std::endl;
+
+				char *msg = g_strdup_printf("<a href=\"%s\"><img id=\"%u\"></a><br/><a href=\"%s\">%s</a><br />%s",
+					url.c_str(), imgid, url.c_str(), url.c_str(), im->caption.c_str());
+				conv_add_message(gc, m->from.c_str(), msg, m->author.c_str(), m->t);
+				g_free(msg);
+			}
 			} break;
 		case LOCAT_MESSAGE: {
 			LocationMessage * lm = dynamic_cast<LocationMessage*>(m);

@@ -2,8 +2,8 @@
 
 void HMAC_SHA256(const unsigned char *text, int text_len, const unsigned char *key, int key_len, unsigned char *digest);
 
-const ByteArray SenderChainKey::MESSAGE_KEY_SEED = ByteArray("\0x01");
-const ByteArray SenderChainKey::CHAIN_KEY_SEED = ByteArray("\0x02");
+const ByteArray SenderChainKey::MESSAGE_KEY_SEED = ByteArray("\1");
+const ByteArray SenderChainKey::CHAIN_KEY_SEED = ByteArray("\2");
 
 SenderChainKey::SenderChainKey(int iteration, const ByteArray &chainKey)
 {

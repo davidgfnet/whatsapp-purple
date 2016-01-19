@@ -13,7 +13,7 @@ public:
     void storeSenderKey(const ByteArray &senderKeyId, SenderKeyRecord *record);
     SenderKeyRecord loadSenderKey(const ByteArray &senderKeyId) const;
 private:
-    std::map<ByteArray, SenderKeyRecord*> store;
+    std::map<ByteArray, SenderKeyRecord> store;
 };
 
 #endif // INMEMORYSENDERKEYSTORE_H

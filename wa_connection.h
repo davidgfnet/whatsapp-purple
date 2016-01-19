@@ -129,7 +129,7 @@ private:
 	bool parseGroupWhisperMessage(std::string, std::string, std::string, unsigned long long, Tree, std::string);
 	SessionCipher *getSessionCipher(uint64_t recepient);
 	GroupCipher *getGroupCipher(std::string recepient);
-	void sendMessageRetry(const std::string &from, const std::string &msgid, unsigned long long t);
+	void sendMessageRetry(const std::string &from, const std::string &part, const std::string &msgid, unsigned long long t);
 	void sendGetCipherKeysFromUser(std::string jid);
 
 	void receiveMessage(const Message & m);

@@ -1,6 +1,12 @@
 package wapurple;
 
 message AxolotlMessage {
+	optional string textMsg = 1;
+
+	optional SenderKeyDistributionMessage senderKeyDistributionMessage = 2;
+
+	optional AxolotlImageMessage imageMsg = 3;
+
 	message AxolotlImageMessage {
 		optional string url = 1;
 		optional string mimetype = 2;
@@ -10,15 +16,13 @@ message AxolotlMessage {
 		optional uint32 height = 6;
 		optional uint32 width = 7;
 		optional bytes refkey = 8;
-		optional bytes key = 9;
-		optional bytes iv = 10;
 		optional bytes thumbnail = 16;
 	}
 
-	optional string textMsg = 1;
-
-	optional AxolotlImageMessage imageMsg = 3;
-
+	message SenderKeyDistributionMessage {
+		optional bytes groupId = 1;
+		optional bytes axolotlSenderKeyDistributionMessage = 2;
+	}
 }
 
 

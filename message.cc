@@ -3,6 +3,7 @@
 #include "wacommon.h"
 #include "wa_connection.h"
 #include "tree.h"
+#include "wa_util.h"
 
 using namespace wapurple;
 
@@ -78,6 +79,8 @@ ChatMessage ChatMessage::parseProtobuf(const WhatsappConnection * wc, const std:
 
 	AxolotlMessage pbuf;
 	pbuf.ParseFromString(buf);
+
+	pbuf.PrintDebugString();
 
 	return ChatMessage(wc, from, time, id, pbuf.textmsg(), author);
 }
@@ -156,7 +159,12 @@ DataBuffer ImageMessage::serialize() const
 
 Message *ImageMessage::copy() const
 {
-	return new ImageMessage(wc, from, t, id, author, url, caption, ip, width, height, size, encoding, hash, filetype, preview);
+	ImageMessage * im = new ImageMessage(wc, from, t, id, author, url, caption, ip, width, height, size, encoding, hash, filetype, preview);
+	im->e2e_key    = this->e2e_key;
+	im->e2e_aeskey = this->e2e_aeskey;
+	im->e2e_iv     = this->e2e_iv;
+
+	return im;
 }
 
 
@@ -166,10 +174,23 @@ ImageMessage ImageMessage::parseProtobuf(const WhatsappConnection * wc, const st
 	AxolotlMessage pbuf;
 	pbuf.ParseFromString(buf);
 
-	return ImageMessage(wc, from, time, id, author,
+	ImageMessage im(wc, from, time, id, author,
 		pbuf.imagemsg().url(), pbuf.imagemsg().caption(), "",
 		pbuf.imagemsg().width(), pbuf.imagemsg().height(), pbuf.imagemsg().length(), "",
 		pbuf.imagemsg().sha256(), pbuf.imagemsg().mimetype(), pbuf.imagemsg().thumbnail());
+
+	// Fill in the RefKey needed to decrypt the image
+	im.e2e_key = pbuf.imagemsg().refkey();
+
+	// Calculate keys
+	HKDF keygen(3);
+	std::string keys = keygen.deriveSecrets(im.e2e_key, "WhatsApp Image Keys", 112, "");
+	im.e2e_iv = keys.substr(0, 16);
+	im.e2e_aeskey = keys.substr(16, 48);
+	//std::strings macKey = keys.substr(48, 80);
+	//std::strings refKey = keys.substr(80);
+
+	return im;
 }
 
 SoundMessage::SoundMessage(const WhatsappConnection * wc, const std::string from, const unsigned long long time,

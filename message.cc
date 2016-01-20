@@ -186,7 +186,7 @@ ImageMessage ImageMessage::parseProtobuf(const WhatsappConnection * wc, const st
 	HKDF keygen(3);
 	std::string keys = keygen.deriveSecrets(im.e2e_key, "WhatsApp Image Keys", 112, "");
 	im.e2e_iv = keys.substr(0, 16);
-	im.e2e_aeskey = keys.substr(16, 48);
+	im.e2e_aeskey = keys.substr(16, 32);
 	//std::strings macKey = keys.substr(48, 80);
 	//std::strings refKey = keys.substr(80);
 

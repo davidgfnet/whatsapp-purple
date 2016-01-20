@@ -186,6 +186,7 @@ public:
 
 	void updatePrivacy(const std::string &, const std::string &, const std::string &);
 	void queryPrivacy(std::string &, std::string &, std::string &);
+	std::string decodeImage(std::string, std::string, std::string);
 
 	std::string getMessageId();
 	void addContacts(std::vector < std::string > clist);

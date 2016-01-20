@@ -1933,4 +1933,18 @@ void WhatsappConnection::sendResponse()
 	outbuffer = outbuffer + serialize_tree(&t, false);
 }
 
+std::string WhatsappConnection::decodeImage(std::string payload, std::string iv, std::string aeskey) {
+	AES_KEY enc_key;
+	char * outb = (char*)malloc(payload.size());
+	AES_set_decrypt_key((const unsigned char*)aeskey.c_str(), aeskey.size() * 8, &enc_key);
+    AES_cbc_encrypt((const unsigned char*)payload.c_str(),
+                    (unsigned char*)outb,
+                    payload.size(), &enc_key,
+                    (unsigned char*)iv.data(), AES_DECRYPT);
+
+	std::string res(outb, payload.size());
+	free(outb);
+
+	return res;
+}
 

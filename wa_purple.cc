@@ -1519,7 +1519,6 @@ static PurpleXfer *waprpl_new_xfer_upload(PurpleConnection * gc, const char *who
 	whatsapp_connection *wconn = (whatsapp_connection*)purple_connection_get_protocol_data(gc);
 
 	wa_file_transfer *xfer_info = new wa_file_transfer();
-	memset(xfer_info, 0, sizeof(wa_file_transfer));
 	xfer_info->upload = true;
 	xfer_info->to = g_strdup(who);
 	xfer->data = xfer_info;
@@ -1556,7 +1555,6 @@ static PurpleXfer *waprpl_new_xfer_download(PurpleConnection * gc, const char *w
 	whatsapp_connection *wconn = (whatsapp_connection*)purple_connection_get_protocol_data(gc);
 
 	wa_file_transfer *xfer_info = new wa_file_transfer();
-	memset(xfer_info, 0, sizeof(wa_file_transfer));
 	xfer_info->upload = false;
 	xfer_info->to = g_strdup(who);
 	xfer->data = xfer_info;

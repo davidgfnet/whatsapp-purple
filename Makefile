@@ -70,7 +70,7 @@ AxolotlMessages.pb.cc:	AxolotlMessages.pb.h
 	# Do nothing
 
 %.o: %.c libaxolotl-cpp/libaxolotl.a
-	$(CC) -c $(CFLAGS) -o $@ $<
+	$(CC) -c $(CFLAGS) -std=c99 -o $@ $<
 %.o: %.cc AxolotlMessages.pb.h libaxolotl-cpp/libaxolotl.a
 	$(CXX) -c $(CFLAGS) $(CXXFLAGS) -o $@ $<
 

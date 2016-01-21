@@ -542,6 +542,16 @@ bool WhatsappConnection::queryReceivedMessage(std::string & msgid, int & type, u
 {
 	if (received_messages.size() == 0) return false;
 
+	// Remove messages in the queue on read or delivered successfully
+	if (type == rRead || type == rDelivered) {
+		for (auto msg: queue_messages) {
+			if (msg->id == msgid) {
+				msg->retries = -1;
+				break;
+			}
+		}
+	}
+
 	msgid = received_messages[0].id;
 	type = received_messages[0].type;
 	t = received_messages[0].t;
@@ -560,25 +570,38 @@ std::string WhatsappConnection::getMessageId()
 }
 
 
+void WhatsappConnection::retryMessage(std::string id) {
+	// Look for the message in the queue and resend it on the plain :D
+	for (auto msg: queue_messages) {
+		if (msg->id == id) {
+			msg->axolotl = false;
+			msg->retries = 0;
+
+			// Re-query user keys just in case they've changed
+			sendGetCipherKeysFromUser(msg->from);
+
+			break;
+		}
+	}
+
+	processMsgQueue();
+}
+
 void WhatsappConnection::processMsgQueue() {
 	for (auto msg: queue_messages) {
+		if (msg->retries != 0) continue;
+		// Only processing messages that haven't been processed!
+
 		DataBuffer buf;
-		std::cerr << "Retry " << msg->retries << std::endl;
-		if (!msg->axolotl || !this->send_ciphered) {
-			buf = msg->serialize();
-			msg->retries = -1;
-		}
-		else {
+		if (msg->axolotl && this->send_ciphered) {
 			uint64_t recepientId = JidAsInt(msg->from);
 			if (!axolotlStore->containsSession(recepientId, 1)) {
 				DEBUG_PRINT("Cannot find session " << recepientId);
-				// Schedule key retrieval
-				if (msg->retries == 0)
-					sendGetCipherKeysFromUser(msg->from);
 
-				msg->retries++;
-				if (msg->retries > 8)
-					msg->axolotl = false;
+				// Schedule key retrieval, this message will go plaintext I'm afraid!
+				sendGetCipherKeysFromUser(msg->from);
+
+				msg->axolotl = false;
 			}
 			else {
 				DEBUG_PRINT("Session found!");
@@ -592,14 +615,22 @@ void WhatsappConnection::processMsgQueue() {
 						ciphertext->getType() == CiphertextMessage::WHISPER_TYPE ? "msg" : "pkmsg"
 					);
 					buf = cmsg.serialize();
-					msg->retries = -1;
+
+					// Put it in hold, just in case we have to retransmit it
+					msg->retries = 1;
 				}
 			}
+		}
+		// Plaintext!
+		if (!msg->axolotl || !this->send_ciphered) {
+			buf = msg->serialize();
+			msg->retries = -1;
 		}
 
 		outbuffer = outbuffer + buf;
 	}
 
+	// Clean up messages that are no longer needed
 	auto it = queue_messages.begin();
 	while (it != queue_messages.end()) {
 		if ((*it)->retries < 0)
@@ -754,35 +785,6 @@ std::string query_field(std::string work, std::string lo, bool integer = false)
 	work = work.substr(0, p);
 
 	return work;
-}
-
-void WhatsappConnection::updateContactStatuses(std::string json)
-{
-	while (true) {
-		size_t offset = json.find("{");
-		if (offset == std::string::npos)
-			break;
-		json = json.substr(offset + 1);
-
-		/* Look for closure */
-		size_t cl = json.find("{");
-		if (cl == std::string::npos)
-			cl = json.size();
-		std::string work = json.substr(0, cl);
-
-		/* Look for "n", the number and "w","t","s" */
-		std::string n = query_field(work, "n");
-		std::string w = query_field(work, "w", true);
-		std::string t = query_field(work, "t", true);
-		std::string s = query_field(work, "s");
-
-		if (w == "1") {
-			contacts[n].status = utf8_decode(s);
-			contacts[n].last_status = std::stoull(t);
-		}
-
-		json = json.substr(cl);
-	}
 }
 
 std::string base64_encode_esp(unsigned char const *bytes_to_encode, unsigned int in_len);
@@ -1049,12 +1051,14 @@ void WhatsappConnection::processIncomingData()
 
 			outbuffer = outbuffer + serialize_tree(&mes);
 
-			// Add reception package to queue
+			// Add reception package to queue or retry it
 			std::string who = getusername(participant.size() ? participant : from);
-			ReceptionType rtype = rDelivered;
-			if (type == "read") rtype = rRead;
-			received_messages.push_back( {id,rtype,t, } );
-			
+			if (type == "read")
+				received_messages.push_back( {id, rRead, t, } );
+			else if (type == "delivery")
+				received_messages.push_back( {id, rDelivered, t, } );
+			else if (type == "retry")
+				this->retryMessage(id);
 		} else if (tl.getTag() == "chatstate") {
 			if (tl.hasChild("composing"))
 				this->gotTyping(tl["from"], "composing");

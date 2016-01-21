@@ -650,7 +650,7 @@ static void waprpl_process_incoming_events(PurpleConnection * gc)
 			}
 
 			// Offer file transfer if the user said so!
-			if (true)
+			if (purple_account_get_bool(acc, "download_pics", TRUE))
 				waprpl_image_download_offer(gc, m->from, im->url, im->e2e_key.size() != 0, im->e2e_iv, im->e2e_aeskey);
 
 			} break;
@@ -1456,15 +1456,12 @@ void http_download_cb(PurpleUtilFetchUrlData *url_data, gpointer user_data, cons
 		purple_xfer_set_bytes_sent(xfer, len);
 		purple_xfer_update_progress(xfer);
 
-		std::string decoded_img = wconn->waAPI->decodeImage(encoded_img, xinfo->iv, xinfo->aeskey);
+		// Decode image if necessary
+		std::string decoded_img = xinfo->iv.size() != 0 ?
+			wconn->waAPI->decodeImage(encoded_img, xinfo->iv, xinfo->aeskey) : encoded_img;
 
 		unsigned char* buffer = (unsigned char*)decoded_img.data();
 		unsigned size = decoded_img.size();
-
-		//PurpleXferUiOps *ui_ops = purple_xfer_get_ui_ops(xfer);
-		//purple_xfer_set_bytes_sent(xfer, purple_xfer_get_bytes_sent(xfer) + 
-		//	(ui_ops && ui_ops->ui_write ? ui_ops->ui_write(xfer, buffer, size) : fwrite(buffer, 1, size, xfer->dest_fp)));
-
 
 		int imgid = purple_imgstore_add_with_id(g_memdup(buffer, size), size, NULL);
 		char *msg = g_strdup_printf("<img id=\"%u\">", imgid);
@@ -1691,6 +1688,9 @@ static void waprpl_init(PurplePlugin * plugin)
 	prpl_info.protocol_options = g_list_append(prpl_info.protocol_options, option);
 
 	option = purple_account_option_bool_new("Send ciphered messages (when possible)", "send_ciphered", TRUE);
+	prpl_info.protocol_options = g_list_append(prpl_info.protocol_options, option);
+
+	option = purple_account_option_bool_new("Download pictures as attachments", "download_pics", TRUE);
 	prpl_info.protocol_options = g_list_append(prpl_info.protocol_options, option);
 
 	_whatsapp_protocol = plugin;

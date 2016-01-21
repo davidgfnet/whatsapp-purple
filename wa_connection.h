@@ -157,7 +157,6 @@ private:
 	std::string generateUploadPOST(t_fileupload * fu);
 	void processUploadQueue();
 
-	void updateContactStatuses(std::string json);
 	void updateFileUpload(std::string);
 
 	std::string getNextIqId();
@@ -206,6 +205,7 @@ public:
 	std::string getUserStatusString(const std::string & who);
 	unsigned long long getLastSeen(const std::string & who);
 	void processMsgQueue();
+	void retryMessage(std::string id);
 
 	void manageParticipant(std::string group, std::string participant, std::string command);
 	void leaveGroup(std::string group);

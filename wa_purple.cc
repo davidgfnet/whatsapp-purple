@@ -90,7 +90,7 @@ extern "C" {
 typedef struct {
 	bool upload;
 	unsigned int file_size;
-	char *to;
+	std::string to, author;
 	void *wconn;
 	PurpleConnection *gc;
 	int ref_id;
@@ -122,7 +122,7 @@ void waprpl_check_ssl_output(PurpleConnection * gc);
 void waprpl_ssl_input_cb(gpointer data, gint source, PurpleInputCondition cond);
 static void waprpl_set_status(PurpleAccount * acct, PurpleStatus * status);
 static void waprpl_check_complete_uploads(PurpleConnection * gc);
-void waprpl_image_download_offer(PurpleConnection *, std::string, std::string, bool, std::string, std::string);
+void waprpl_image_download_offer(PurpleConnection *, std::string, std::string, std::string, bool, std::string, std::string);
 
 unsigned int chatid_to_convo(const char *id)
 {
@@ -651,7 +651,7 @@ static void waprpl_process_incoming_events(PurpleConnection * gc)
 
 			// Offer file transfer if the user said so!
 			if (purple_account_get_bool(acc, "download_pics", TRUE))
-				waprpl_image_download_offer(gc, m->from, im->url, im->e2e_key.size() != 0, im->e2e_iv, im->e2e_aeskey);
+				waprpl_image_download_offer(gc, m->from, m->author, im->url, im->e2e_key.size() != 0, im->e2e_iv, im->e2e_aeskey);
 
 			} break;
 		case LOCAT_MESSAGE: {
@@ -1465,7 +1465,7 @@ void http_download_cb(PurpleUtilFetchUrlData *url_data, gpointer user_data, cons
 
 		int imgid = purple_imgstore_add_with_id(g_memdup(buffer, size), size, NULL);
 		char *msg = g_strdup_printf("<img id=\"%u\">", imgid);
-		conv_add_message(xinfo->gc, xinfo->to, msg, xinfo->to, 0);
+		conv_add_message(xinfo->gc, xinfo->to.c_str(), msg, xinfo->author.c_str(), 0);
 		g_free(msg);
 
 		purple_xfer_set_completed(xfer, TRUE);
@@ -1517,7 +1517,7 @@ static PurpleXfer *waprpl_new_xfer_upload(PurpleConnection * gc, const char *who
 
 	wa_file_transfer *xfer_info = new wa_file_transfer();
 	xfer_info->upload = true;
-	xfer_info->to = g_strdup(who);
+	xfer_info->to = who;
 	xfer->data = xfer_info;
 	xfer_info->wconn = wconn;
 	xfer_info->gc = gc;
@@ -1544,7 +1544,7 @@ static void waprpl_send_file(PurpleConnection * gc, const char *who, const char 
 		purple_xfer_request(xfer);
 }
 
-static PurpleXfer *waprpl_new_xfer_download(PurpleConnection * gc, const char *who, std::string url, std::string iv, std::string k)
+static PurpleXfer *waprpl_new_xfer_download(PurpleConnection * gc, const char *who, std::string author, std::string url, std::string iv, std::string k)
 {
 	purple_debug_info(WHATSAPP_ID, "New file xfer (download)\n");
 	PurpleXfer *xfer = purple_xfer_new(gc->account, PURPLE_XFER_RECEIVE, who);
@@ -1553,7 +1553,8 @@ static PurpleXfer *waprpl_new_xfer_download(PurpleConnection * gc, const char *w
 
 	wa_file_transfer *xfer_info = new wa_file_transfer();
 	xfer_info->upload = false;
-	xfer_info->to = g_strdup(who);
+	xfer_info->to = who;
+	xfer_info->author = author;
 	xfer->data = xfer_info;
 	xfer_info->wconn = wconn;
 	xfer_info->gc = gc;
@@ -1571,11 +1572,11 @@ static PurpleXfer *waprpl_new_xfer_download(PurpleConnection * gc, const char *w
 	return xfer;
 }
 
-void waprpl_image_download_offer(PurpleConnection * gc, std::string from, std::string url, bool ciphered,
+void waprpl_image_download_offer(PurpleConnection * gc, std::string from, std::string author, std::string url, bool ciphered,
 	std::string iv, std::string aeskey)
 {
 	purple_debug_info(WHATSAPP_ID, "Received a file transfer request!\n");
-	PurpleXfer *xfer = waprpl_new_xfer_download(gc, from.c_str(), url, iv, aeskey);
+	PurpleXfer *xfer = waprpl_new_xfer_download(gc, from.c_str(), author, url, iv, aeskey);
 
 	if (xfer)
 		purple_xfer_request(xfer);

@@ -1496,11 +1496,9 @@ bool WhatsappConnection::parseWhisperMessage(std::string jid, std::string id,
 bool WhatsappConnection::parseGroupWhisperMessage(std::string jid, std::string id,
 	std::string author, unsigned long long time, Tree enc, std::string mtype) {
 
-	std::cerr << "Received group ciphered message!" << std::endl;
 	try {
 		GroupCipher *cipher = getGroupCipher(jid);
 		std::string plaintext = cipher->decrypt(enc.getData());
-		std::cerr << "Plaintext is " << plaintext << std::endl;
 
 		if (mtype == "text")
 			this->receiveMessage(ChatMessage::parseProtobuf(this, jid, time, id, author, plaintext));

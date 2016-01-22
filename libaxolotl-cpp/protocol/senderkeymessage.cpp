@@ -28,9 +28,6 @@ SenderKeyMessage::SenderKeyMessage(const ByteArray &serialized)
         !senderKeyMessage.has_iteration() ||
         !senderKeyMessage.has_ciphertext())
     {
-        std::cerr << "has_id" << senderKeyMessage.has_id();
-        std::cerr << "has_iteration" << senderKeyMessage.has_iteration();
-        std::cerr << "has_ciphertext" << senderKeyMessage.has_ciphertext();
         throw InvalidMessageException("Incomplete message.");
     }
 

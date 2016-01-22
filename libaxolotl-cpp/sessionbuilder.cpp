@@ -55,7 +55,6 @@ uint64_t SessionBuilder::process(SessionRecord *sessionRecord, std::shared_ptr<P
         throw UntrustedIdentityException("Untrusted identity: " + std::to_string(recipientId));
     }
 
-	std::cerr << "Got message version " << messageVersion << std::endl;
     switch (messageVersion) {
         case 2:  unsignedPreKeyId = processV2(sessionRecord, message); break;
         case 3:  unsignedPreKeyId = processV3(sessionRecord, message); break;
@@ -152,9 +151,6 @@ void SessionBuilder::process(const PreKeyBundle &preKey)
                                 preKey.getIdentityKey().getPublicKey().serialize(),
                                 preKey.getSignedPreKeySignature()))
     {
-        std::cerr << ByteUtil::toHex(preKey.getIdentityKey().getPublicKey().serialize());
-        std::cerr << ByteUtil::toHex(preKey.getSignedPreKey().serialize());
-        std::cerr << ByteUtil::toHex(preKey.getSignedPreKeySignature());
         throw InvalidKeyException("Invalid signature on device key!");
     }
 

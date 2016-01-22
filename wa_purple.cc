@@ -641,7 +641,6 @@ static void waprpl_process_incoming_events(PurpleConnection * gc)
 				g_free(msg);
 			}else{
 				std::string url = "https://davidgf.net/whatsapp/imgdec.php?url=" + im->url + "&iv=" + tohex(im->e2e_iv.c_str(), 16) + "&key=" + tohex(im->e2e_aeskey.c_str(), 32);
-				std::cout << tohex(im->e2e_aeskey.c_str(), 32) << std::endl;
 
 				char *msg = g_strdup_printf("<a href=\"%s\"><img id=\"%u\"></a><br/><a href=\"%s\">%s</a><br />%s",
 					url.c_str(), imgid, url.c_str(), url.c_str(), im->caption.c_str());

@@ -5,7 +5,7 @@ AR=ar
 
 TARGET=libcurve25519.a
 INCLUDES=-I./src/ed25519/ -I./src/ed25519/additions/ -I./src/ed25519/nacl_includes/
-CFLAGS=-DLIBCURVE25519_LIBRARY -O2 -ggdb -fPIC
+CFLAGS=-DLIBCURVE25519_LIBRARY -O2 -fPIC 
 
 HEADERS=curve.h curve_global.h
 #    src/ed25519/main/main.c

@@ -36,9 +36,6 @@ WhisperMessage::WhisperMessage(const ByteArray &serialized)
             !whisperMessage.has_counter() ||
             !whisperMessage.has_ratchetkey())
         {
-            std::cerr << "has_ciphertext" << whisperMessage.has_ciphertext();
-            std::cerr << "has_counter" << whisperMessage.has_counter();
-            std::cerr << "has_ratchetkey" << whisperMessage.has_ratchetkey();
             throw InvalidMessageException("Incomplete message.");
         }
 

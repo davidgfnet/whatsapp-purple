@@ -27,12 +27,6 @@ PreKeyWhisperMessage::PreKeyWhisperMessage(const ByteArray &serialized)
             !preKeyWhisperMessage.has_identitykey()                       ||
             !preKeyWhisperMessage.has_message())
         {
-            std::cerr << "version:" << version << std::endl;
-            std::cerr << "has_prekeyid:" << preKeyWhisperMessage.has_prekeyid() << std::endl;
-            std::cerr << "has_signedprekeyid:" << preKeyWhisperMessage.has_signedprekeyid() << std::endl;
-            std::cerr << "has_basekey:" << preKeyWhisperMessage.has_basekey() << std::endl;
-            std::cerr << "has_identitykey:" << preKeyWhisperMessage.has_identitykey() << std::endl;
-            std::cerr << "has_message:" << preKeyWhisperMessage.has_message() << std::endl;
             throw InvalidMessageException("Incomplete message.");
         }
 

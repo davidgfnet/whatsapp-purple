@@ -2,7 +2,7 @@
 CXX=g++
 GCC=gcc
 
-CFLAGS = -I./ecc -I./exception -I./util -I./state -I./groups/ratchet -I./groups/state -I./kdf -I./ratchet -I./protocol -I./ -std=c++11 -fPIC -O0 -ggdb $(EXTRA_INCLUDES)
+CFLAGS = -I./ecc -I./exception -I./util -I./state -I./groups/ratchet -I./groups/state -I./kdf -I./ratchet -I./protocol -I./ -std=c++11 -O2 -fPIC $(EXTRA_INCLUDES)
 
 CPP_FILES = identitykey.cpp \
 			identitykeypair.cpp \

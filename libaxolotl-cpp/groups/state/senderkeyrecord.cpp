@@ -25,7 +25,6 @@ SenderKeyRecord::SenderKeyRecord(const ByteArray &serialized)
 
 SenderKeyState *SenderKeyRecord::getSenderKeyState(int keyId)
 {
-	std::cerr << "senderKeyStates has " << senderKeyStates.size() << " elements" << std::endl;
 	for (auto keys: senderKeyStates)
 		if (keys->getKeyId() == keyId)
 			return keys;

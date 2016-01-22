@@ -16,3 +16,7 @@
 *.dll
 *.exe
 *.res
+
+# Protobuf generated shit
+*.pb.cc
+*.pb.h

@@ -80,8 +80,6 @@ ChatMessage ChatMessage::parseProtobuf(const WhatsappConnection * wc, const std:
 	AxolotlMessage pbuf;
 	pbuf.ParseFromString(buf);
 
-	pbuf.PrintDebugString();
-
 	return ChatMessage(wc, from, time, id, pbuf.textmsg(), author);
 }
 

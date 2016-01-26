@@ -291,13 +291,14 @@ void WhatsappConnection::deleteBlist(std::string id)
 void WhatsappConnection::doLogin(std::string resource, bool send_ciphered)
 {
 	this->send_ciphered = send_ciphered;
+	this->resource = resource;
 
 	/* Send stream init */
 	DataBuffer first;
 	error_queue.clear();
 
 	{
-		first.addData("WA\1\5", 4);
+		first.addData("WA\1\6", 4);
 		Tree t("start", makeat({"resource",resource, "to",whatsappserver}));
 		first = first + serialize_tree(&t, false);
 	}
@@ -305,10 +306,6 @@ void WhatsappConnection::doLogin(std::string resource, bool send_ciphered)
 	/* Send features */
 	{
 		Tree p("stream:features");
-		p.addChild(Tree("readreceipts"));
-		p.addChild(Tree("privacy"));
-		p.addChild(Tree("presence"));
-		p.addChild(Tree("groups_v2"));
 		first = first + serialize_tree(&p, false);
 	}
 
@@ -963,6 +960,7 @@ void WhatsappConnection::processIncomingData()
 	/* Now process the tree list! */
 	//for (unsigned int i = 0; i < treelist.size(); i++) {
 	for (auto & tl : treelist) {
+		DEBUG_PRINT( "Tree read:\n" );
 		DEBUG_PRINT( tl.toString() );
 		if (tl.getTag() == "challenge") {
 			/* Generate a session key using the challege & the password */
@@ -1926,7 +1924,9 @@ void WhatsappConnection::sendResponse()
 {
 	Tree t("response");
 
-	std::string response = phone + challenge_data + std::to_string(time(NULL));
+	std::string response = phone + challenge_data + std::to_string(time(NULL)) +
+		std::string("000\000000\000", 8) + resource + std::string("\000Samsung\000GalaxyS3\000JLS36C", 24);
+
 	DataBuffer eresponse(response.c_str(), response.size());
 	eresponse = eresponse.encodedBuffer(this->out, &this->session_key[20*1], false, this->frame_seq++);
 	response = eresponse.toString();

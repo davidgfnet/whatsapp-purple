@@ -13,34 +13,30 @@ extern "C" {
 }
 
 // This changed to a huffman-like encoding. Therefore we can use one or two bytes...
-static bool getDecoded(int n, std::string & res)
+static std::string getDecoded(int n)
 {
-	if (n < 236) {
-		res = std::string(main_dict[n]);
-		return true;
-	}
-	return false; // Extended code!
+	return std::string(main_dict[n]);
 }
 
 static std::string getDecodedExtended(int n, int n2)
 {
-	if (n == 236) {
-		return std::string(sec_dict[n2]);
-	} // In the future add more secondary dictionaries here
-	return ""; // This should never happen
+	unsigned index = n * 256 + n2;
+	if (index < sizeof(sec_dict)/sizeof(sec_dict[0]))
+		return std::string(sec_dict[index]);
+	return "";
 }
 
 // Return a token (or extended token) for a given value
 static unsigned short lookupDecoded(std::string value)
 {
-	for (unsigned int i = 0; i < sizeof(main_dict)/sizeof(main_dict[0]); i++) {
+	for (unsigned int i = 3; i < sizeof(main_dict)/sizeof(main_dict[0]); i++) {
 		if (strcmp(main_dict[i], value.c_str()) == 0)
 			return i;
 	}
 	// Not found in the main dict, search the secondary
 	for (unsigned int i = 0; i < sizeof(sec_dict)/sizeof(sec_dict[0]); i++) {
 		if (strcmp(sec_dict[i], value.c_str()) == 0)
-			return i | 0x0100;
+			return i + 0x0100;
 	}
 	
 	return 0;
@@ -211,7 +207,10 @@ int DataBuffer::readListSize()
 	if (blen == 0)
 		throw 0;
 	int ret;
-	if (buffer[0] == 0xf8 or buffer[0] == 0xf3) {
+	if (buffer[0] == 0) {
+		popData(1);
+		ret = 0;
+	} else if (buffer[0] == 0xf8) {
 		ret = buffer[1];
 		popData(2);
 	} else if (buffer[0] == 0xf9) {
@@ -220,7 +219,7 @@ int DataBuffer::readListSize()
 	} else {
 		/* FIXME throw 0 error */
 		ret = -1;
-		printf("Parse error!!\n");
+		throw 0;
 	}
 	return ret;
 }
@@ -248,25 +247,34 @@ std::string DataBuffer::readRawString(int size)
 	return st;
 }
 
+std::string DataBuffer::readNibbleHex(char bchar) {
+	// read packed nibble or packed hex!
+	int nbyte = readInt(1);
+	int size = nbyte & 0x7f;
+	int numnibbles = size*2 - ((nbyte&0x80) ? 1 : 0);
+
+	std::string rawd = readRawString(size);
+	std::string s;
+	for (int i = 0; i < numnibbles; i++) {
+		char c = (rawd[i/2] >> (4-((i&1)<<2))) & 0xF;
+		if (c < 10) s += (c+'0');
+		else s += (c-10+bchar);
+	}
+	return s;
+}
+
 std::string DataBuffer::readString()
 {
 	if (blen == 0)
 		throw 0;
 	int type = readInt(1);
-	if (type > 2 and type <= 236) {
-		std::string r;
-		if (getDecoded(type,r))
-			return r;
-		return getDecodedExtended(type, readInt(1));
-	} else if (type == 0) {
-		return "";
-	} else if (type == 252) {
-		int slen = readInt(1);
-		return readRawString(slen);
-	} else if (type == 253) {
-		int slen = readInt(3);
-		return readRawString(slen);
-	} else if (type == 250) {
+	switch (type) {
+	case 236:
+	case 237:
+	case 238:
+	case 239:
+		return getDecodedExtended(type - 236, readInt(1));
+	case 250: {
 		std::string u = readString();
 		std::string s = readString();
 
@@ -275,23 +283,29 @@ std::string DataBuffer::readString()
 		else if (s.size() > 0)
 			return s;
 		return "";
-	}
-	else if (type == 255) {
-		// Some sort of number encoding (using 4 bit)
-		int nbyte = readInt(1);
-		int size = nbyte & 0x7f;
-		int numnibbles = size*2 - ((nbyte&0x80) ? 1 : 0);
+	};
+	case 252: {
+		int slen = readInt(1);
+		return readRawString(slen);
+	};
+	case 253: {
+		// 20 bits length
+		int slen = readInt(3) & 0xFFFFF;
+		return readRawString(slen);
+	};
+	case 254: {
+		// 31 bits length
+		int slen = readInt(4) & 0x7FFFFFFF;
+		return readRawString(slen);
+	};
+	case 251:
+	case 255:
+		return readNibbleHex(type == 255 ? '-' : 'A');
+	default:
+		if (type < 236)
+			return getDecoded(type);
+	};
 
-		std::string rawd = readRawString(size);
-		std::string s;
-		for (int i = 0; i < numnibbles; i++) {
-			char c = (rawd[i/2] >> (4-((i&1)<<2))) & 0xF;
-			if (c < 10) s += (c+'0');
-			else s += (c-10+'-');
-		}
-
-		return s;
-	}
 	return "";
 }
 
@@ -308,12 +322,23 @@ void DataBuffer::putRawString(std::string s)
 	}
 }
 
-bool DataBuffer::canbeNibbled(const std::string & s) {
+bool DataBuffer::canbeNibbled(const std::string & s) const {
 	for (unsigned i = 0; i < s.size(); i++) {
 		if (!(
 			(s[i] >= '0' && s[i] <= '9') ||
 			(s[i] == '-') ||
 			(s[i] == '.')
+		))
+			return false;
+	}
+	return true;
+}
+
+bool DataBuffer::canbeHexed(const std::string & s) const {
+	for (unsigned i = 0; i < s.size(); i++) {
+		if (!(
+			(s[i] >= '0' && s[i] <= '9') ||
+			(s[i] >= 'A' && s[i] <= 'F')
 		))
 			return false;
 	}
@@ -336,13 +361,14 @@ void DataBuffer::putString(std::string s)
 		putInt(250, 1);
 		putString(p1);
 		putString(p2);
-	} else if (canbeNibbled(s)) {
+	} else if (canbeNibbled(s) || canbeHexed(s)) {
 		// Encode it in nibbles
 		int numn = (s.size()+1)/2;
 		std::string out(numn, 0);
 		for (unsigned i = 0; i < s.size(); i++) {
 			unsigned char c;
 			if (s[i] >= '0' && s[i] <= '9') c = s[i]-'0';
+			else if (s[i] >= 'A' && s[i] <= 'F') c = s[i]-'A'+10;
 			else c = s[i]-'-'+10;
 
 			out[i/2] |= c << (4-4*(i&1));
@@ -352,7 +378,7 @@ void DataBuffer::putString(std::string s)
 			numn |= 0x80;
 			out[out.size()-1] |= 0xf;
 		}
-		putInt(255,1);
+		putInt(canbeHexed(s) ? 251 : 255,1);
 		putInt(numn,1);
 		addData(out.c_str(), out.size());
 	} else if (s.size() < 256) {

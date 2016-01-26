@@ -121,6 +121,7 @@ private:
 	std::map<std::string, GroupCipher*> gcipherHash;
 
 	bool send_ciphered;
+	std::string resource;
 
 	void sendEncrypt();
 	bool receiveCipheredMessage(std::string, std::string, std::string, unsigned long long, Tree, std::string);

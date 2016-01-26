@@ -39,7 +39,9 @@ public:
 	void writeListSize(int size);
 	void putRawString(std::string s);
 	void putString(std::string s);
-	bool canbeNibbled(const std::string & s);
+	bool canbeNibbled(const std::string & s) const;
+	bool canbeHexed(const std::string & s) const;
+	std::string readNibbleHex(char bchar);
 
 	void clear();
 	void addData(const void *ptr, int size);

@@ -133,6 +133,9 @@ private:
 	void sendMessageRetry(const std::string &from, const std::string &part, const std::string &msgid, unsigned long long t);
 	void sendGetCipherKeysFromUser(std::string jid);
 
+	void protobufIncomingMessage(std::string mtype, std::string jid, unsigned long long time,
+		std::string id, std::string author, std::string plaintext, Tree & enc);
+
 	void receiveMessage(const Message & m);
 	void notifyPresence(std::string from, std::string presence, std::string last);
 	void updatePrivacy();

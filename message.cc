@@ -83,7 +83,6 @@ ChatMessage ChatMessage::parseProtobuf(const WhatsappConnection * wc, const std:
 	return ChatMessage(wc, from, time, id, pbuf.textmsg(), author);
 }
 
-
 CipheredChatMessage::CipheredChatMessage(const WhatsappConnection * wc, const std::string from, const unsigned long long time,
 	const std::string id, const std::string message, const std::string author, const std::string ctype) : 
 	ChatMessage(wc, from, time, id, message, author)
@@ -228,6 +227,17 @@ LocationMessage::LocationMessage(const WhatsappConnection * wc, const std::strin
 Message * LocationMessage::copy() const
 {
 	return new LocationMessage(wc, from, t, id, author, latitude, longitude, name, preview);
+}
+
+LocationMessage LocationMessage::parseProtobuf(const WhatsappConnection * wc, const std::string from, const unsigned long long time,
+	const std::string id, const std::string author, const std::string & buf) {
+
+	AxolotlMessage pbuf;
+	pbuf.ParseFromString(buf);
+
+	return LocationMessage(wc, from, time, id, author, pbuf.locationmsg().latitude(), 
+		pbuf.locationmsg().longitude(), pbuf.locationmsg().name() + " (" + pbuf.locationmsg().address() + ")",
+		pbuf.locationmsg().jpeg_thumbnail());
 }
 
 VCardMessage::VCardMessage(const WhatsappConnection * wc, const std::string from, const unsigned long long time,

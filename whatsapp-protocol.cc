@@ -1430,6 +1430,19 @@ GroupCipher *WhatsappConnection::getGroupCipher(std::string recepient) {
 	return gcipherHash[recepient];
 }
 
+void WhatsappConnection::protobufIncomingMessage(std::string mtype, std::string jid, unsigned long long time,
+	std::string id, std::string author, std::string plaintext, Tree & enc) {
+
+	if (mtype == "text")
+		this->receiveMessage(ChatMessage::parseProtobuf(this, jid, time, id, author, plaintext));
+	else if (mtype == "media") {
+		if (enc["mediatype"] == "location")
+			this->receiveMessage(LocationMessage::parseProtobuf(this, jid, time, id, author, plaintext));
+		else
+			this->receiveMessage(ImageMessage::parseProtobuf(this, jid, time, id, author, plaintext));
+	}
+}
+
 bool WhatsappConnection::parsePreKeyWhisperMessage(std::string jid, std::string id,
 	std::string author, unsigned long long time, Tree enc, std::string mtype) {
 
@@ -1440,10 +1453,7 @@ bool WhatsappConnection::parsePreKeyWhisperMessage(std::string jid, std::string 
 		SessionCipher *cipher = getSessionCipher(recepientId);
 		std::string plaintext = cipher->decrypt(message);
 
-		if (mtype == "text")
-			this->receiveMessage(ChatMessage::parseProtobuf(this, jid, time, id, author, plaintext));
-		else if (mtype == "media")
-			this->receiveMessage(ImageMessage::parseProtobuf(this, jid, time, id, author, plaintext));
+		this->protobufIncomingMessage(mtype, jid, time, id, author, plaintext, enc);
 
 		// Try to parse any sender key
 		wapurple::AxolotlMessage pbuf;
@@ -1477,10 +1487,7 @@ bool WhatsappConnection::parseWhisperMessage(std::string jid, std::string id,
 		SessionCipher *cipher = getSessionCipher(recepientId);
 		std::string plaintext = cipher->decrypt(message);
 
-		if (mtype == "text")
-			this->receiveMessage(ChatMessage::parseProtobuf(this, jid, time, id, author, plaintext));
-		else if (mtype == "media")
-			this->receiveMessage(ImageMessage::parseProtobuf(this, jid, time, id, author, plaintext));
+		this->protobufIncomingMessage(mtype, jid, time, id, author, plaintext, enc);
 	}
 	catch (WhisperException &e) {
 		DEBUG_PRINT("Axolotl exception (parseWhisperMessage): "
@@ -1498,10 +1505,7 @@ bool WhatsappConnection::parseGroupWhisperMessage(std::string jid, std::string i
 		GroupCipher *cipher = getGroupCipher(jid);
 		std::string plaintext = cipher->decrypt(enc.getData());
 
-		if (mtype == "text")
-			this->receiveMessage(ChatMessage::parseProtobuf(this, jid, time, id, author, plaintext));
-		else if (mtype == "media")
-			this->receiveMessage(ImageMessage::parseProtobuf(this, jid, time, id, author, plaintext));
+		this->protobufIncomingMessage(mtype, jid, time, id, author, plaintext, enc);
 	}
 	catch (WhisperException &e) {
 		DEBUG_PRINT("Axolotl exception (parseGroupWhisperMessage): "

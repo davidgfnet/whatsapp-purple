@@ -148,6 +148,9 @@ public:
 
 	double latitude, longitude;	/* Location */
 	std::string name, preview;
+
+	static LocationMessage parseProtobuf(const WhatsappConnection * wc, const std::string from, const unsigned long long time,
+		const std::string id, const std::string author, const std::string & buf);
 };
 
 #endif

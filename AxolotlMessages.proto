@@ -7,6 +7,13 @@ message AxolotlMessage {
 
 	optional AxolotlImageMessage imageMsg = 3;
 
+	optional LocationMessage locationMsg = 5;
+
+	message SenderKeyDistributionMessage {
+		optional bytes groupId = 1;
+		optional bytes axolotlSenderKeyDistributionMessage = 2;
+	}
+
 	message AxolotlImageMessage {
 		optional string url = 1;
 		optional string mimetype = 2;
@@ -19,10 +26,15 @@ message AxolotlMessage {
 		optional bytes thumbnail = 16;
 	}
 
-	message SenderKeyDistributionMessage {
-		optional bytes groupId = 1;
-		optional bytes axolotlSenderKeyDistributionMessage = 2;
+	message LocationMessage {
+		required double latitude         = 1;
+		required double longitude        = 2;
+		required string name             = 3;
+		required string address          = 4;
+		required string url              = 5;
+		required bytes  jpeg_thumbnail   = 16;
 	}
+
 }
 
 

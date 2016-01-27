@@ -1510,8 +1510,7 @@ bool WhatsappConnection::parseGroupWhisperMessage(std::string jid, std::string i
 	catch (WhisperException &e) {
 		DEBUG_PRINT("Axolotl exception (parseGroupWhisperMessage): "
 			<< e.errorType() << " " << e.errorMessage());
-		std::string fromretry = jid.substr(0, jid.find("-")) + "@s.whatsapp.net";
-		sendMessageRetry(jid, fromretry, id, time);
+		sendMessageRetry(jid, author, id, time);
 		return false;
 	}
 	return true;

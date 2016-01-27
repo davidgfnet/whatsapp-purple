@@ -152,7 +152,8 @@ std::string InMemoryAxolotlStore::serialize() const {
 		identityKeyStore.serialize() +
 		preKeyStore.serialize() +
 		sessionStore.serialize() +
-		signedPreKeyStore.serialize();
+		signedPreKeyStore.serialize() +
+		senderKeyStore.serialize();
 }
 
 InMemoryAxolotlStore::InMemoryAxolotlStore(std::string data) {
@@ -161,6 +162,7 @@ InMemoryAxolotlStore::InMemoryAxolotlStore(std::string data) {
 	preKeyStore = InMemoryPreKeyStore(uns);
 	sessionStore = InMemorySessionStore(uns);
 	signedPreKeyStore = InMemorySignedPreKeyStore(uns);
+	senderKeyStore = InMemorySenderKeyStore(uns);
 }
 
 

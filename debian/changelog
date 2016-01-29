@@ -1,3 +1,14 @@
+pidgin-whatsapp (0.9.0) trusty; urgency=low
+
+  * Implemented axolotl encryption
+  * Added libprotobuf as a dependency
+  * Implemented most decryption schemes, even for groups
+  * Message sending only working for plaintext messages
+  * Implemented WA1.6 network protocol
+  * This is very WIP and unstable, many bugs will probably show up
+
+ -- David Guillen Fandos <david@davidgf.net>  Thu, 29 Jan 2016 00:45:00 +0100
+
 pidgin-whatsapp (0.8.6) trusty; urgency=low
 
   * Some cleanup for smaller binary size

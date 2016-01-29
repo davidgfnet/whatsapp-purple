@@ -114,7 +114,7 @@ ByteArray SessionCipher::decrypt(std::shared_ptr<PreKeyWhisperMessage> ciphertex
     sessionStore->storeSession(recipientId, deviceId, sessionRecord);
 
     if (unsignedPreKeyId != -1) {
-        preKeyStore->removePreKey(unsignedPreKeyId);
+        //preKeyStore->removePreKey(unsignedPreKeyId);
     }
 
     return plaintext;

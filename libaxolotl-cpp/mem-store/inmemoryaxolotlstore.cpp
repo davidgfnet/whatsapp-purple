@@ -43,9 +43,9 @@ void InMemoryAxolotlStore::saveIdentity(uint64_t recipientId, const IdentityKey 
 
 bool InMemoryAxolotlStore::isTrustedIdentity(uint64_t recipientId, const IdentityKey &identityKey)
 {
-	bool r = identityKeyStore.isTrustedIdentity(recipientId, identityKey);
-	DEBUG_PRINT("isTrustedIdentity " << recipientId << " " << r);
-	return r;
+	//bool r = identityKeyStore.isTrustedIdentity(recipientId, identityKey);
+	//DEBUG_PRINT("isTrustedIdentity " << recipientId << " " << r);
+	return true;
 }
 
 PreKeyRecord InMemoryAxolotlStore::loadPreKey(uint64_t preKeyId)

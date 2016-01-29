@@ -123,7 +123,7 @@ private:
 	bool send_ciphered;
 	std::string resource;
 
-	void sendEncrypt();
+	void sendEncrypt(bool);
 	bool receiveCipheredMessage(std::string, std::string, std::string, unsigned long long, Tree, std::string);
 	bool parseWhisperMessage(std::string, std::string, std::string, unsigned long long, Tree, std::string);
 	bool parsePreKeyWhisperMessage(std::string, std::string, std::string, unsigned long long, Tree, std::string);

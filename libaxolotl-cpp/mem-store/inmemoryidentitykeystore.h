@@ -20,9 +20,7 @@ public:
 		return localRegistrationId;
 	}
 
-	void saveIdentity(uint64_t recipientId, const IdentityKey &identityKey) {
-		trustedKeys[recipientId] = identityKey;
-	}
+	void saveIdentity(uint64_t recipientId, const IdentityKey &identityKey);
 
 	void storeLocalData(uint64_t registrationId, const IdentityKeyPair identityKeyPair) {
 		this->localRegistrationId = registrationId;

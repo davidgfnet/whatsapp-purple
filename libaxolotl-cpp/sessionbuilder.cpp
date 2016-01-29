@@ -52,7 +52,7 @@ uint64_t SessionBuilder::process(SessionRecord *sessionRecord, std::shared_ptr<P
     uint64_t unsignedPreKeyId;
 
     if (!identityKeyStore->isTrustedIdentity(recipientId, theirIdentityKey)) {
-        throw UntrustedIdentityException("Untrusted identity: " + std::to_string(recipientId));
+        throw UntrustedIdentityException("session process Untrusted identity: " + std::to_string(recipientId));
     }
 
     switch (messageVersion) {
@@ -143,7 +143,7 @@ uint64_t SessionBuilder::processV2(SessionRecord *sessionRecord, std::shared_ptr
 void SessionBuilder::process(const PreKeyBundle &preKey)
 {
     if (!identityKeyStore->isTrustedIdentity(recipientId, preKey.getIdentityKey())) {
-        throw UntrustedIdentityException("Untrusted identity: " + std::to_string(recipientId));
+        throw UntrustedIdentityException("prekey process Untrusted identity: " + std::to_string(recipientId));
     }
 
     if (!preKey.getSignedPreKey().serialize().empty() &&
@@ -194,7 +194,7 @@ void SessionBuilder::process(const PreKeyBundle &preKey)
 KeyExchangeMessage SessionBuilder::process(std::shared_ptr<KeyExchangeMessage> message)
 {
     if (!identityKeyStore->isTrustedIdentity(recipientId, message->getIdentityKey())) {
-        throw UntrustedIdentityException("Untrusted identity: %1" + std::to_string(recipientId));
+        throw UntrustedIdentityException("keyexchange process Untrusted identity: " + std::to_string(recipientId));
     }
 
     KeyExchangeMessage responseMessage;

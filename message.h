@@ -49,6 +49,7 @@ public:
 
 	DataBuffer serialize() const;
 	Message *copy() const;
+	std::string getProtoBuf() const;
 
 	static ChatMessage parseProtobuf(const WhatsappConnection * wc, const std::string from, const unsigned long long time,
 		const std::string id, const std::string author, const std::string & buf);

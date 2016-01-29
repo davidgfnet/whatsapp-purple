@@ -50,7 +50,7 @@ DataBuffer ChatMessage::serialize() const
 	Tree tbody(this->msg_body);
 	tbody.setData(this->message);
 	if (this->ctype != "") {
-		tbody.setAttributes(makeat({"type", this->ctype, "v", "2"}));
+		tbody.setAttributes(makeat({"type", this->ctype, "v", "2", "count", "1"}));
 	}
 
 	std::string stime = std::to_string(t);
@@ -82,6 +82,17 @@ ChatMessage ChatMessage::parseProtobuf(const WhatsappConnection * wc, const std:
 
 	return ChatMessage(wc, from, time, id, pbuf.textmsg(), author);
 }
+
+std::string ChatMessage::getProtoBuf() const {
+	AxolotlMessage pbuf;
+	pbuf.set_textmsg(message);
+
+	std::string ret;
+	pbuf.SerializeToString(&ret);
+
+	return ret + '\1';
+}
+
 
 CipheredChatMessage::CipheredChatMessage(const WhatsappConnection * wc, const std::string from, const unsigned long long time,
 	const std::string id, const std::string message, const std::string author, const std::string ctype) : 

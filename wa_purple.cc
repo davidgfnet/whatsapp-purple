@@ -649,7 +649,7 @@ static void waprpl_process_incoming_events(PurpleConnection * gc)
 			}
 
 			// Offer file transfer if the user said so!
-			if (purple_account_get_bool(acc, "download_pics", TRUE))
+			if (purple_account_get_bool(acc, "download_pics", FALSE))
 				waprpl_image_download_offer(gc, m->from, m->author, im->url, im->e2e_key.size() != 0, im->e2e_iv, im->e2e_aeskey);
 
 			} break;
@@ -804,7 +804,7 @@ static void waprpl_connect_cb(gpointer data, gint source, const gchar * error_me
 
 	PurpleAccount *acct = purple_connection_get_account(gc);
 	const char *resource = purple_account_get_string(acct, "resource", default_resource);
-	gboolean send_ciphered = purple_account_get_bool(acct, "send_ciphered", TRUE);
+	gboolean send_ciphered = purple_account_get_bool(acct, "send_ciphered", FALSE);
 
 	if (source < 0) {
 		gchar *tmp = g_strdup_printf("Unable to connect: %s", error_message);
@@ -1687,10 +1687,10 @@ static void waprpl_init(PurplePlugin * plugin)
 	option = purple_account_option_string_new("Resource", "resource", default_resource);
 	prpl_info.protocol_options = g_list_append(prpl_info.protocol_options, option);
 
-	option = purple_account_option_bool_new("Send ciphered messages (when possible)", "send_ciphered", TRUE);
+	option = purple_account_option_bool_new("Send ciphered messages (when possible)", "send_ciphered", FALSE);
 	prpl_info.protocol_options = g_list_append(prpl_info.protocol_options, option);
 
-	option = purple_account_option_bool_new("Download pictures as attachments", "download_pics", TRUE);
+	option = purple_account_option_bool_new("Download pictures as attachments", "download_pics", FALSE);
 	prpl_info.protocol_options = g_list_append(prpl_info.protocol_options, option);
 
 	_whatsapp_protocol = plugin;

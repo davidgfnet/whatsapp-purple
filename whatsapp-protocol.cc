@@ -45,8 +45,17 @@ static int isbroadcast(const std::string user)
 	return (user.find("@broadcast") != std::string::npos);
 }
 
+// Group numbers are a bit tricky! I wish I stored them as strings...
 static uint64_t JidAsInt(const std::string & s) {
-	return std::stoull(s.substr(0, s.find("@")));
+	std::string id = s.substr(0, s.find("@"));
+	std::string onlynums;
+	for (auto c: id)
+		if (c >= '0' && c <= '9')
+			onlynums += c;
+	
+	// This is fucking disgusting :D
+	onlynums = onlynums.substr(0, 19);
+	return std::stoull(onlynums);
 }
 
 DataBuffer WhatsappConnection::generateResponse(std::string from, std::string type, std::string id)
@@ -69,32 +78,6 @@ std::string WhatsappConnection::tohex(uint64_t n) {
 		cnum >>= 4;
 	}
 	return ret;
-}
-
-std::string decode7bit(std::string s) {
-	if (s.size() && s[0] == '\n')
-		s = s.substr(1); // Remove first \n
-
-	while (s.size() && (s[0] & 0x80))
-		s = s.substr(1);
-	if (s.size())
-		s = s.substr(1);
-	if (s.size())
-		s = s.substr(0, s.size()-1);
-
-	return s;
-}
-std::string encode7bit(std::string s) {
-	std::string enclen;
-	int len = s.size();
-	while (len > 0) {
-		if (len >= 128)
-			enclen += (char)((len | 128) & 255);
-		else
-			enclen += (char)(len & 255);
-		len = len >> 7;
-	}
-	return "\n" + enclen + s + "\1";
 }
 
 #define adjustId(id) numToBytesZPadded(id, 3)
@@ -581,6 +564,7 @@ void WhatsappConnection::retryMessage(std::string id) {
 		}
 	}
 
+	// Process the message queue
 	processMsgQueue();
 }
 
@@ -605,7 +589,7 @@ void WhatsappConnection::processMsgQueue() {
 				ChatMessage * txtmsg = dynamic_cast<ChatMessage*>(msg);
 				if (txtmsg) {
 					SessionCipher *cipher = getSessionCipher(recepientId);
-					std::shared_ptr<CiphertextMessage> ciphertext(cipher->encrypt(encode7bit(txtmsg->message).c_str()));
+					std::shared_ptr<CiphertextMessage> ciphertext(cipher->encrypt(txtmsg->getProtoBuf().c_str()));
 
 					CipheredChatMessage cmsg(
 						this, msg->from, msg->t, msg->id, ciphertext->serialize(), txtmsg->author, 
@@ -993,9 +977,8 @@ void WhatsappConnection::processIncomingData()
 			this->updateGroups();
 			this->updateBlists();
 
-			/*resource.startsWith("S40") &&*/
 			if (axolotlStore->countPreKeys() == 0)
-				this->sendEncrypt();
+				this->sendEncrypt(true);
 
 			DEBUG_PRINT("Logged in!!!");
 		} else if (tl.getTag() == "failure") {
@@ -1016,6 +999,11 @@ void WhatsappConnection::processIncomingData()
 				tl.hasAttributeValue("type", "w:gp2") ) {
 				/* If the nofitication comes from a group, assume we have to reload groups ;) */
 				updateGroups();
+			}
+
+			if (tl.hasAttributeValue("type", "encrypt")) {
+				// Push some more keys?
+				this->sendEncrypt(false);
 			}
 
 			if (tl.hasAttributeValue("type", "picture")) {
@@ -1333,11 +1321,11 @@ bool WhatsappConnection::receiveCipheredMessage(std::string from, std::string id
 		return this->parseWhisperMessage(from, id, author, time, enc, mtype);
 }
 
-void WhatsappConnection::sendEncrypt()
+void WhatsappConnection::sendEncrypt(bool fresh)
 {
 	DEBUG_PRINT ("Generating axolotl keys...");
 
-	IdentityKeyPair identityKeyPair = KeyHelper::generateIdentityKeyPair();
+	IdentityKeyPair identityKeyPair = fresh ? KeyHelper::generateIdentityKeyPair() : axolotlStore->getIdentityKeyPair();
 	std::vector<PreKeyRecord> preKeys = KeyHelper::generatePreKeys(KeyHelper::getRandomFFFFFFFF(), 100);
 
 	Tree iq("iq", makeat({"id", getNextIqId(), "type", "set", "to", whatsappserver, "xmlns", "encrypt"}));
@@ -1367,8 +1355,9 @@ void WhatsappConnection::sendEncrypt()
 	SignedPreKeyRecord signedPreKey = KeyHelper::generateSignedPreKey(identityKeyPair, KeyHelper::getRandomFFFFFFFF() & 0xFFFF);
 
 	// STORE
-	uint64_t registrationId = KeyHelper::generateRegistrationId();
-	axolotlStore->storeLocalData(registrationId, identityKeyPair);
+	uint64_t registrationId = fresh ? KeyHelper::generateRegistrationId() : axolotlStore->getLocalRegistrationId();
+	if (fresh)
+		axolotlStore->storeLocalData(registrationId, identityKeyPair);
 
 	Tree registrationNode("registration");
 	registrationNode.setData(adjustId(registrationId));

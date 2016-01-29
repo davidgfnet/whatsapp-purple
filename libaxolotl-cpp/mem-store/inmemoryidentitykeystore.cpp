@@ -33,11 +33,17 @@ InMemoryIdentityKeyStore::InMemoryIdentityKeyStore(Unserializer uns)
 
 bool InMemoryIdentityKeyStore::isTrustedIdentity(uint64_t recipientId, const IdentityKey &identityKey)
 {
-    if (trustedKeys.find(recipientId) != trustedKeys.end()) {
+	// If identify not in the list return true? WTF!
+    if (trustedKeys.find(recipientId) == trustedKeys.end()) {
         return true;
     }
     return trustedKeys[recipientId] == identityKey;
 }
+
+void InMemoryIdentityKeyStore::saveIdentity(uint64_t recipientId, const IdentityKey &identityKey) {
+	trustedKeys[recipientId] = identityKey;
+}
+
 
 std::string InMemoryIdentityKeyStore::serialize() const
 {

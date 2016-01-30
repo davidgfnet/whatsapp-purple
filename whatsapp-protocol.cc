@@ -1444,6 +1444,8 @@ bool WhatsappConnection::parsePreKeyWhisperMessage(std::string jid, std::string 
 
 		this->protobufIncomingMessage(mtype, jid, time, id, author, plaintext, enc);
 
+		DEBUG_PRINT("parsePreKeyWhisperMessage: " << Tree::hexifyStrings(plaintext));
+
 		// Try to parse any sender key
 		wapurple::AxolotlMessage pbuf;
 		pbuf.ParseFromString(plaintext);
@@ -1477,6 +1479,8 @@ bool WhatsappConnection::parseWhisperMessage(std::string jid, std::string id,
 		std::string plaintext = cipher->decrypt(message);
 
 		this->protobufIncomingMessage(mtype, jid, time, id, author, plaintext, enc);
+
+		DEBUG_PRINT("parseWhisperMessage: " << Tree::hexifyStrings(plaintext));
 	}
 	catch (WhisperException &e) {
 		DEBUG_PRINT("Axolotl exception (parseWhisperMessage): "
@@ -1495,6 +1499,8 @@ bool WhatsappConnection::parseGroupWhisperMessage(std::string jid, std::string i
 		std::string plaintext = cipher->decrypt(enc.getData());
 
 		this->protobufIncomingMessage(mtype, jid, time, id, author, plaintext, enc);
+
+		DEBUG_PRINT("parseGroupWhisperMessage: " << Tree::hexifyStrings(plaintext));
 	}
 	catch (WhisperException &e) {
 		DEBUG_PRINT("Axolotl exception (parseGroupWhisperMessage): "

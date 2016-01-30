@@ -43,6 +43,7 @@ public:
 	std::string toString(int sp = 0);
 
 	static std::string escapeStrings(std::string);
+	static std::string hexifyStrings(std::string s);
 };
 
 #endif

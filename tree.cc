@@ -111,7 +111,7 @@ bool Tree::hasChild(std::string tag) const
 
 std::string Tree::escapeStrings(std::string s) {
 	std::string ret;
-	for (auto c: s) {
+	for (unsigned char c: s) {
 		if (c < 32 || c > 126) {
 			ret += "\\";
 			ret += ('0' + (c / 64));
@@ -124,6 +124,17 @@ std::string Tree::escapeStrings(std::string s) {
 	return ret;
 }
 
+std::string Tree::hexifyStrings(std::string s) {
+	std::string ret;
+	for (unsigned char c: s) {
+		int hi = (c >> 4);
+		int lo = (c & 15);
+		ret += (hi >= 10) ? 'a' + hi-10 : '0' + hi; 
+		ret += (lo >= 10) ? 'a' + lo-10 : '0' + lo; 
+	}
+	return ret;
+}
+
 std::string Tree::toString(int sp)
 {
 	std::string ret;
@@ -132,8 +143,9 @@ std::string Tree::toString(int sp)
 	for (std::map < std::string, std::string >::iterator iter = attributes.begin(); iter != attributes.end(); iter++) {
 		ret += spacing + "at[" + iter->first + "]=" + iter->second + "\n";
 	}
-	std::string piece = data.substr(0,10) + " ...";
+	std::string piece = data.substr(0,32);
 	ret += spacing + "Data: " + escapeStrings(piece) + "\n";
+	ret += spacing + " Hex: " + hexifyStrings(piece) + "\n";
 
 	for (unsigned int i = 0; i < children.size(); i++) {
 		ret += children[i].toString(sp + 1);

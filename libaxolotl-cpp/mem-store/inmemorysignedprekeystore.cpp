@@ -5,8 +5,10 @@
 #include "byteutil.h"
 #include <vector>
 
-InMemorySignedPreKeyStore::InMemorySignedPreKeyStore(Unserializer uns)
+InMemorySignedPreKeyStore::InMemorySignedPreKeyStore(Unserializer &uns)
 {
+	unsigned int magic = uns.readInt32();
+	assert(magic == 0x372DEBD2);
 	unsigned int n = uns.readInt32();
 	while (n--) {
 		uint64_t key = uns.readInt64();
@@ -49,6 +51,7 @@ void InMemorySignedPreKeyStore::removeSignedPreKey(uint64_t signedPreKeyId)
 std::string InMemorySignedPreKeyStore::serialize() const
 {
 	Serializer ser;
+	ser.putInt32(0x372DEBD2);
 	ser.putInt32(store.size());
 
 	for (auto & key: store) {

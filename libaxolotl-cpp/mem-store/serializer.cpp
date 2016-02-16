@@ -19,9 +19,9 @@ void Serializer::putString(std::string s) {
 uint64_t Unserializer::readInt(int size) {
 	uint64_t ret = 0;
 	for (uint64_t i = 0; i < size; i++) {
-		ret |= (buffer[i] << (i*8));
+		ret |= ((*(unsigned char*)&buffer[i]) << (i*8));
 	}
-	buffer = buffer.substr(4);
+	buffer = buffer.substr(size);
 	return ret;
 }
 

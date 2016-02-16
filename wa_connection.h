@@ -13,7 +13,6 @@
 #include "contacts.h"
 #include "inmemoryaxolotlstore.h"
 #include "axolotl_groups.h"
-//#include "liteaxolotlstore.h"
 
 class SessionCipher;
 
@@ -116,7 +115,7 @@ private:
 	/* 5/6 for image upload */
 
 	/* New Axolotl stuff */
-	std::shared_ptr<AxolotlStore> axolotlStore;
+	std::shared_ptr<InMemoryAxolotlStore> axolotlStore;
 	std::map<uint64_t, SessionCipher*> cipherHash;
 	std::map<std::string, GroupCipher*> gcipherHash;
 

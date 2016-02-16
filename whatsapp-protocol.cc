@@ -151,8 +151,7 @@ WhatsappConnection::WhatsappConnection(std::string phonenum, std::string passwor
 	this->last_keepalive = 0;
 
 	// Create in memory temp database!
-	//this->axolotlStore.reset(new LiteAxolotlStore(axolotldb));
-	this->axolotlStore.reset(new InMemoryAxolotlStore());
+	this->axolotlStore.reset(new InMemoryAxolotlStore(axolotldb));
 
 	/* Trim password spaces */
 	while (password.size() > 0 and password[0] == ' ')
@@ -178,8 +177,7 @@ WhatsappConnection::~WhatsappConnection()
 std::string WhatsappConnection::saveAxolotlDatabase()
 {
 	// Serialize the database
-	//return axolotlStore->serialize();
-	return "";
+	return axolotlStore->serialize();
 }
 
 std::map < std::string, Group > WhatsappConnection::getGroups()
@@ -767,8 +765,6 @@ std::string query_field(std::string work, std::string lo, bool integer = false)
 
 	return work;
 }
-
-std::string base64_encode_esp(unsigned char const *bytes_to_encode, unsigned int in_len);
 
 void WhatsappConnection::updateFileUpload(std::string json)
 {

@@ -10,7 +10,7 @@ class InMemorySenderKeyStore : public SenderKeyStore
 {
 public:
     InMemorySenderKeyStore();
-	InMemorySenderKeyStore(Unserializer uns);
+	InMemorySenderKeyStore(Unserializer &uns);
 
     void storeSenderKey(const ByteArray &senderKeyId, SenderKeyRecord *record);
     SenderKeyRecord loadSenderKey(const ByteArray &senderKeyId) const;

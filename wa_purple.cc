@@ -845,7 +845,10 @@ static void waprpl_login(PurpleAccount * acct)
 	const char *password = purple_account_get_password(acct);
 	const char *nickname = purple_account_get_string(acct, "nick", "");
 
-	wconn->waAPI = new WhatsappConnection(username, password, nickname);
+	// Try load axolotl if any
+	std::string axolotldb = base64_decode(purple_account_get_string(acct, "axolotldb", ""));
+
+	wconn->waAPI = new WhatsappConnection(username, password, nickname, axolotldb);
 	purple_connection_set_protocol_data(gc, wconn);
 
 	const char *hostname = purple_account_get_string(acct, "server", "");
@@ -883,8 +886,15 @@ static void waprpl_close(PurpleConnection * gc)
 	if (wconn->fd >= 0)
 		sys_close(wconn->fd);
 
-	if (wconn->waAPI)
+	if (wconn->waAPI) {
+		// Save the axolotl database
+		std::string data = wconn->waAPI->saveAxolotlDatabase();
+		std::string datab64 = base64_encode((unsigned char*)data.c_str(), data.size());
+
+		purple_account_set_string(purple_connection_get_account(gc), "axolotldb", datab64.c_str());
+
 		delete wconn->waAPI;
+	}
 	wconn->waAPI = NULL;
 
 	g_free(wconn);

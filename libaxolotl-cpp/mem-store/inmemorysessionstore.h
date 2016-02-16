@@ -16,7 +16,7 @@ class InMemorySessionStore : public SessionStore
 {
 public:
 	InMemorySessionStore() {}
-	InMemorySessionStore(Unserializer uns);
+	InMemorySessionStore(Unserializer &uns);
 
 	SessionRecord *loadSession(uint64_t recipientId, int deviceId);
 	std::vector<int> getSubDeviceSessions(uint64_t recipientId);

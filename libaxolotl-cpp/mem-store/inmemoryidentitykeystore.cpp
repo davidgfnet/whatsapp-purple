@@ -5,9 +5,12 @@
 #include "ecc/eckeypair.h"
 
 #include <iostream>
+#include <assert.h>
 
-InMemoryIdentityKeyStore::InMemoryIdentityKeyStore(Unserializer uns)
+InMemoryIdentityKeyStore::InMemoryIdentityKeyStore(Unserializer &uns)
 {
+	unsigned int magic = uns.readInt32();
+	assert(magic == 0x1D387171);
 	unsigned int n = uns.readInt32();
 	while (n--) {
 		uint64_t key = uns.readInt64();
@@ -48,6 +51,7 @@ void InMemoryIdentityKeyStore::saveIdentity(uint64_t recipientId, const Identity
 std::string InMemoryIdentityKeyStore::serialize() const
 {
 	Serializer ser;
+	ser.putInt32(0x1D387171);
 	ser.putInt32(trustedKeys.size());
 
 	for (auto & key: trustedKeys) {

@@ -12,7 +12,7 @@ class InMemorySignedPreKeyStore : public SignedPreKeyStore
 {
 public:
     InMemorySignedPreKeyStore() {}
-    InMemorySignedPreKeyStore(Unserializer uns);
+    InMemorySignedPreKeyStore(Unserializer &uns);
 
     SignedPreKeyRecord loadSignedPreKey(uint64_t signedPreKeyId);
     std::vector<SignedPreKeyRecord> loadSignedPreKeys();

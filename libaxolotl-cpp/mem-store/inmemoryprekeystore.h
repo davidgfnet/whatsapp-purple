@@ -11,7 +11,7 @@ class InMemoryPreKeyStore : public PreKeyStore
 {
 public:
     InMemoryPreKeyStore() {}
-	InMemoryPreKeyStore(Unserializer uns);
+	InMemoryPreKeyStore(Unserializer &uns);
 
     PreKeyRecord loadPreKey(uint64_t preKeyId);
     void         storePreKey(uint64_t preKeyId, const PreKeyRecord &record);

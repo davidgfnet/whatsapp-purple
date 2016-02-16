@@ -4,7 +4,7 @@ InMemorySenderKeyStore::InMemorySenderKeyStore()
 {
 }
 
-InMemorySenderKeyStore::InMemorySenderKeyStore(Unserializer uns)
+InMemorySenderKeyStore::InMemorySenderKeyStore(Unserializer &uns)
 {
 	unsigned int n = uns.readInt32();
 	while (n--) {

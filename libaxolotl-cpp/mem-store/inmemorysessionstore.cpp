@@ -4,9 +4,12 @@
 
 #include <iostream>
 #include <vector>
+#include <assert.h>
 
-InMemorySessionStore::InMemorySessionStore(Unserializer uns)
+InMemorySessionStore::InMemorySessionStore(Unserializer &uns)
 {
+	unsigned int magic = uns.readInt32();
+	assert(magic == 0x53551011);
 	unsigned int n = uns.readInt32();
 	while (n--) {
 		uint64_t recipientId = uns.readInt64();
@@ -77,6 +80,7 @@ void InMemorySessionStore::deleteAllSessions(uint64_t recipientId)
 
 std::string InMemorySessionStore::serialize() const {
 	Serializer ser;
+	ser.putInt32(0x53551011);
 	ser.putInt32(sessions.size());
 
 	for (auto & key: sessions) {

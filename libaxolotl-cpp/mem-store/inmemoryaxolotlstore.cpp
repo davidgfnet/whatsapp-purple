@@ -157,12 +157,14 @@ std::string InMemoryAxolotlStore::serialize() const {
 }
 
 InMemoryAxolotlStore::InMemoryAxolotlStore(std::string data) {
-	Unserializer uns(data);
-	identityKeyStore = InMemoryIdentityKeyStore(uns);
-	preKeyStore = InMemoryPreKeyStore(uns);
-	sessionStore = InMemorySessionStore(uns);
-	signedPreKeyStore = InMemorySignedPreKeyStore(uns);
-	senderKeyStore = InMemorySenderKeyStore(uns);
+	if (data.size()) {
+		Unserializer uns(data);
+		identityKeyStore = InMemoryIdentityKeyStore(uns);
+		preKeyStore = InMemoryPreKeyStore(uns);
+		sessionStore = InMemorySessionStore(uns);
+		signedPreKeyStore = InMemorySignedPreKeyStore(uns);
+		senderKeyStore = InMemorySenderKeyStore(uns);
+	}
 }
 
 

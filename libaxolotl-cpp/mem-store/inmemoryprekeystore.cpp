@@ -2,8 +2,12 @@
 #include "serializer.h"
 #include "whisperexception.h"
 
-InMemoryPreKeyStore::InMemoryPreKeyStore(Unserializer uns)
+#include <assert.h>
+
+InMemoryPreKeyStore::InMemoryPreKeyStore(Unserializer &uns)
 {
+	unsigned int magic = uns.readInt32();
+	assert(magic == 0x353F3111);
 	unsigned int n = uns.readInt32();
 	while (n--) {
 		uint64_t key = uns.readInt64();
@@ -37,6 +41,7 @@ void InMemoryPreKeyStore::removePreKey(uint64_t preKeyId)
 std::string InMemoryPreKeyStore::serialize() const
 {
 	Serializer ser;
+	ser.putInt32(0x353F3111);
 	ser.putInt32(store.size());
 
 	for (auto & key: store) {

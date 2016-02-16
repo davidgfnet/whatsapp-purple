@@ -12,7 +12,7 @@ class InMemoryIdentityKeyStore : public IdentityKeyStore
 {
 public:
 	InMemoryIdentityKeyStore() {}
-	InMemoryIdentityKeyStore(Unserializer uns);
+	InMemoryIdentityKeyStore(Unserializer &uns);
 
     IdentityKeyPair getIdentityKeyPair() { return identityKeyPair; }
 

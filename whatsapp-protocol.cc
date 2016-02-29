@@ -801,7 +801,7 @@ void WhatsappConnection::updateFileUpload(std::string json)
 		}
 	/* Send the message with the URL :) */
 	ImageMessage msg(this, to, time(NULL), mid, "author", url, "", ip, 
-		std::stoi(width), std::stoi(height), std::stoi(size), "encoding", 
+		std::atoi(width.c_str()), std::atoi(height.c_str()), std::atoi(size.c_str()), "encoding", 
 		filehash, mimetype, thumb);
 
 	DataBuffer buf = msg.serialize();
@@ -1319,7 +1319,7 @@ bool WhatsappConnection::receiveCipheredMessage(std::string from, std::string id
 
 void WhatsappConnection::sendEncrypt(bool fresh)
 {
-	DEBUG_PRINT ("Generating axolotl keys...");
+	DEBUG_PRINT ("Generating axolotl keys... " << fresh);
 
 	IdentityKeyPair identityKeyPair = fresh ? KeyHelper::generateIdentityKeyPair() : axolotlStore->getIdentityKeyPair();
 	std::vector<PreKeyRecord> preKeys = KeyHelper::generatePreKeys(KeyHelper::getRandomFFFFFFFF(), 100);
@@ -1382,7 +1382,8 @@ void WhatsappConnection::sendEncrypt(bool fresh)
 	outbuffer = outbuffer + serialize_tree(&iq);
 }
 
-void WhatsappConnection::sendMessageRetry(const std::string &from, const std::string &part, const std::string &msgid, unsigned long long t)
+void WhatsappConnection::sendMessageRetry(const std::string &from, const std::string &part, const std::string &msgid,
+	unsigned long long t, unsigned int count)
 {
 	Tree resp("receipt", makeat({"to", from, "id", msgid, "type", "retry", "t", std::to_string(time(0))}));
 	if (part != "")
@@ -1393,7 +1394,7 @@ void WhatsappConnection::sendMessageRetry(const std::string &from, const std::st
 	registrationNode.setData(adjustId(registrationId));
 	resp.addChild(registrationNode);
 
-	Tree retryNode("retry", makeat({"count", "1", "id", msgid, "v", "1", "t", std::to_string(t)}));
+	Tree retryNode("retry", makeat({"count", std::to_string(count+1), "id", msgid, "v", "1", "t", std::to_string(t)}));
 	resp.addChild(retryNode);
 
 	outbuffer = outbuffer + serialize_tree(&resp);
@@ -1456,7 +1457,7 @@ bool WhatsappConnection::parsePreKeyWhisperMessage(std::string jid, std::string 
 	catch (WhisperException &e) {
 		DEBUG_PRINT("Axolotl exception (parseWhisperMessage): "
 			<< e.errorType() << " " << e.errorMessage());
-		sendMessageRetry(jid, author, id, time);
+		sendMessageRetry(jid, author, id, time, std::atoi(enc["count"].c_str()));
 		return false;
 	}
 	return true;
@@ -1477,7 +1478,7 @@ bool WhatsappConnection::parseWhisperMessage(std::string jid, std::string id,
 	catch (WhisperException &e) {
 		DEBUG_PRINT("Axolotl exception (parseWhisperMessage): "
 			<< e.errorType() << " " << e.errorMessage());
-		sendMessageRetry(jid, "", id, time);
+		sendMessageRetry(jid, "", id, time, std::atoi(enc["count"].c_str()));
 		return false;
 	}
 	return true;
@@ -1495,7 +1496,7 @@ bool WhatsappConnection::parseGroupWhisperMessage(std::string jid, std::string i
 	catch (WhisperException &e) {
 		DEBUG_PRINT("Axolotl exception (parseGroupWhisperMessage): "
 			<< e.errorType() << " " << e.errorMessage());
-		sendMessageRetry(jid, author, id, time);
+		sendMessageRetry(jid, author, id, time, std::atoi(enc["count"].c_str()));
 		return false;
 	}
 	return true;

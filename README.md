@@ -22,9 +22,12 @@ Official binary sources (provided by davidgfnet):
 Building
 --------
 
+Next to the `build-essentials`, you will need `protobuf-compiler` and the 
+following headers `libpurple-dev`, `libprotobuf-dev`, `libfreeimage-dev`.
+
 Just run `make` (if you have to choose between 32 and 64 bit, run `make
 ARCH=i686` or `make ARCH=x86_64`). `Makefile.mingw` is the Makefile for 32-bit
-Windows.
+Windows. 
 
 FAQ
 ---

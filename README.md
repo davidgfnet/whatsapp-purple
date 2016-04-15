@@ -5,6 +5,8 @@ whatsapp-purple
 
 WhatsApp protocol implementation for libpurple (Pidgin)
 
+***Important!*** As of April 15th 2016 I won't be working on this plugin anymore. If someone wants to pick up development feel free to email me. There are some other up-to-date APIs that you may want to check (yowsup, ChatAPI, etc).
+
 Get a copy
 ----------
 

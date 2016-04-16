@@ -804,11 +804,18 @@ void WhatsappConnection::updateFileUpload(std::string json)
 			break;
 		}
 	/* Send the message with the URL :) */
-	ImageMessage msg(this, to, time(NULL), mid, "author", url, "", ip, 
-		std::stoi(width), std::stoi(height), std::stoi(size), "encoding", 
-		filehash, mimetype, thumb);
-
-	DataBuffer buf = msg.serialize();
+	DataBuffer buf;
+	
+	if (type == "audio") {
+		SoundMessage msg(this, to, time(NULL), mid, "author", url, "", filehash,
+			mimetype);
+		buf = msg.serialize();
+	} else {
+		ImageMessage msg(this, to, time(NULL), mid, "author", url, "", ip,
+			std::stoi(width), std::stoi(height), std::stoi(size), "encoding",
+			filehash, mimetype, thumb);
+		buf = msg.serialize();
+	}
 
 	outbuffer = outbuffer + buf;
 }

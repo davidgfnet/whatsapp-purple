@@ -208,11 +208,39 @@ SoundMessage::SoundMessage(const WhatsappConnection * wc, const std::string from
 {
 }
 
+DataBuffer SoundMessage::serialize() const
+{
+        std::map < std::string, std::string > mattrs;
+        mattrs["encoding"] = "raw";
+        mattrs["filehash"] = this->hash;
+        mattrs["mimetype"] = this->filetype;
+        mattrs["type"] = "audio";
+        mattrs["url"] = url;
+        mattrs["file"] = basename(url);
+        mattrs["ip"] = this->ip;
+
+        Tree tmedia("media", mattrs);
+
+        std::string stime = std::to_string(t);
+        std::map < std::string, std::string > attrs;
+        if (server.size())
+                attrs["to"] = from + "@" + server;
+        else
+                attrs["to"] = from + "@" + wc->whatsappserver;
+        attrs["type"] = "media";
+        attrs["id"] = id;
+        attrs["t"] = stime;
+
+        Tree mes("message", attrs);
+        mes.addChild(tmedia);
+
+        return wc->serialize_tree(&mes);
+}
+
 Message * SoundMessage::copy() const
 {
 	return new SoundMessage(wc, from, t, id, author, url, caption, hash, filetype);
 }
-
 
 VideoMessage::VideoMessage(const WhatsappConnection * wc, const std::string from, const unsigned long long time,
 	const std::string id, const std::string author, const std::string url, const std::string caption, const std::string hash,

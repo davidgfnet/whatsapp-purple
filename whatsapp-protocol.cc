@@ -1070,6 +1070,9 @@ void WhatsappConnection::processIncomingData()
 				Tree t;
 				if (tl.getChild("body", t)) {
 					this->receiveMessage(ChatMessage(this, from, time, id, t.getData(), author));
+				} else
+				if (treelist[i].getChild("enc", t)) {
+					this->receiveMessage(ChatMessage(this, from, time, id, "FIXME: decode encrypted message", author));
 				}
 				if (tl.getChild("enc", t)) {
 					if (!this->receiveCipheredMessage(from, id, author, time, t, tl["type"]))

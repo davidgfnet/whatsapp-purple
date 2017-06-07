@@ -25,7 +25,7 @@ Building requirements
 
 ```bash
 # macOS
-$ brew install freeimage pidgin
+$ brew install freeimage pidgin protobuf
 ```
 
 Building

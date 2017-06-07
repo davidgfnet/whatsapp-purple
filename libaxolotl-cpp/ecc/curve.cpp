@@ -2,6 +2,7 @@
 #include "invalidkeyexception.h"
 #include "libcurve25519/curve.h"
 
+#include <cstdlib>
 #include <string.h>
 
 const int Curve::DJB_TYPE = 5;

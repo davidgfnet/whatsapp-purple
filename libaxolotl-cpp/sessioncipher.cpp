@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include <memory>
+#include <cstdlib>
 #include "aes.h"
 
 static void ctr128_inc(unsigned char *counter) {

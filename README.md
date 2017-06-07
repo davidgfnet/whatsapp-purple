@@ -20,15 +20,16 @@ Official binary sources (provided by davidgfnet):
 * Fedora: https://copr.fedoraproject.org/coprs/davidgf/whatsapp-purple/
 * Windows: https://gosell.it/product/whatsapp-for-pidgin-20
 
-Building
+Building requirements
 --------
-
-**requirements**
 
 ```bash
 # macOS
 $ brew install freeimage pidgin
 ```
+
+Building
+--------
 
 Just run `make` (if you have to choose between 32 and 64 bit, run `make
 ARCH=i686` or `make ARCH=x86_64`). `Makefile.mingw` is the Makefile for 32-bit

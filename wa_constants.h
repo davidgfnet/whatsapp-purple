@@ -3,8 +3,8 @@
 
 #define WHATSAPP_SERVER          "s.whatsapp.net"
 
-#define WHATSAPP_VERSION         "Android-2.12.419"
-#define WHATSAPP_USER_AGENT      "User-Agent: WhatsApp/2.12.419 Android/4.3 Device/GalaxyS3\r\n"
+#define WHATSAPP_VERSION         "S40-2.16.11"
+#define WHATSAPP_USER_AGENT      "User-Agent: WhatsApp/2.16.11 S40/14.26 Device/Nokia-302\r\n"
 
 #define WHATSAPP_STATUS_ONLINE   "online"
 #define WHATSAPP_STATUS_AWAY     "away"
